@@ -7,27 +7,31 @@ logger = logging.getLogger(__name__)
 
 def extract_text_with_metadata(pdf_path, section_pattern):
     doc = fitz.open(pdf_path)
-    extracted_text = []
     
     result = []
+    cont = 0
     patterns = RegexPattern()
     non_ascii = patterns.get_pattern("non_ascii")
     unicode_spaces = patterns.get_pattern("unicode_spaces")
     number_text = patterns.get_pattern(section_pattern)
 
+    logger.info(f"Extracting text from {pdf_path}")
+    logger.info(f"Section pattern: {section_pattern}")
+    logger.info(f"Number pattern: {number_text}")
+
+    f = open("output.txt", "w")
 
     for _, page in enumerate(doc, start=1):
         blocks = page.get_text("dict")["blocks"]
         for block in blocks:
             if "lines" in block:
                 for line in block["lines"]:
-
                     for span in line["spans"]:
                         if "bold" in span["font"].lower():
                             bold = True
+                            break
                         else:
                             bold = False
-                    
                     if bold:
 
                         line_text = " ".join(span["text"] for span in line["spans"])
@@ -35,16 +39,24 @@ def extract_text_with_metadata(pdf_path, section_pattern):
                         clean_text = re.sub(unicode_spaces, " ", clean_text)
 
                         if re.search(number_text, clean_text):
+                            cont += 1
                             result.append((clean_text))
-    
+    logger.info(f"Extracted {cont} sections")
+    f.close()
+    doc.close()
     return result 
 
-def extract_text(pdf_path):
+def extract_text(pdf_path, debug=False):
     doc = fitz.open(pdf_path)
     text = ''
     for page in doc:
         text += page.get_text()
     doc.close()
+
+    if debug:
+        with open("debug.txt", "w") as f:
+            f
+            f.write(text)
     return text
 
 def ExtractText(pdf_text: str, section_pattern: str):
@@ -54,9 +66,6 @@ def ExtractText(pdf_text: str, section_pattern: str):
     patterns = RegexPattern()
     non_ascii = patterns.get_pattern("non_ascii")
     clean_text = re.sub(non_ascii, "", pdf_text)
-
-    with open("output.txt", "w") as f:
-            f.write(clean_text)
 
     # "pattern": "\\n\\s*[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\\s*\\n",
     reference_pattern = patterns.get_pattern("references")
@@ -92,10 +101,12 @@ def ExtractText(pdf_text: str, section_pattern: str):
 
 
 if __name__ == "__main__":
-    pdf_path = "pdfs/ANALYSISONTHESTRATEGYANDIMPLEMENTATIONOFDIGITALTECHNOLOGYINTHEXYZCOMPANY.pdf"
+    pdf_path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf/ScienceDirect/Arcaini2020.pdf"
     extracted_text = extract_text_with_metadata(pdf_path, "numeric_point_section")
+    #extract_text(pdf_path, debug=True)
 
     print(extracted_text)
 
     # "pattern": "(?<=\\n)(\\d+)\\.\\s*[A-Z][^\\n]+\\n"
     # ExtractText(extracted_text, "numeric_section")
+    #print( "bold" in "CharisSIL-Bold".lower())
