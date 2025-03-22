@@ -16,16 +16,16 @@
         "description": "Find the start of the references section."
     },
     "numeric_point_section": {
-        "pattern": "(?<=\\n)(\\d+)\\.\\s*[A-Z][^\\n]+\\n",
+        "pattern": "\\d+\\.\\s*[\\w]",
         "description": "Find topics and contents."
     },
     "rome_point_section": {
-        "pattern": "(?<=\\n)([IVXL]+\\.\\s+[A-Z][^\\n]+\\n)",
+        "pattern": "(?<=\\n)([IVXLCDM]+\\.\\s+[A-Z][^\\n]+\\n)",
         "description": "Find topics and contents trying to find rome synbols."
     },
     "numeric_section": {
-        "pattern": "(?<=\\n)(\\d+)\\s*[^\\n]+",
-        "description": "Find topics."
+        "pattern": "(\\d+)\\s+(\\w+)",
+        "description": "Find to."
     },
     "table_description": {
         "pattern": "(TABLE|Table|table)\\s*\\d+\\.[\\s\\S]+?",
