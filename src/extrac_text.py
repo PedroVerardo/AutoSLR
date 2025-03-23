@@ -19,8 +19,6 @@ def extract_text_with_metadata(pdf_path, section_pattern):
     logger.info(f"Section pattern: {section_pattern}")
     logger.info(f"Number pattern: {number_text}")
 
-    f = open("output.txt", "w")
-
     for _, page in enumerate(doc, start=1):
         blocks = page.get_text("dict")["blocks"]
         for block in blocks:
@@ -41,22 +39,17 @@ def extract_text_with_metadata(pdf_path, section_pattern):
                         if re.search(number_text, clean_text):
                             cont += 1
                             result.append((clean_text))
+
     logger.info(f"Extracted {cont} sections")
-    f.close()
     doc.close()
     return result 
 
-def extract_text(pdf_path, debug=False):
+def extract_text(pdf_path):
     doc = fitz.open(pdf_path)
     text = ''
     for page in doc:
         text += page.get_text()
     doc.close()
-
-    if debug:
-        with open("debug.txt", "w") as f:
-            f
-            f.write(text)
     return text
 
 def ExtractText(pdf_text: str, section_pattern: str):
@@ -83,9 +76,6 @@ def ExtractText(pdf_text: str, section_pattern: str):
 
     document_section_pattern = patterns.get_pattern(section_pattern)
     matches = list(re.finditer(document_section_pattern, clean_text, re.MULTILINE))
-
-    with open("output.txt", "w") as f:
-            f.write(clean_text)
 
     # Segmenta o texto
     segments = []
