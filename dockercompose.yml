@@ -43,19 +43,14 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: article_search
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "article_search"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf
-    command: postgres -c config_file=/etc/postgresql/postgresql.conf
-    deploy:
-      resources:
-        limits:
-          cpus: '4'
-          memory: 8G
+      - ./custom-entrypoint.sh:/custom-entrypoint.sh
+    command:
   
   # prometheus:
   #   image: prom/prometheus:latest

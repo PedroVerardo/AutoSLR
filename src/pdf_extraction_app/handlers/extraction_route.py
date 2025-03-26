@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 import os
-from src.pdf_extraction.extrac_text import extract_text_with_metadata
+from pdf_extraction_app.utils.extrac_text import extract_text_with_metadata
 
 class ExtractTextRequest(BaseModel):
     archive_name: str

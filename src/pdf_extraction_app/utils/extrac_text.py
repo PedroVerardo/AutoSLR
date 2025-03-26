@@ -1,7 +1,7 @@
 import fitz
 import re
 import logging
-from pdf_extraction.utils.regex_pattern import RegexPattern
+from pdf_extraction_app.utils.regex_pattern import RegexPattern
 
 def extract_text_with_metadata(pdf_path, section_pattern):
     doc = fitz.open(pdf_path)
