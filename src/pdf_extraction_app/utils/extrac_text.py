@@ -1,9 +1,7 @@
 import fitz
 import re
 import logging
-from regex_pattern import RegexPattern
-
-logger = logging.getLogger(__name__)
+from pdf_extraction.utils.regex_pattern import RegexPattern
 
 def extract_text_with_metadata(pdf_path, section_pattern):
     doc = fitz.open(pdf_path)
@@ -14,10 +12,6 @@ def extract_text_with_metadata(pdf_path, section_pattern):
     non_ascii = patterns.get_pattern("non_ascii")
     unicode_spaces = patterns.get_pattern("unicode_spaces")
     number_text = patterns.get_pattern(section_pattern)
-
-    logger.info(f"Extracting text from {pdf_path}")
-    logger.info(f"Section pattern: {section_pattern}")
-    logger.info(f"Number pattern: {number_text}")
 
     for _, page in enumerate(doc, start=1):
         blocks = page.get_text("dict")["blocks"]
@@ -40,7 +34,6 @@ def extract_text_with_metadata(pdf_path, section_pattern):
                             cont += 1
                             result.append((clean_text))
 
-    logger.info(f"Extracted {cont} sections")
     doc.close()
     return result 
 
@@ -84,10 +77,6 @@ def ExtractText(pdf_text: str, section_pattern: str):
         end = matches[i + 1].start() if i + 1 < len(matches) else len(clean_text)
         segment_text = clean_text[start:end].strip()
         segments.append((matches[i].group().strip(), segment_text))
-
-    logger.info("Document sections:")
-    for i in segments:
-        logger.info(re.sub(r"\n", " ", i[0]))
 
 
 if __name__ == "__main__":

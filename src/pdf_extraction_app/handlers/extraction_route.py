@@ -1,22 +1,24 @@
-from flask import Flask
-
-from extrac_text import extract_text_with_metadata
-from flask import request
+from fastapi import FastAPI, HTTPException, Request
+from pydantic import BaseModel
 import os
+from src.pdf_extraction.extrac_text import extract_text_with_metadata
 
-app = Flask("literature_review_app")
+class ExtractTextRequest(BaseModel):
+    archive_name: str
+    section_pattern: str = "numeric_point_section"
 
-@app.route("/extract_text_with_metadata", methods=["POST"])
-def extract_text_with_metadata_route():
-    archive_name = request.json.get("archive_name")
-    section_pattern = request.json.get("section_pattern")
-    
-    if not archive_name:
-        return {"error": "archive_name is required"}, 400
-    
+class ExtractTextBatchRequest(BaseModel):
+    section_pattern: str = "numeric_point_section"
+    subdirectory: str = ""
+
+@app.post("/extract_text_with_metadata")
+async def extract_text_with_metadata_route(request: ExtractTextRequest):
+    archive_name = request.archive_name
+    section_pattern = request.section_pattern
+
     papers_pdf_path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf"
-    
     direct_path = os.path.join(papers_pdf_path, archive_name)
+
     if os.path.isfile(direct_path):
         archive_path = direct_path
     else:
@@ -25,28 +27,26 @@ def extract_text_with_metadata_route():
             if archive_name in files:
                 archive_path = os.path.join(root, archive_name)
                 break
-        
+
         if not archive_path:
-            return {"error": f"Archive '{archive_name}' not found in {papers_pdf_path}"}, 404
-    
-    text = extract_text_with_metadata(archive_path, section_pattern or "numeric_point_section")
+            raise HTTPException(status_code=404, detail=f"Archive '{archive_name}' not found in {papers_pdf_path}")
+
+    text = extract_text_with_metadata(archive_path, section_pattern)
     return {"text": text}
 
-@app.route("/extract_text_with_metadata_batch", methods=["POST"])
-def extract_text_with_metadata_batch():
-
-    section_pattern = request.json.get("section_pattern", "numeric_point_section")
-    subdirectory = request.json.get("subdirectory", "")
+@app.post("/extract_text_with_metadata_batch")
+async def extract_text_with_metadata_batch(request: ExtractTextBatchRequest):
+    section_pattern = request.section_pattern
+    subdirectory = request.subdirectory
 
     papers_pdf_path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf"
-    
     target_directory = os.path.join(papers_pdf_path, subdirectory)
-    
+
     if not os.path.isdir(target_directory):
-        return {"error": f"Subdirectory '{subdirectory}' not found in {papers_pdf_path}"}, 404
-    
+        raise HTTPException(status_code=404, detail=f"Subdirectory '{subdirectory}' not found in {papers_pdf_path}")
+
     results = []
-    
+
     for root, dirs, files in os.walk(target_directory):
         for file in files:
             if file.lower().endswith('.pdf'):
@@ -64,13 +64,10 @@ def extract_text_with_metadata_batch():
                         "full_path": archive_path,
                         "error": str(e)
                     })
-    
+
     if not results:
-        return {"error": f"No PDF files found in {papers_pdf_path}"}, 404
-    
+        raise HTTPException(status_code=404, detail=f"No PDF files found in {papers_pdf_path}")
+
     return {"results": results}
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
-
+# Run the application using a command like `uvicorn extraction_route:app --reload`

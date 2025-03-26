@@ -1,65 +1,88 @@
 version: '3.8'
-
 services:
-  qdrant:
-    image: qdrant/qdrant
-    ports:
-      - "6333:6333"
-    volumes:
-      - ./data:/data
-    environment:
-      - QDRANT_LOG_LEVEL=info
-    restart: unless-stopped
-
-  ollama:
-    image: ollama/ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama:/root/.ollama
-    restart: unless-stopped
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: rabbitmq
-      RABBITMQ_DEFAULT_PASS: rabbitmq
-    restart: unless-stopped
-
+  # qdrant:
+  #   image: qdrant/qdrant
+  #   ports:
+  #     - "6333:6333"
+  #   volumes:
+  #     - ./data:/data
+  #   environment:
+  #     - QDRANT_LOG_LEVEL=info
+  #   restart: unless-stopped
+  
+  # ollama:
+  #   image: ollama/ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama:/root/.ollama
+  #   restart: unless-stopped
+  
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: rabbitmq
+  #     RABBITMQ_DEFAULT_PASS: rabbitmq
+  #   restart: unless-stopped
+  
   otel-collector:
     image: otel/opentelemetry-collector:latest
     ports:
-      - "4317:4317"  # OTLP gRPC
-      - "4318:4318"  # OTLP HTTP
-      - "8888:8888"  # Metrics endpoint
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8888:8888" # Metrics endpoint
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
     command: ["--config=/etc/otel-collector-config.yaml"]
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    restart: unless-stopped
   
-  grafana:
-    image: grafana/grafana:latest
+  db:
+    image: pgvector/pgvector:0.8.0-pg17
     ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
+      - "5432:5432"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    restart: unless-stopped
-    depends_on:
-      - prometheus
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: article_search
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+  
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+  #     - prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #   restart: unless-stopped
+  
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - prometheus
+
 volumes:
   ollama:
+  postgres-data:
+  # prometheus_data:
+  # grafana_data:
