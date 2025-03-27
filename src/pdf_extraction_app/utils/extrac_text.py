@@ -2,40 +2,64 @@ import fitz
 import re
 import logging
 from pdf_extraction_app.utils.regex_pattern import RegexPattern
+from collections import OrderedDict
+
 
 def extract_text_with_metadata(pdf_path, section_pattern):
-    doc = fitz.open(pdf_path)
     
-    result = []
-    cont = 0
+    doc = fitz.open(pdf_path)
+    sections = OrderedDict()
+    current_section = None
     patterns = RegexPattern()
     non_ascii = patterns.get_pattern("non_ascii")
     unicode_spaces = patterns.get_pattern("unicode_spaces")
     number_text = patterns.get_pattern(section_pattern)
-
-    for _, page in enumerate(doc, start=1):
+    
+    for page_num, page in enumerate(doc, start=1):
         blocks = page.get_text("dict")["blocks"]
+        
         for block in blocks:
-            if "lines" in block:
-                for line in block["lines"]:
-                    for span in line["spans"]:
-                        if "bold" in span["font"].lower():
-                            bold = True
-                            break
-                        else:
-                            bold = False
-                    if bold:
-
-                        line_text = " ".join(span["text"] for span in line["spans"])
-                        clean_text = re.sub(non_ascii, "", line_text)
-                        clean_text = re.sub(unicode_spaces, " ", clean_text)
-
-                        if re.search(number_text, clean_text):
-                            cont += 1
-                            result.append((clean_text))
-
+            if "lines" not in block:
+                continue
+                
+            for line in block["lines"]:
+                is_bold = False
+                line_text = ""
+                
+                for span in line["spans"]:
+                    line_text += span["text"] + " "
+                    if "bold" in span["font"].lower():
+                        is_bold = True
+                
+                line_text = line_text.strip()
+                clean_text = re.sub(non_ascii, "", line_text)
+                clean_text = re.sub(unicode_spaces, " ", clean_text)
+                
+                # Check if this is a section heading
+                if is_bold and re.search(number_text, clean_text):
+                    current_section = clean_text
+                    sections[current_section] = ""
+                # Add content to current section if we've found a section
+                elif current_section is not None:
+                    sections[current_section] += clean_text + "\n"
+    
+    # Convert to list of dictionaries for easier handling
+    result = []
+    for title, content in sections.items():
+        result.append({
+            "title": title,
+            "content": content.strip()
+        })
+        
     doc.close()
-    return result 
+    return result
+
+# Usage example:
+# sections = extract_text_with_sections("your_document.pdf", "section_pattern")
+# for section in sections:
+#     print(f"Section: {section['title']}")
+#     print(f"Content: {section['content'][:100]}...")  # Print first 100 chars
+#     print("-" * 50)
 
 def extract_text(pdf_path):
     doc = fitz.open(pdf_path)

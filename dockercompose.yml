@@ -48,9 +48,7 @@ services:
       POSTGRES_DB: "article_search"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
-      - ./custom-entrypoint.sh:/custom-entrypoint.sh
-    command:
+    
   
   # prometheus:
   #   image: prom/prometheus:latest
