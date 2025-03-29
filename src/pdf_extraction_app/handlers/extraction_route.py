@@ -1,15 +1,7 @@
-from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
+from fastapi import HTTPException
 import os
 from pdf_extraction_app.utils.extrac_text import extract_text_with_metadata
-
-class ExtractTextRequest(BaseModel):
-    archive_name: str
-    section_pattern: str = "numeric_point_section"
-
-class ExtractTextBatchRequest(BaseModel):
-    section_pattern: str = "numeric_point_section"
-    subdirectory: str = ""
+from pdf_extraction_app.models import ExtractTextRequest, ExtractTextBatchRequest
 
 @app.post("/extract_text_with_metadata")
 async def extract_text_with_metadata_route(request: ExtractTextRequest):
@@ -37,7 +29,7 @@ async def extract_text_with_metadata_route(request: ExtractTextRequest):
 @app.post("/extract_text_with_metadata_batch")
 async def extract_text_with_metadata_batch(request: ExtractTextBatchRequest):
     section_pattern = request.section_pattern
-    subdirectory = request.subdirectory
+    subdirectory = request.directory
 
     papers_pdf_path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf"
     target_directory = os.path.join(papers_pdf_path, subdirectory)
