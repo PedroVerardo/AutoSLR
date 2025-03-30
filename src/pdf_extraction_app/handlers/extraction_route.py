@@ -1,14 +1,16 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 import os
-from pdf_extraction_app.utils.extrac_text import extract_text_with_metadata
-from pdf_extraction_app.models import ExtractTextRequest, ExtractTextBatchRequest
+from ..utils.extrac_text import extract_text_with_metadata
+from ..models import ExtractTextRequest, ExtractTextBatchRequest
 
-@app.post("/extract_text_with_metadata")
+router = APIRouter()
+
+@router.post("/extract_text_with_metadata")
 async def extract_text_with_metadata_route(request: ExtractTextRequest):
     archive_name = request.archive_name
     section_pattern = request.section_pattern
 
-    papers_pdf_path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf"
+    papers_pdf_path = os.getenv("PAPERS_PDF_PATH","/home/pedro/Documents/Rag_test/grpc/papers_pdf")
     direct_path = os.path.join(papers_pdf_path, archive_name)
 
     if os.path.isfile(direct_path):
@@ -26,12 +28,12 @@ async def extract_text_with_metadata_route(request: ExtractTextRequest):
     text = extract_text_with_metadata(archive_path, section_pattern)
     return {"text": text}
 
-@app.post("/extract_text_with_metadata_batch")
+@router.post("/extract_text_with_metadata_batch")
 async def extract_text_with_metadata_batch(request: ExtractTextBatchRequest):
     section_pattern = request.section_pattern
     subdirectory = request.directory
 
-    papers_pdf_path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf"
+    papers_pdf_path = os.getenv("PAPERS_PDF_PATH","/home/pedro/Documents/Rag_test/grpc/papers_pdf")
     target_directory = os.path.join(papers_pdf_path, subdirectory)
 
     if not os.path.isdir(target_directory):

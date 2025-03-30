@@ -1,7 +1,7 @@
 import fitz
 import re
 import logging
-from pdf_extraction_app.utils.regex_pattern import RegexPattern
+from .regex_pattern import RegexPattern
 from collections import OrderedDict
 
 
@@ -53,13 +53,6 @@ def extract_text_with_metadata(pdf_path, section_pattern):
         
     doc.close()
     return result
-
-# Usage example:
-# sections = extract_text_with_sections("your_document.pdf", "section_pattern")
-# for section in sections:
-#     print(f"Section: {section['title']}")
-#     print(f"Content: {section['content'][:100]}...")  # Print first 100 chars
-#     print("-" * 50)
 
 def extract_text(pdf_path):
     doc = fitz.open(pdf_path)

@@ -9,7 +9,7 @@ class RegexPattern:
     
     def __init__(self):
         logging.info("Loading regex patterns from regex.json")
-        with open("regex.json", "r") as f:
+        with open("./regex.json", "r") as f:
             self.patterns = json.load(f)
         logging.info(f"Loaded {len(self.patterns)} patterns")
 
@@ -18,7 +18,7 @@ class RegexPattern:
     
     def _save_patterns(self):
         logging.info("Saving patterns to regex.json")
-        with open("regex.json", "w") as f:
+        with open("./regex.json", "w") as f:
             json.dump(self.patterns, f, indent=4)
     
     def new_pattern(self, pattern_name, pattern, description):
