@@ -9,9 +9,9 @@ CREATE TABLE "segment" (
   "id" integer PRIMARY KEY,
   "article_id" integer,
   "segment_title" varchar[1024],
-  "segment_text" text
+  "segment_title_vector" vector(768),
+  "segment_text" text,
+  "segment_text_vector" vector(768)
 );
 
 ALTER TABLE "segment" ADD FOREIGN KEY ("article_id") REFERENCES "article" ("id");
-
-CREATE INDEX idx_article_upload_date ON article(upload_date);
