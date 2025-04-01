@@ -48,8 +48,6 @@ class ChunkText:
 
         return splits
 
-    
-
 
 if __name__ == "__main__":
     text = "This is a sample text for chunking. We will split this text into chunks."

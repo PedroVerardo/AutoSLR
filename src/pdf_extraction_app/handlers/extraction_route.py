@@ -10,7 +10,7 @@ async def extract_text_with_metadata_route(request: ExtractTextRequest):
     archive_name = request.archive_name
     section_pattern = request.section_pattern
 
-    papers_pdf_path = os.getenv("PAPERS_PDF_PATH","/home/pedro/Documents/Rag_test/grpc/papers_pdf")
+    papers_pdf_path = os.getenv("PAPERS_PDF_PATH","/home/PUC/Documentos/AutoSLR/papers_pdf/ScienceDirect/")
     direct_path = os.path.join(papers_pdf_path, archive_name)
 
     if os.path.isfile(direct_path):

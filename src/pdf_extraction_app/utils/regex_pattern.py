@@ -1,15 +1,18 @@
 import logging
 import json
+import os 
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RegexPattern:
-    """Class for storing regex patterns and their descriptions."""
-    
     def __init__(self):
         logging.info("Loading regex patterns from regex.json")
-        with open("./regex.json", "r") as f:
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        regex_path = os.path.join(current_dir, "../utils/regex.json")
+        self.regex_path = os.path.normpath(regex_path)
+
+        with open(self.regex_path, "r") as f:
             self.patterns = json.load(f)
         logging.info(f"Loaded {len(self.patterns)} patterns")
 
@@ -18,7 +21,7 @@ class RegexPattern:
     
     def _save_patterns(self):
         logging.info("Saving patterns to regex.json")
-        with open("./regex.json", "w") as f:
+        with open(self.regex_path, "w") as f:
             json.dump(self.patterns, f, indent=4)
     
     def new_pattern(self, pattern_name, pattern, description):

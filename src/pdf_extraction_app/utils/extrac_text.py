@@ -6,7 +6,6 @@ from collections import OrderedDict
 
 
 def extract_text_with_metadata(pdf_path, section_pattern):
-    
     doc = fitz.open(pdf_path)
     sections = OrderedDict()
     current_section = None
@@ -15,42 +14,33 @@ def extract_text_with_metadata(pdf_path, section_pattern):
     unicode_spaces = patterns.get_pattern("unicode_spaces")
     number_text = patterns.get_pattern(section_pattern)
     
-    for page_num, page in enumerate(doc, start=1):
-        blocks = page.get_text("dict")["blocks"]
+    for page_num in range(len(doc)):
+        page = doc[page_num]
+        text_blocks = page.get_text("dict")["blocks"]
         
-        for block in blocks:
+        for block in text_blocks:
             if "lines" not in block:
                 continue
                 
             for line in block["lines"]:
-                is_bold = False
-                line_text = ""
+                is_bold = any("bold" in span["font"].lower() for span in line["spans"])
+                line_text = " ".join(span["text"] for span in line["spans"]).strip()
                 
-                for span in line["spans"]:
-                    line_text += span["text"] + " "
-                    if "bold" in span["font"].lower():
-                        is_bold = True
-                
-                line_text = line_text.strip()
                 clean_text = re.sub(non_ascii, "", line_text)
                 clean_text = re.sub(unicode_spaces, " ", clean_text)
                 
-                # Check if this is a section heading
                 if is_bold and re.search(number_text, clean_text):
+                    if current_section and len(sections[current_section]) < 350:
+                        del sections[current_section]
+                    
                     current_section = clean_text
                     sections[current_section] = ""
-                # Add content to current section if we've found a section
+                    
                 elif current_section is not None:
                     sections[current_section] += clean_text + "\n"
     
-    # Convert to list of dictionaries for easier handling
-    result = []
-    for title, content in sections.items():
-        result.append({
-            "title": title,
-            "content": content.strip()
-        })
-        
+    result = [{"title": title, "content": content.strip()} for title, content in sections.items()]
+    
     doc.close()
     return result
 
@@ -64,9 +54,8 @@ def extract_text(pdf_path):
 
 def ExtractText(pdf_text: str, section_pattern: str):
 
-
-    # Limpa o texto extraído
     patterns = RegexPattern()
+
     non_ascii = patterns.get_pattern("non_ascii")
     clean_text = re.sub(non_ascii, "", pdf_text)
 
@@ -87,7 +76,6 @@ def ExtractText(pdf_text: str, section_pattern: str):
     document_section_pattern = patterns.get_pattern(section_pattern)
     matches = list(re.finditer(document_section_pattern, clean_text, re.MULTILINE))
 
-    # Segmenta o texto
     segments = []
     for i in range(len(matches)):
         start = matches[i].end()
@@ -97,7 +85,7 @@ def ExtractText(pdf_text: str, section_pattern: str):
 
 
 if __name__ == "__main__":
-    pdf_path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf/ScienceDirect/Arcaini2020.pdf"
+    pdf_path = "/home/PUC/Documentos/AutoSLR/papers_pdf/ScienceDirect/lesoil2023.pdf"
     extracted_text = extract_text_with_metadata(pdf_path, "numeric_point_section")
     #extract_text(pdf_path, debug=True)
 
