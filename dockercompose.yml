@@ -72,12 +72,12 @@ services:
     
   pdf_extraction_app:
         build:
-            context: ./src/pdf_extraction_app  # Point directly to the microservice folder
+            context: ./src/pdf_extraction_app
             dockerfile: dockerfile
         ports:
             - "7070:7070"
         volumes:
-            - ./papers_pdf:/code/app/pdf # need to be the same as the PAPERS_PDF_PATH
+            - ./papers_pdf:/code/app/pdf
         environment:
             PAPERS_PDF_PATH: /code/app/pdf
  
