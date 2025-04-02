@@ -1,9 +1,9 @@
 from fastapi import HTTPException, APIRouter
 import os
-from ..utils.extrac_text import extract_text_with_metadata
-from ..utils.chunking import ChunkText
-from ..models import ExtractTextRequest, ExtractTextBatchRequest, Article, Segment, Chunk
-from ..database import get_db
+from .utils.extrac_text import extract_text_with_metadata
+from .utils.chunking import ChunkText
+from .models import ExtractTextRequest, ExtractTextBatchRequest, Article, Segment, Chunk
+from .database import get_db
 import requests
 from datetime import datetime
 import logging
