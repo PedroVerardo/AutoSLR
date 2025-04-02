@@ -41,26 +41,26 @@ services:
     networks:
       - app-network
     
-  text-embeddings:
-    image: ghcr.io/huggingface/text-embeddings-inference:1.6
-    ports:
-      - "8080:80"
-    volumes:
-      - ./volumes/embedding:/data
-    environment:
-      - OTLP_ENDPOINT=http://otel-collector:4317
-      - MODEL_ID=nomic-ai/nomic-embed-text-v1
-      - JSON_OUTPUT=/data/output.json
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    pull_policy: always
-    networks:
-      - app-network
+  # text-embeddings:
+  #   image: ghcr.io/huggingface/text-embeddings-inference:1.6
+  #   ports:
+  #     - "8080:80"
+  #   volumes:
+  #     - ./volumes/embedding:/data
+  #   environment:
+  #     - OTLP_ENDPOINT=http://otel-collector:4317
+  #     - MODEL_ID=nomic-ai/nomic-embed-text-v1
+  #     - JSON_OUTPUT=/data/output.json
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   pull_policy: always
+  #   networks:
+  #     - app-network
     
   pdf_extraction_app:
         build:
