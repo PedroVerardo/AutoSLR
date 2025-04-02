@@ -37,28 +37,30 @@ services:
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_DB: "article_search"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-    # depends_on:
-    #   - text-embeddings
+      - ./volumes/postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
     
-  # text-embeddings:
-  #   image: ghcr.io/huggingface/text-embeddings-inference:1.6
-  #   ports:
-  #     - "8080:80"
-  #   volumes:
-  #     - ./volumes/embedding:/data
-  #   environment:
-  #     - OTLP_ENDPOINT=http://otel-collector:4317
-  #     - MODEL_ID=nomic-ai/nomic-embed-text-v1
-  #     - JSON_OUTPUT=/data/output.json
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: all
-  #             capabilities: [gpu]
-  #   pull_policy: always
+  text-embeddings:
+    image: ghcr.io/huggingface/text-embeddings-inference:1.6
+    ports:
+      - "8080:80"
+    volumes:
+      - ./volumes/embedding:/data
+    environment:
+      - OTLP_ENDPOINT=http://otel-collector:4317
+      - MODEL_ID=nomic-ai/nomic-embed-text-v1
+      - JSON_OUTPUT=/data/output.json
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    pull_policy: always
+    networks:
+      - app-network
     
   pdf_extraction_app:
         build:
@@ -70,6 +72,13 @@ services:
             - ./papers_pdf:/code/app/pdf
         environment:
             PAPERS_PDF_PATH: /code/app/pdf
+            TEXT_EMBEDDINGS_URL: http://text-embeddings:80
+            DATABASE_URL: postgresql://postgres:postgres@db:5432/article_search
+        depends_on:
+            - text-embeddings
+            - db
+        networks:
+            - app-network
  
 
 
@@ -96,6 +105,10 @@ services:
   #   restart: unless-stopped
   #   depends_on:
   #     - prometheus
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   ollama:

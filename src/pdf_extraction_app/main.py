@@ -6,4 +6,4 @@ app = FastAPI()
 
 app.include_router(extraction_router, prefix="/api", tags=["extraction"])
 
-#Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
