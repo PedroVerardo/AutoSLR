@@ -10,6 +10,8 @@ class Article(Base):
     __tablename__ = "article"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer)
+    project_id = Column(Integer)
     title = Column(String(1024), unique=True, nullable=False)
     upload_date = Column(Date)
 
