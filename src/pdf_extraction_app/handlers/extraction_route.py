@@ -9,7 +9,7 @@ from datetime import datetime
 import logging
 
 router = APIRouter()
-embed_url = os.getenv("TEXT_EMBEDDINGS_URL","http://127.0.0.1:8080/embed")
+embed_url = os.getenv("TEXT_EMBEDDINGS_URL","") #http://127.0.0.1:8080/embed
 headers = {
         "Content-Type": "application/json"
 }
@@ -71,13 +71,14 @@ async def extract_text_with_metadata_route(request: ExtractTextRequest):
         new_segment = Segment(
             article_id=new_article.id,
             segment_title=segment["title"],
+            segment_title_vector=None,
             segment_text=segment["content"],
         )
         
-        response = requests.post(embed_url, headers=headers, json=payload)
-        response_data = response.json()
-        vectors = response_data
-        new_segment.segment_title_vector = vectors[0]
+        # response = requests.post(embed_url, headers=headers, json=payload)
+        # response_data = response.json()
+        # vectors = response_data
+        # new_segment.segment_title_vector = vectors[0]
         
         db.add(new_segment)
         db.flush() 
@@ -85,15 +86,15 @@ async def extract_text_with_metadata_route(request: ExtractTextRequest):
         
         chunk_list = ChunkText.fixed_window_splitter(segment["content"], 256)
         for chunk in chunk_list:
-            payload = {"inputs": [chunk]}
-            response = requests.post(embed_url, headers=headers, json=payload)
-            response_data = response.json()
-            vectors = response_data[0]
+            # payload = {"inputs": [chunk]}
+            # response = requests.post(embed_url, headers=headers, json=payload)
+            # response_data = response.json()
+            # vectors = response_data[0]
             
             new_chunk = Chunk(
                 segment_id=new_segment.id,
                 chunk_text=chunk,
-                chunk_vector=vectors
+                chunk_vector=None
             )
             db.add(new_chunk)
     
