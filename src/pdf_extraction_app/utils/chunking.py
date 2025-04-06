@@ -9,7 +9,7 @@ class ChunkText:
             splits.append(text[i:i + chunk_size])
         return splits
     
-    def fixed_window_splitter_with_overlap(text, chunk_size: int, overlap_size: int) -> list[str]:
+    def fixed_window_splitter_with_overlap(text: str, chunk_size: int, overlap_size: int) -> list[str]:
         splits = []
         for i in range(0, len(text), chunk_size - overlap_size):
             splits.append(text[i:i + chunk_size])

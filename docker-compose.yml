@@ -69,23 +69,23 @@ services:
   #   networks:
   #     - app-network
     
-  pdf_extraction_app:
-        build:
-            context: ./src/pdf_extraction_app
-            dockerfile: dockerfile
-        ports:
-            - "7070:7070"
-        volumes:
-            - ./papers_pdf:/code/app/pdf
-        environment:
-            PAPERS_PDF_PATH: /code/app/pdf
-            TEXT_EMBEDDINGS_URL: http://text-embeddings:80
-            DATABASE_URL: postgresql://postgres:postgres@db:5432/article_search
-        depends_on:
-           # - text-embeddings
-            - db
-        networks:
-            - app-network
+  # pdf_extraction_app:
+  #       build:
+  #           context: ./src/pdf_extraction_app
+  #           dockerfile: dockerfile
+  #       ports:
+  #           - "7070:7070"
+  #       volumes:
+  #           - ./papers_pdf:/code/app/pdf
+  #       environment:
+  #           PAPERS_PDF_PATH: /code/app/pdf
+  #           TEXT_EMBEDDINGS_URL: http://text-embeddings:80
+  #           DATABASE_URL: postgresql://postgres:postgres@db:5432/article_search
+  #       depends_on:
+  #          # - text-embeddings
+  #           - db
+  #       networks:
+  #           - app-network
  
 
 

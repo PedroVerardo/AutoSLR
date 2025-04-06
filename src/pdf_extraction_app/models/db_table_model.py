@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import VARCHAR
 from sqlalchemy.dialects.postgresql import ARRAY
-from ..database import Base
+from ..database.database import Base
 from pgvector.sqlalchemy import Vector
 
 class Article(Base):

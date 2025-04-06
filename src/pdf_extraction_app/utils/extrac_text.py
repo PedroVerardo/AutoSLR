@@ -10,11 +10,13 @@ def extract_text_with_metadata(pdf_path, section_pattern):
     sections = OrderedDict()
     current_section = None
     patterns = RegexPattern()
+
     non_ascii = patterns.get_pattern("non_ascii")
     unicode_spaces = patterns.get_pattern("unicode_spaces")
     number_text = patterns.get_pattern(section_pattern)
+    page_cont = range(len(doc))
     
-    for page_num in range(len(doc)):
+    for page_num in page_cont:
         page = doc[page_num]
         text_blocks = page.get_text("dict")["blocks"]
         
@@ -40,17 +42,19 @@ def extract_text_with_metadata(pdf_path, section_pattern):
                     sections[current_section] += clean_text + "\n"
     
     result = [{"title": title, "content": content.strip()} for title, content in sections.items()]
-    
+    result["pages_cont"] = page_cont
     doc.close()
     return result
 
 def extract_text(pdf_path):
     doc = fitz.open(pdf_path)
     text = ''
+    cont = 0
     for page in doc:
         text += page.get_text()
+        cont += 1
     doc.close()
-    return text
+    return (text, cont)
 
 def ExtractText(pdf_text: str, section_pattern: str):
 
@@ -82,6 +86,7 @@ def ExtractText(pdf_text: str, section_pattern: str):
         end = matches[i + 1].start() if i + 1 < len(matches) else len(clean_text)
         segment_text = clean_text[start:end].strip()
         segments.append((matches[i].group().strip(), segment_text))
+
 
 
 if __name__ == "__main__":
