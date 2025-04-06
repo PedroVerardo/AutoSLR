@@ -25,7 +25,6 @@ class Segment(Base):
     segment_title = Column(String(1024))
     segment_title_vector = Column(Vector(768), nullable=True)
     segment_text = Column( Text )
-    # segment_text_vector = Column(Vector(768), nullable=True)
 
     article = relationship("Article", back_populates="segments")
     chunks = relationship("Chunk", back_populates="segment")

@@ -1,0 +1,1 @@
+from .pdf_extraction_route import router as pdf_extraction_router

@@ -86,6 +86,8 @@ services:
   #           - db
   #       networks:
   #           - app-network
+  #           - kafka-net
+
  
 
 
