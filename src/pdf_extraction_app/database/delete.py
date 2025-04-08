@@ -86,6 +86,7 @@ async def delete_article_with_segments_and_chunks(db: Session, article_id: int):
     except Exception as e:
         db.rollback()
         return False, f"Error deleting article, segments, and chunks: {e}"
+    
 async def delete_all_articles(db: Session):
     try:
         articles = db.query(Article).all()
