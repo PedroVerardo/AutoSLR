@@ -31,7 +31,7 @@ async def pdf_extraction(request: PdfRequestModel, producer: Producer = Depends(
     topic = 'pdf_topic'
     message = {
         "archive_name": request.archive_name,
-        "extraction_method": request.extraction_method,
+        #"extraction_method": request.extraction_method,
         "section_pattern": request.section_pattern
     }
     send_to_kafka(producer, topic, message)
