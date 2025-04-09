@@ -1,4 +1,4 @@
-from database import get_db
+from .session import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 import logging

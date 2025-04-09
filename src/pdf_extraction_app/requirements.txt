@@ -4,3 +4,4 @@ psycopg2-binary==2.9.10
 nltk==3.9.1
 confluent-kafka==2.9.0
 PyMuPDF==1.25.2
+nomic==3.4.1 # remove that line after create the microservice needed

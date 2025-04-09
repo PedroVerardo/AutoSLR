@@ -5,12 +5,19 @@ import json
 import time
 import os
 import logging
+import datetime
 
-from pdf_handler import PDFHandler
+from .pdf_handler import PDFHandler
+from .embedding_handler import generate_embeddings, create_embedding, chunk_and_embed
+from ..database import insert_article, insert_segment, insert_chunk
+from ..database import get_db
+from ..models.db_table_model import Article, Segment, Chunk
+from ..utils.chunking import ChunkText
+from ..database.session import Base, engine
 
-# TODO: change the print to logging or to opentelemetry
-# TODO: thinking how to personalize the regex pattern with the specific tag
-# TODO: implement the migration of the database
+# TODO: Add logging configuration
+# TODO: Add the separation between the embedding and the pdf extraction
+# TODO: Add the separation between the embedding and the database insertion
 
 def process_message(message):
     """
@@ -63,6 +70,50 @@ def process_message(message):
 
     titles = [value['title'] for value in extracted_text.values()]
     doc.close()
+
+    ####### Insert into DB #######
+    Article_obj = Article(
+        title=archive_name,
+        upload_date=datetime.date.fromtimestamp(time.time()),
+    )
+
+    db = get_db()
+
+    err, info = insert_article(db, Article_obj, auto_commit=True)
+    if not err:
+        logging.error(f"Error inserting article: {info}")
+        return []
+    
+    for key, value in extracted_text.items():
+        segment_obj = Segment(
+            article_id=Article_obj.id,
+            segment_title=value['title'],
+            segment_title_vector=create_embedding(value['title']),
+            segment_text=value['text'],
+        )
+
+        err, info = insert_segment(db, segment_obj, auto_commit=True)
+        if not err:
+            logging.error(f"Error inserting segment: {info}")
+            continue
+
+        chunk_list = ChunkText.fixed_window_splitter(value['text'], 384)
+
+        for chunk in chunk_list:
+            chunk_obj = Chunk(
+                segment_id=segment_obj.id,
+                chunk_text=chunk,
+                chunk_vector=create_embedding(chunk),
+            )
+
+            err, info = insert_chunk(db, chunk_obj, auto_commit=True)
+            if not err:
+                logging.error(f"Error inserting chunk: {info}")
+                continue
+
+    
+    db.close()
+
     return titles
 
 def ensure_topic_exists(topic_name, bootstrap_servers):
@@ -121,6 +172,7 @@ def main():
         consumer.close()
 
 if __name__ == "__main__":
+    Base.metadata.create_all(bind=engine)
     ensure_topic_exists('pdf_topic', 'localhost:9092')
     time.sleep(5)
     main()

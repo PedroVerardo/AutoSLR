@@ -1,4 +1,4 @@
-from database import get_db
+from .session import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 import logging
@@ -7,7 +7,7 @@ from ..models import Article, Segment, Chunk
 
 logging.basicConfig(level=logging.INFO)
 
-async def insert_article(db: Session, article: Article, auto_commit: bool=False):
+def insert_article(db: Session, article: Article, auto_commit: bool=False):
     try:
         db.add(article)
         db.flush()  
@@ -23,7 +23,7 @@ async def insert_article(db: Session, article: Article, auto_commit: bool=False)
         db.rollback()
         return False, f"Error inserting article: {e}"
 
-async def insert_segment(db: Session, segment: Segment, auto_commit: bool=False):
+def insert_segment(db: Session, segment: Segment, auto_commit: bool=False):
     if not segment.article_id:
         return False, "Segment must have an article_id"
     
@@ -39,7 +39,7 @@ async def insert_segment(db: Session, segment: Segment, auto_commit: bool=False)
         db.rollback()
         return False, f"Error inserting segment: {e}"
 
-async def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
+def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
     if not chunk.segment_id:
         return False, "Chunk must have a segment_id"
     
@@ -55,7 +55,7 @@ async def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
         db.rollback()
         return False, f"Error inserting chunk: {e}"
     
-async def insert_article_with_segments(db: Session, article: Article, segments: list[Segment]):
+def insert_article_with_segments(db: Session, article: Article, segments: list[Segment]):
     try:
         article_success, article_result = insert_article(db, article)
         if not article_success:
@@ -75,7 +75,7 @@ async def insert_article_with_segments(db: Session, article: Article, segments: 
         db.rollback()
         return False, f"Error during insertion: {e}"
     
-async def insert_article_with_segments_and_chunks(db: Session, article: Article, segments: list[Segment], chunks_list: list[list[Chunk]]):
+def insert_article_with_segments_and_chunks(db: Session, article: Article, segments: list[Segment], chunks_list: list[list[Chunk]]):
     try:
         article_success, article_result = insert_article(db, article)
         if not article_success:
