@@ -11,3 +11,5 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 
 COPY . /code/app
+
+CMD [ "python", "-m", "src.consumer"]

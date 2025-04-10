@@ -59,8 +59,6 @@ def process_message(message):
     if not text:
         logging.error(f"Failed to extract text from PDF: {pdf_path}")
         return []
-    
-    section_pattern = fr"\n(\d)\.\s+(?!\d)[\w\s]+<--{tag}-->\n"
 
     extracted_text = PDFHandler.extract_text_with_regex(text, section_pattern)
 
@@ -79,7 +77,7 @@ def process_message(message):
 
     db = get_db()
 
-    err, info = insert_article(db, Article_obj, auto_commit=True)
+    err, info = insert_article(db, Article_obj, auto_commit=False)
     if not err:
         logging.error(f"Error inserting article: {info}")
         return []
@@ -92,10 +90,12 @@ def process_message(message):
             segment_text=value['text'],
         )
 
-        err, info = insert_segment(db, segment_obj, auto_commit=True)
+        err, info = insert_segment(db, segment_obj, auto_commit=False)
         if not err:
             logging.error(f"Error inserting segment: {info}")
             continue
+
+        db.commit()
 
         chunk_list = ChunkText.fixed_window_splitter(value['text'], 384)
 
