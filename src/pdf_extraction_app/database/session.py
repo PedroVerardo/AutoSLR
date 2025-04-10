@@ -8,7 +8,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localho
 engine = create_engine(DATABASE_URL)
 
 with engine.connect() as conn:
-    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vectorscale;"))
     conn.commit()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

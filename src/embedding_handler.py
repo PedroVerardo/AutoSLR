@@ -1,6 +1,5 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
-from .pdf_handler import PDFHandler
 from typing import Dict, List
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -78,20 +77,4 @@ def generate_embeddings(text_data: Dict[str, Dict[str, str]]) -> Dict[str, Dict[
         return None
 
 if __name__ == "__main__":
-    path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf/ScienceDirect/Arcaini2020.pdf"
-    
-    doc = PDFHandler.try_open(path)
-
-    text, _ = PDFHandler.tagged_extraction(doc, "bold")
-    # print("Extracted Text:", text)
-
-    metadata = PDFHandler.get_metadata(doc)
-    # print("Metadata:", metadata)
-
-    regex_pattern = r"\n(\d)\.\s+(?!\d)[\w\s]+<--bold-->\n"
-
-    extracted_text = PDFHandler.extract_text_with_regex(text, regex_pattern)
-
-    print(generate_embeddings(extracted_text))
-
-    doc.close()
+    print("oi")

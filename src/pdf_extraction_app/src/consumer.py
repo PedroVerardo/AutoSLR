@@ -1,5 +1,6 @@
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer, KafkaError, Producer
 from confluent_kafka.admin import AdminClient, NewTopic
+import numpy as np
 
 import json
 import time
@@ -8,8 +9,8 @@ import logging
 import datetime
 
 from .pdf_handler import PDFHandler
-from .embedding_handler import generate_embeddings, create_embedding, chunk_and_embed
-from ..database import insert_article, insert_segment, insert_chunk
+from ..config.kafka_config import producer_config
+from ..database import insert_article, insert_segment, insert_chunk, batch_insert_segments, batch_insert_chunks
 from ..database import get_db
 from ..models.db_table_model import Article, Segment, Chunk
 from ..utils.chunking import ChunkText
@@ -17,7 +18,8 @@ from ..database.session import Base, engine
 
 # TODO: Add logging configuration
 # TODO: Add the separation between the embedding and the pdf extraction
-# TODO: Add the separation between the embedding and the database insertion
+
+db = get_db()
 
 def process_message(message):
     """
@@ -33,7 +35,6 @@ def process_message(message):
     section_pattern = message.get("section_pattern")
     data_path = os.getenv('DATA_PATH', '/home/pedro/Documents/Rag_test/grpc/papers_pdf')
 
-    # Initialize pdf_path to None
     pdf_path = None
 
     for root, dirs, files in os.walk(data_path):
@@ -67,52 +68,55 @@ def process_message(message):
         return []
 
     titles = [value['title'] for value in extracted_text.values()]
+    qtd = len(titles)
     doc.close()
 
     ####### Insert into DB #######
+
+    segment_buff = np.array([0] * qtd, dtype=Segment)
+
     Article_obj = Article(
         title=archive_name,
         upload_date=datetime.date.fromtimestamp(time.time()),
     )
 
-    db = get_db()
-
-    err, info = insert_article(db, Article_obj, auto_commit=False)
-    if not err:
+    err, info = insert_article(db, Article_obj, auto_commit=True)
+    if err:
         logging.error(f"Error inserting article: {info}")
         return []
     
-    for key, value in extracted_text.items():
+    for idx, (key, value) in enumerate(extracted_text.items()):
         segment_obj = Segment(
             article_id=Article_obj.id,
             segment_title=value['title'],
-            segment_title_vector=create_embedding(value['title']),
             segment_text=value['text'],
         )
 
-        err, info = insert_segment(db, segment_obj, auto_commit=False)
-        if not err:
-            logging.error(f"Error inserting segment: {info}")
-            continue
-
-        db.commit()
+        segment_buff[idx] = segment_obj
 
         chunk_list = ChunkText.fixed_window_splitter(value['text'], 384)
+        qtd = len(chunk_list)
+        chunk_buff = np.array([0] * qtd, dtype=Chunk)
 
         for chunk in chunk_list:
             chunk_obj = Chunk(
                 segment_id=segment_obj.id,
                 chunk_text=chunk,
-                chunk_vector=create_embedding(chunk),
             )
+            chunk_buff.append(chunk_obj)
+        
 
-            err, info = insert_chunk(db, chunk_obj, auto_commit=True)
-            if not err:
-                logging.error(f"Error inserting chunk: {info}")
-                continue
 
-    
-    db.close()
+        err, info = batch_insert_segments(db, segment_obj, auto_commit=True)
+        err, info = insert_chunk(db, chunk_buff, auto_commit=True)
+        if err:
+            logging.error(f"Error inserting chunk: {info}")
+            return []
+        
+
+
+        
+
 
     return titles
 
@@ -169,9 +173,14 @@ def main():
     except KeyboardInterrupt:
         print("Consumer interrupted by user.")
     finally:
+        db.close()
         consumer.close()
 
 if __name__ == "__main__":
+    with engine.begin() as connection:
+        for table in reversed(Base.metadata.sorted_tables):
+            connection.execute(table.delete())
+
     Base.metadata.create_all(bind=engine)
     ensure_topic_exists('pdf_topic', 'localhost:9092')
     time.sleep(5)

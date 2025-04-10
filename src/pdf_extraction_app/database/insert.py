@@ -9,96 +9,101 @@ logging.basicConfig(level=logging.INFO)
 
 def insert_article(db: Session, article: Article, auto_commit: bool=False):
     try:
-        db.add(article)
-        db.flush()  
+        db.add(article) 
         
         if auto_commit:
             db.commit()
             
-        return True, article.id
+        return False, article.id
     except IntegrityError:
         db.rollback()
-        return False, f"Article with title '{article.title}' already exists."
+        return True, f"Article with title '{article.title}' already exists."
     except Exception as e:
         db.rollback()
-        return False, f"Error inserting article: {e}"
+        return True, f"Error inserting article: {e}"
 
 def insert_segment(db: Session, segment: Segment, auto_commit: bool=False):
     if not segment.article_id:
-        return False, "Segment must have an article_id"
+        return True, "Segment must have an article_id"
     
     try:
         db.add(segment)
-        db.flush()  
         
         if auto_commit:
             db.commit()
             
-        return True, segment.id
+        return False, segment.id
     except Exception as e:
         db.rollback()
-        return False, f"Error inserting segment: {e}"
+        return True, f"Error inserting segment: {e}"
 
 def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
     if not chunk.segment_id:
-        return False, "Chunk must have a segment_id"
+        return True, "Chunk must have a segment_id"
     
     try:
         db.add(chunk)
-        db.flush()  
         
         if auto_commit:
             db.commit()
             
-        return True, chunk.id
+        return False, chunk.id
     except Exception as e:
         db.rollback()
-        return False, f"Error inserting chunk: {e}"
+        return True, f"Error inserting chunk: {e}"
     
-def insert_article_with_segments(db: Session, article: Article, segments: list[Segment]):
+def batch_insert_segments(db: Session, segment_objects: list[Segment], auto_commit=False):
     try:
-        article_success, article_result = insert_article(db, article)
-        if not article_success:
-            db.rollback()
-            return False, article_result
+        segment_values = [
+            (seg.article_id, seg.segment_title, seg.segment_text) 
+            for seg in segment_objects
+        ]
         
-        for segment in segments:
-            segment.article_id = article.id
-            segment_success, segment_result = insert_segment(db, segment)
-            if not segment_success:
-                db.rollback()
-                return False, segment_result
+        cursor = db.connection().connection.cursor()
+        cursor.executemany(
+            "INSERT INTO segments (article_id, segment_title, segment_text) VALUES (%s, %s, %s) RETURNING id", 
+            segment_values
+        )
         
-        db.commit()
-        return True, "Successfully inserted article with segments"
-    except Exception as e:
-        db.rollback()
-        return False, f"Error during insertion: {e}"
-    
-def insert_article_with_segments_and_chunks(db: Session, article: Article, segments: list[Segment], chunks_list: list[list[Chunk]]):
-    try:
-        article_success, article_result = insert_article(db, article)
-        if not article_success:
-            db.rollback()
-            return False, article_result
+        segment_ids = [row[0] for row in cursor.fetchall()]
         
-        for i, segment in enumerate(segments):
-            segment.article_id = article.id
-            segment_success, segment_result = insert_segment(db, segment)
-            if not segment_success:
-                db.rollback()
-                return False, segment_result
+        for i, segment_obj in enumerate(segment_objects):
+            segment_obj.id = segment_ids[i]
             
-            if i < len(chunks_list):
-                for chunk in chunks_list[i]:
-                    chunk.segment_id = segment.id
-                    chunk_success, chunk_result = insert_chunk(db, chunk)
-                    if not chunk_success:
-                        db.rollback()
-                        return False, chunk_result
+        if auto_commit:
+            db.commit()
+            
+        return False, segment_ids
         
-        db.commit()
-        return True, "Successfully inserted article with segments and chunks"
     except Exception as e:
-        db.rollback()
-        return False, f"Error during insertion: {e}"
+        if auto_commit:
+            db.rollback()
+        return True, str(e)
+
+def batch_insert_chunks(db: Session, chunk_objects: list[Chunk], auto_commit=False):
+    try:
+        chunk_values = [
+            (chunk.segment_id, chunk.chunk_text) 
+            for chunk in chunk_objects
+        ]
+        
+        cursor = db.connection().connection.cursor()
+        cursor.executemany(
+            "INSERT INTO chunks (segment_id, chunk_text) VALUES (%s, %s) RETURNING id", 
+            chunk_values
+        )
+        
+        chunk_ids = [row[0] for row in cursor.fetchall()]
+        
+        for i, chunk_obj in enumerate(chunk_objects):
+            chunk_obj.id = chunk_ids[i]
+            
+        if auto_commit:
+            db.commit()
+            
+        return False, chunk_ids
+        
+    except Exception as e:
+        if auto_commit:
+            db.rollback()
+        return True, str(e)
