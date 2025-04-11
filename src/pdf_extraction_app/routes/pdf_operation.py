@@ -37,7 +37,7 @@ def article_to_dict(pydanamic_obj) -> Dict[Any, Any]:
 
 
 @router.get("pdf/{pdf_id}")
-async def find_paper(pdf_id: str, db: Session = Depends(get_db)):
+async def find_article(pdf_id: str, db: Session = Depends(get_db)):
     err, article = get_article_by_id(db, pdf_id)
     
     if err:
@@ -47,9 +47,19 @@ async def find_paper(pdf_id: str, db: Session = Depends(get_db)):
     
     return JSONResponse(content={"article_info": article_dict})
 
-@router.get("/segment/{segment_id}")
-async def find_segment(segment_id: int, db: Session = Depends(get_db)):
-    err, segment = get_segment_by_id(db, segment_id)
+async def find_article_by_title(title: str, db: Session = Depends(get_db)):
+    err, article = get_article_by_id(db, title)
+    
+    if err:
+        raise HTTPException(status_code=404, detail=str(err))
+    
+    article_dict = article_to_dict(article)
+    
+    return JSONResponse(content={"article_info": article_dict})
+
+@router.get("/segment/{article_id}")
+async def find_segment(article_id: int, db: Session = Depends(get_db)):
+    err, segment = get_segment_by_id(db, article_id)
     
     if err:
         raise HTTPException(status_code=404, detail=str(err))

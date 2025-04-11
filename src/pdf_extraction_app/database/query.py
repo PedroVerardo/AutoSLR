@@ -14,6 +14,15 @@ def get_article_by_id(db: Session, article_id: int) -> tuple[bool, Article]:
         return False, article
     except Exception as e:
         return True, f"Error fetching article: {e}"
+
+def get_article_by_title(db: Session, title: str) -> tuple[bool, Article]:
+    try:
+        article = db.query(Article).filter(Article.title == title).all()
+        if not article:
+            return True, f"Article with title '{title}' does not exist."
+        return False, article
+    except Exception as e:
+        return True, f"Error fetching article: {e}"
     
 def get_segment_by_id(db: Session, segment_id: int) -> tuple[bool, Segment]:
     try:
@@ -65,6 +74,16 @@ def get_segments_by_title_and_articleid(db: Session, title: str, article_id: int
         segments = db.query(Segment).filter(Segment.segment_title.like(f"%{title}%"), Segment.article_id == article_id).all()
         if not segments:
             return True, f"No segments found with title '{title}'."
+        return False, segments
+    except Exception as e:
+        return True, f"Error fetching segments: {e}"
+    
+def get_segmentid_by_title_vector_proximity(db: Session, title_vector: str, vector_distance: float) -> tuple[bool, list[int]]:
+    try:
+        segments = db.query(Segment).filter(Segment.segment_title_vector.op('<->')(title_vector) <= vector_distance).all()
+        segments = [segment.id for segment in segments]
+        if not segments:
+            return True, f"No segments found with title vector '{title_vector}'."
         return False, segments
     except Exception as e:
         return True, f"Error fetching segments: {e}"

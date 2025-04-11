@@ -33,7 +33,7 @@ def process_message(message):
     """
     archive_name = message.get("archive_name")
     section_pattern = message.get("section_pattern")
-    data_path = os.getenv('DATA_PATH', '/home/pedro/Documents/Rag_test/grpc/papers_pdf')
+    data_path = os.getenv('DATA_PATH', '/home/PUC/Documentos/AutoSLR/papers_pdf')
 
     pdf_path = None
 
@@ -107,16 +107,11 @@ def process_message(message):
         
 
 
-        err, info = batch_insert_segments(db, segment_obj, auto_commit=True)
-        err, info = insert_chunk(db, chunk_buff, auto_commit=True)
+        err, info = batch_insert_segments(db, segment_buff, auto_commit=True)
+        err, info = batch_insert_chunks(db, chunk_buff, auto_commit=True)
         if err:
             logging.error(f"Error inserting chunk: {info}")
             return []
-        
-
-
-        
-
 
     return titles
 
