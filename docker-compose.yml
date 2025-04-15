@@ -48,47 +48,52 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    
-    
-  # text-embeddings:
-  #   image: ghcr.io/huggingface/text-embeddings-inference:1.6
-  #   ports:
-  #     - "8080:80"
-  #   volumes:
-  #     - ./volumes/embedding:/data
-  #   environment:
-  #     - OTLP_ENDPOINT=http://otel-collector:4317
-  #     - MODEL_ID=nomic-ai/nomic-embed-text-v1
-  #     - JSON_OUTPUT=/data/output.json
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: all
-  #             capabilities: [gpu]
-  #   pull_policy: always
-  #   networks:
-  #     - app-network
-    
-  # pdf_extraction_app:
-  #       build:
-  #           context: ./src/pdf_extraction_app
-  #           dockerfile: dockerfile
-  #       ports:
-  #           - "7070:7070"
-  #       volumes:
-  #           - ./papers_pdf:/code/app/pdf
-  #       environment:
-  #           PAPERS_PDF_PATH: /code/app/pdf
-  #           TEXT_EMBEDDINGS_URL: http://text-embeddings:80
-  #           DATABASE_URL: postgresql://postgres:postgres@db:5432/article_search
-  #       depends_on:
-  #          # - text-embeddings
-  #           - db
-  #       networks:
-  #           - app-network
-  #           - kafka-net
+  
+  pdf_crude_service:
+        build:
+            context: ./src/pdf_crude_service
+            dockerfile: dockerfile
+        ports:
+            - "7071:7071"
+        volumes:
+            - ./papers_pdf:/code/app/pdf
+        environment:
+            PAPERS_PDF_PATH: /code/app/pdf
+            DATABASE_URL: postgresql://postgres:postgres@db:5432/article_search
+        depends_on:
+            - db
+        networks:
+            - app-network
+            - kafka-net
+  
+  pdf_extraction_consumer:
+        build:
+            context: ./src/pdf_extraction_consumer
+            dockerfile: dockerfile
+        volumes:
+            - ./papers_pdf:/code/app/pdf
+        environment:
+            PAPERS_PDF_PATH: /code/app/pdf
+            DATABASE_URL: postgresql://postgres:postgres@db:5432/article_search
+        depends_on:
+            - db
+            - kafka
+        networks:
+            - app-network
+            - kafka-net
+
+  gateway:
+        build:
+            context: ./src/gateway
+            dockerfile: dockerfile
+        ports:
+            - "7070:7070"
+        depends_on:
+            - pdf_extraction_app
+            - pdf_crude_service
+        networks:
+            - app-network
+            - kafka-net
 
  
 

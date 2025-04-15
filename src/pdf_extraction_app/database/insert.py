@@ -2,9 +2,11 @@ from .session import get_db
 from embedding_loading import generate_embedding, load_embedding_model
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sentence_transformers import SentenceTransformer
 import logging
 from ..models import Article, Segment, Chunk
 
+from ..config.embedding_model_config import model
 
 logging.basicConfig(level=logging.INFO)
 
@@ -55,14 +57,15 @@ def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
     
 def batch_insert_segments(db: Session, segment_objects: list[Segment], auto_commit=False):
     try:
-        segment_values = [
-            (seg.article_id, seg.segment_title, seg.segment_text) 
-            for seg in segment_objects
-        ]
+        segment_values = []
+
+        for seg in segment_objects:
+            title_vector = model.encode(seg.segment_title)
+            segment_values.append((seg.article_id, seg.segment_title, title_vector, seg.segment_text))
         
         cursor = db.connection().connection.cursor()
         cursor.executemany(
-            "INSERT INTO segments (article_id, segment_title, segment_text) VALUES (%s, %s, %s) RETURNING id", 
+            "INSERT INTO segments (article_id, segment_title, segment_title_vector, segment_text) VALUES (%s, %s, %s, %s) RETURNING id", 
             segment_values
         )
         
@@ -83,14 +86,15 @@ def batch_insert_segments(db: Session, segment_objects: list[Segment], auto_comm
 
 def batch_insert_chunks(db: Session, chunk_objects: list[Chunk], auto_commit=False):
     try:
-        chunk_values = [
-            (chunk.segment_id, chunk.chunk_text) 
-            for chunk in chunk_objects
-        ]
+        chunk_values = []
+
+        for chunk in chunk_objects:
+            chunk_vector = model.encode(chunk.chunk_text)
+            chunk_values.append((chunk.id, chunk.chunk_text, chunk_vector))
         
         cursor = db.connection().connection.cursor()
         cursor.executemany(
-            "INSERT INTO chunks (segment_id, chunk_text) VALUES (%s, %s) RETURNING id", 
+            "INSERT INTO chunks (segment_id, chunk_text, chunk_vector) VALUES (%s, %s, %s) RETURNING id", 
             chunk_values
         )
         
