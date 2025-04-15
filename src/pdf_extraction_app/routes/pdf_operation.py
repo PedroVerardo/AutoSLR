@@ -28,9 +28,9 @@ def article_to_dict(pydanamic_obj) -> Dict[Any, Any]:
     for relationship in pydanamic_obj.__mapper__.relationships:
         related_value = getattr(pydanamic_obj, relationship.key)
         if related_value is not None:
-            if isinstance(related_value, list):  # Handle one-to-many relationships
+            if isinstance(related_value, list):
                 result[relationship.key] = [article_to_dict(item) for item in related_value]
-            else:  # Handle one-to-one relationships
+            else:
                 result[relationship.key] = article_to_dict(related_value)
 
     return result
@@ -48,7 +48,7 @@ async def find_article(pdf_id: str, db: Session = Depends(get_db)):
     return JSONResponse(content={"article_info": article_dict})
 
 async def find_article_by_title(title: str, db: Session = Depends(get_db)):
-    err, article = get_article_by_id(db, title)
+    err, article = get_article_by_id(db, title).all()
     
     if err:
         raise HTTPException(status_code=404, detail=str(err))
