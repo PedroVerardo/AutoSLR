@@ -1,4 +1,5 @@
 from .session import get_db
+from embedding_loading import generate_embedding, load_embedding_model
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 import logging
