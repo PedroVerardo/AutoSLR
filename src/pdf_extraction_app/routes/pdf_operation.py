@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi import Depends
 from sqlalchemy.orm import Session
-
+from pydantic import BaseModel
 
 from database import get_db, get_article_by_id, get_segment_by_id
 from models import Article, Segment, Chunk
@@ -13,7 +13,7 @@ router = APIRouter()
 db = get_db()
 
 
-def article_to_dict(pydanamic_obj) -> Dict[Any, Any]:
+def article_to_dict(pydanamic_obj: BaseModel) -> Dict[Any, Any]:
     """Convert SQLAlchemy model instance to a dictionary for JSON serialization."""
     if not pydanamic_obj:
         return {}
@@ -48,7 +48,7 @@ async def find_article(pdf_id: str, db: Session = Depends(get_db)):
     return JSONResponse(content={"article_info": article_dict})
 
 async def find_article_by_title(title: str, db: Session = Depends(get_db)):
-    err, article = get_article_by_id(db, title).all()
+    err, article = get_article_by_id(db, title)
     
     if err:
         raise HTTPException(status_code=404, detail=str(err))

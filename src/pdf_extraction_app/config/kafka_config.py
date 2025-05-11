@@ -9,18 +9,17 @@ class KafkaConfig:
     CLIENT_ID = os.getenv('KAFKA_CLIENT_ID', 'gateway_producer')
     
     TOPIC_MAPPING: Dict[str, str] = {
-        ServiceType.PDF_EXTRACTION: os.getenv('PDF_TOPIC', 'pdf_topic'),
-        ServiceType.CRUD_INTERACTION: os.getenv('CRUD_TOPIC', 'crud_topic'),
-        ServiceType.EMBEDDING_PROCESSING: os.getenv('EMBEDDING_TOPIC', 'embedding_topic'),
+        ServiceType.PDF_EXTRACTION: os.getenv('PDF_TOPIC', 'pdf_extraction_topic'),
+        ServiceType.CRUD_INTERACTION: os.getenv('QUESTION_TOPIC', 'pdf_question_topic'),
     }
     
     @staticmethod
-    def get_producer_config():
+    def get_consumer_config():
         return {
             'bootstrap.servers': KafkaConfig.BOOTSTRAP_SERVERS,
-            'client.id': KafkaConfig.CLIENT_ID,
-            'acks': 'all',
-            'retries': 3, 
+            'group.id': os.getenv('KAFKA_GROUP_ID', 'pdf_consumer_group'),
+            'auto.offset.reset': 'earliest',
+            'enable.auto.commit': True,
         }
         
     @staticmethod

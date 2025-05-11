@@ -49,9 +49,9 @@ services:
     networks:
       - app-network
   
-  pdf_crude_service:
+  pdf_crud_service:
         build:
-            context: ./src/pdf_crude_service
+            context: ./src/pdf_extraction_app
             dockerfile: dockerfile
         ports:
             - "7071:7071"
@@ -68,7 +68,7 @@ services:
   
   pdf_extraction_consumer:
         build:
-            context: ./src/pdf_extraction_consumer
+            context: ./src/pdf_extraction_app
             dockerfile: dockerfile
         volumes:
             - ./papers_pdf:/code/app/pdf
@@ -89,8 +89,7 @@ services:
         ports:
             - "7070:7070"
         depends_on:
-            - pdf_extraction_app
-            - pdf_crude_service
+            - pdf_crud_service
         networks:
             - app-network
             - kafka-net

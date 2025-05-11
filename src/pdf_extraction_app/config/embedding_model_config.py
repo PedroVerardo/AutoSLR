@@ -24,7 +24,7 @@ class EmbeddingConfig:
     
     DEFAULT_MODEL = EmbeddingMethod.ALL_MINI_LM
     
-    CACHE_DIR = os.getenv('EMBEDDING_CACHE_DIR', '~/.cache/sentence_transformers')
+    # CACHE_DIR = os.getenv('EMBEDDING_CACHE_DIR', '~/.cache/sentence_transformers')
     
     DEVICE = os.getenv('EMBEDDING_DEVICE', 'cuda' if torch.cuda.is_available() else 'cpu')
     
@@ -51,7 +51,6 @@ class EmbeddingConfig:
         
         return {
             'model_name': model,
-            'cache_dir': EmbeddingConfig.CACHE_DIR,
             'device': EmbeddingConfig.DEVICE,
             'pooling_strategy': EmbeddingConfig.POOLING_STRATEGY,
             'dimension': EmbeddingConfig.get_dimension_for_model(model),
@@ -70,9 +69,27 @@ class EmbeddingConfig:
         else:
             
             return EmbeddingConfig.DEFAULT_DIMENSION
-    
-model = SentenceTransformer(
-    EmbeddingConfig.get_model_config()['model_name'],
-    cache_folder=EmbeddingConfig.get_model_config()['cache_dir'],
-    device=EmbeddingConfig.get_model_config()['device']
-)
+        
+    @staticmethod
+    def load_embedding_model(model_name: Optional[str] = None):
+        model_name = model_name or EmbeddingConfig.DEFAULT_MODEL
+        # model_path = os.path.join(EmbeddingConfig.CACHE_DIR, model_name)
+        model = SentenceTransformer(model_name, device=EmbeddingConfig.DEVICE)
+        return model
+
+    @staticmethod
+    def generate_embedding(text: Union[str, List[str]], model: SentenceTransformer) -> Union[List[float], List[List[float]]]:
+        if isinstance(text, str):
+            text = [text]
+        
+        embeddings = model.encode(
+            text,
+            batch_size=EmbeddingConfig.BATCH_SIZE,
+            convert_to_numpy=True,
+            normalize_embeddings=EmbeddingConfig.NORMALIZE_EMBEDDINGS,
+            show_progress_bar=False,
+        )
+            
+        if len(embeddings) == 1:
+            return embeddings[0].tolist()
+        return [embedding.tolist() for embedding in embeddings]

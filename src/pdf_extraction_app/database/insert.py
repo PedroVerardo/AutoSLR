@@ -1,18 +1,16 @@
 from .session import get_db
-from embedding_loading import generate_embedding, load_embedding_model
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sentence_transformers import SentenceTransformer
 import logging
-from ..models import Article, Segment, Chunk
-
-from ..config.embedding_model_config import model
+from ..models import Article, Segment, Chunk, ChatHistory
 
 logging.basicConfig(level=logging.INFO)
 
 def insert_article(db: Session, article: Article, auto_commit: bool=False):
     try:
         db.add(article) 
+        db.flush()
         
         if auto_commit:
             db.commit()
@@ -26,11 +24,12 @@ def insert_article(db: Session, article: Article, auto_commit: bool=False):
         return True, f"Error inserting article: {e}"
 
 def insert_segment(db: Session, segment: Segment, auto_commit: bool=False):
-    if not segment.article_id:
+    if segment.article_id is None:
         return True, "Segment must have an article_id"
     
     try:
         db.add(segment)
+        db.flush()
         
         if auto_commit:
             db.commit()
@@ -41,7 +40,7 @@ def insert_segment(db: Session, segment: Segment, auto_commit: bool=False):
         return True, f"Error inserting segment: {e}"
 
 def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
-    if not chunk.segment_id:
+    if chunk.segment_id is None:
         return True, "Chunk must have a segment_id"
     
     try:
@@ -55,13 +54,24 @@ def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
         db.rollback()
         return True, f"Error inserting chunk: {e}"
     
+def insert_question_and_answer(db: Session, chat_history: ChatHistory, auto_commit: bool=False):
+    if not chat_history.article_id:
+        return True, "ChatHistory must be associated with one or more articles ids"
+    
+    try:
+        db.add(chat_history)
+        
+        if auto_commit:
+            db.commit()
+            
+        return False, chat_history.id
+    except Exception as e:
+        db.rollback()
+        return True, f"Error inserting chat history: {e}"
+    
 def batch_insert_segments(db: Session, segment_objects: list[Segment], auto_commit=False):
     try:
-        segment_values = []
-
-        for seg in segment_objects:
-            title_vector = model.encode(seg.segment_title)
-            segment_values.append((seg.article_id, seg.segment_title, title_vector, seg.segment_text))
+        segment_values = [(seg.article_id, seg.segment_title, seg.segment_title_vector, seg.segment_text) for seg in segment_objects]
         
         cursor = db.connection().connection.cursor()
         cursor.executemany(
@@ -86,11 +96,7 @@ def batch_insert_segments(db: Session, segment_objects: list[Segment], auto_comm
 
 def batch_insert_chunks(db: Session, chunk_objects: list[Chunk], auto_commit=False):
     try:
-        chunk_values = []
-
-        for chunk in chunk_objects:
-            chunk_vector = model.encode(chunk.chunk_text)
-            chunk_values.append((chunk.id, chunk.chunk_text, chunk_vector))
+        chunk_values = [(chunk.id, chunk.chunk_text, chunk.chunk_vector) for chunk in chunk_objects]
         
         cursor = db.connection().connection.cursor()
         cursor.executemany(
@@ -112,3 +118,18 @@ def batch_insert_chunks(db: Session, chunk_objects: list[Chunk], auto_commit=Fal
         if auto_commit:
             db.rollback()
         return True, str(e)
+    
+def insert_question_and_answer(db: Session, chat_history: ChatHistory, auto_commit=False):
+    if not chat_history.article_id:
+        return True, "ChatHistory must be associated with one or more articles ids"
+    
+    try:
+        db.add(chat_history)
+        
+        if auto_commit:
+            db.commit()
+            
+        return False, chat_history.id
+    except Exception as e:
+        db.rollback()
+        return True, f"Error inserting chat history: {e}"

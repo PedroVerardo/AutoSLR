@@ -39,3 +39,14 @@ class Chunk(Base):
     chunk_vector = Column(Vector(384), nullable=True)
 
     segment = relationship("Segment", back_populates="chunks")
+
+class ChatHistory(Base):
+    __tablename__ = "chat_history"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # user_id = Column(Integer)
+    # project_id = Column(Integer)
+    article_id = Column(Integer, ForeignKey("article.id"))
+    chat_title = Column(String(1024), nullable=True)
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
