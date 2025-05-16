@@ -62,7 +62,13 @@ class PDFHandler:
         "rome_point_section": r"^\s*([IVX]+)\.\s+([A-Z][^<]+)\n",
         "numeric_section": r"^\s*(\d)\s+([A-Z][^<]+)\n",
         "table_description": r"(TABLE|Table|table)\s*\d+\.[\s\S]+?\n",
-        "citation1": r"^\[(\d)\]\s*([^\[]+)\n"
+        "citation1": r"^\[(\d)\]\s*([^\[]+)\n",
+        "bold_tag": r"<--bold-->",
+        "italic_tag": r"<--italic-->",
+        "size_tag": r"<--size=(\d+(\.\d+)?)-->",
+        "page_start_tag": r"<--page_start:(\d+)-->",
+        "page_end_tag": r"<--page_end:(\d+)-->",
+        "image_tag": r"<--image width=(\d+(\.\d+)?) height=(\d+(\.\d+)?)-->",
     }
     
     normal_article_words = [
@@ -191,7 +197,6 @@ class PDFHandler:
             return information_by_depth[1]
         
         logging.info(f"Most common depth for section titles: {argmax_depth}")
-        # loggind the result of argmax
         for elem in information_by_depth[argmax_depth]:
             logging.info(f"Title: {elem['title']}, Page: {elem['page_number']}")
 
@@ -291,8 +296,22 @@ if __name__ == "__main__":
     # simple usage for futher reference
     path = "/home/PUC/Documentos/AutoSLR/papers_pdf/SpringerLink/Dorn2023ese.pdf"
     pattern = "numeric_section"
+    tagged = True
     
     doc = PDFHandler.try_open(path)
 
-    result = PDFHandler.find_pdf_topics_outline(doc)
+    topics = PDFHandler.find_pdf_topics_outline(doc)
+    if topics == None:
+        print("do not found outline")
+    
+    result = PDFHandler.tagged_text_extraction(doc)
+        
+    if result == None:
+        tagged = False
+        print("error during the tagged extraction")
+        result = PDFHandler.simple_extraction(doc)
+
+    if result == None:
+        print("error during the simple extraction")
+        exit(1)
     
