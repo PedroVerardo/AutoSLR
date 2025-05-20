@@ -4,6 +4,7 @@ from statistics import mode
 from typing import List, Dict, Tuple, Optional, Union, Any
 import numpy as np
 import logging
+from roman import fromRoman, InvalidRomanNumeralError
 
 '''
 Considerations:
@@ -19,6 +20,8 @@ Considerations:
     - Ex: figure 1.1: Some description, table 1.1: Some description
 - Could store the probaly sequence of section titles
 - Is difficult to find three or more sections in the same page
+- probably do not have ponctuation in the section title
+- You could remove all figure 1. of the text
 '''
 
 logging.basicConfig(
@@ -232,11 +235,8 @@ class PDFHandler:
         This enhanced method extracts text while preserving formatting information such as:
         - Font size
         - Bold formatting
-        - Italic formatting
-        - Color information
-        - Superscript/subscript status
-        - Paragraph breaks
         - Page numbers
+        - Image dimensions
 
         Args:
             doc (fitz.Document): The PDF document object.
@@ -267,49 +267,93 @@ class PDFHandler:
                         prev_span = None
                         
                         tags = []
+                        line_font_sizes = []
+                        line_is_bold = True
+
                         for span in line["spans"]:
                             mod = extract_span_formatting(span)
-                            font_size = mod["font_size"]
-                            is_bold = mod["is_bold"]
+                            if mod is None:
+                                continue
+                            line_font_sizes.append(mod["font_size"])
+                            if not mod["is_bold"]:
+                                line_is_bold = False
+                            line_text += mod["text"]
 
-                        size_tag = f"<--size={font_size:.1f}-->"
-                        tags.append(size_tag)
-                        if is_bold:
+                        if line_font_sizes:
+                            most_common_size = mode(line_font_sizes)
+                            size_tag = f"<--size={most_common_size:.1f}-->"
+                            tags.append(size_tag)
+
+                        if line_is_bold:
                             tags.append("<--bold-->")
-                        text += line_text + tags + "\n"
+
+                        text += line_text + "".join(tags) + "\n"
 
                     text += "\n"
                 text += f"<--page_end:{page_num+1}-->\n\n"
-            return text
+            return text, page_num+1
 
         except Exception as e:
             logging.error(f"Error in tagged_text_extraction: {e}")
             return None
-        
+    
+    @staticmethod
+    def convert_rome_to_numeric(rome: str) -> int:
+        """Convert a Roman numeral string to an integer.
 
-# results[section_number] = {
-#                     "title": section_title,
-#                     "text": clean_text
-#                 }
+        Args:
+            rome (str): The Roman numeral string.
+
+        Returns:
+            int: The integer value of the Roman numeral.
+        """
+        try:
+            return fromRoman(rome.upper())
+        except InvalidRomanNumeralError as irne:
+            logging.error(f"Error converting Roman numeral: {irne}")
+            return int(rome)
+
+    @staticmethod
+    def extract_section_title_and_text(text: str, pattern: str, isTextTagged: bool) -> List[Dict[str, Union[str, int]]]:
+        page_number = 0
+        match_count = 0
+        for line in text.split("\n"):
+            page_match = re.search(PDFHandler.regex_patterns["page_start_tag"], line)
+            match = re.search(pattern, line)
+            if page_match:
+                page_number = int(page_match.group(1))
+            
+            if match and match.group(1) and match.group(2):
+                section_number = match.group(1)
+                section_title = match.group(2).strip()
+                section_position = match.start()
+            elif match and match.group(1) and not match.group(2):
+                section_number = match_count
+                section_title = match.group(1)
 
 if __name__ == "__main__":
-    # simple usage for futher reference
-    path = "/home/PUC/Documentos/AutoSLR/papers_pdf/SpringerLink/Dorn2023ese.pdf"
+    path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf/ACM/muhlbauer2023_icse.pdf"
     pattern = "numeric_section"
     tagged = True
     
     doc = PDFHandler.try_open(path)
+    if doc == None:
+        print("error opening the pdf")
+        exit(1)
 
     topics = PDFHandler.find_pdf_topics_outline(doc)
     if topics == None:
         print("do not found outline")
     
-    result = PDFHandler.tagged_text_extraction(doc)
+    result, numberOfPages = PDFHandler.tagged_text_extraction(doc)
         
     if result == None:
         tagged = False
         print("error during the tagged extraction")
         result = PDFHandler.simple_extraction(doc)
+    
+    print(result)
+    print("number of pages: ", numberOfPages)
 
     if result == None:
         print("error during the simple extraction")

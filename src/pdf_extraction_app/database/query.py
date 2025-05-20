@@ -9,7 +9,6 @@ from typing import Tuple, Dict, List, Union
 from sqlalchemy import text
 
 logging.basicConfig(level=logging.INFO)
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 def get_article_by_id(db: Session, article_id: int) -> tuple[bool, Article]:
     try:
