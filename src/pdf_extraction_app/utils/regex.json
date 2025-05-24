@@ -16,7 +16,7 @@
         "description": "Find the start of the references section."
     },
     "numeric_point_section": {
-        "pattern": "^(\\d+)\\.\\s+(?!\\d)\\w+",
+        "pattern": "\\n(\\d)\\.\\s+(?!\\d)[\\w\\s]+<--bold-->\\n",
         "description": "Find topics and contents."
     },
     "rome_point_section": {
@@ -29,7 +29,7 @@
     },
     "table_description": {
         "pattern": "(TABLE|Table|table)\\s*\\d+\\.[\\s\\S]+?",
-        "description": "Remove tables."
+        "description": "Find tables."
     },
     "citation1":{
         "pattern": "\\[(\\d)\\]\\s*([^\\[]+)",

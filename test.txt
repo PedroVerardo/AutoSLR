@@ -1,0 +1,1899 @@
+<--page_1-->Whence to Learn? Transferring Knowledge in
+Conﬁgurable Systems Using BEETLE
+Rahul Krishna
+, Vivek Nair
+, Pooyan Jamshidi, and Tim Menzies
+, Fellow, IEEE
+Abstract—As software systems grow in complexity and the space of possible conﬁgurations increases exponentially, ﬁnding the near-
+optimal conﬁguration of a software system becomes challenging. Recent approaches address this challenge by learning performance
+models based on a sample set of conﬁgurations. However, collecting enough sample conﬁgurations can be very expensive since each
+such sample requires conﬁguring, compiling, and executing the entire system using a complex test suite. When learning on new data is
+too expensive, it is possible to use Transfer Learning to “transfer” old lessons to the new context. Traditional transfer learning has a
+number of challenges, speciﬁcally, (a) learning from excessive data takes excessive time, and (b) the performance of the models built
+via transfer can deteriorate as a result of learning from a poor source. To resolve these problems, we propose a novel transfer learning
+framework called BEETLE, which is a “bellwether”-based transfer learner that focuses on identifying and learning from the most
+relevant source from amongst the old data. This paper evaluates BEETLE with 57 different software conﬁguration problems based
+on ﬁve software systems (a video encoder, an SAT solver, a SQL database, a high-performance C-compiler, and a streaming
+data analytics tool). In each of these cases, BEETLE found conﬁgurations that are as good as or better than those found by other
+state-of-the-art transfer learners while requiring only a fraction (1
+7th) of the measurements needed by those other methods. Based on
+these results, we say that BEETLE is a new high-water mark in optimally conﬁguring software.
+Index Terms—Performance optimization, SBSE, transfer learning, bellwether
+Ç
+1
+INTRODUCTION
+A
+problem of increasing difﬁculty in modern software is
+ﬁnding the right set of conﬁgurations that can achieve
+the best performance. As more functionality is added to the
+code, it becomes increasingly difﬁcult for users to under-
+stand all the options a software offers [1], [2], [3], [4], [5], [6],
+[7], [8], [9], [10], [11], [12]. It is hard to overstate the impor-
+tance of good conﬁguration choices and the impact poor
+choices can have. For example, it has been reported that for
+Apache Storm, the throughput achieved using the worst
+conﬁguration was 480 times slower than that achieved by the
+best conﬁguration [3].
+Recent research has attempted to address this problem
+usually by creating accurate performance models that
+predict performance characteristics. While this approach is
+certainly cheaper and more effective than manual conﬁgu-
+ration it still incurs the expense of extensive data collection.
+This is undesirable, since the data collection must be
+repeated if the software is updated or the workload of the
+system changes.
+Rather than learning new conﬁgurations afresh, in this
+paper, we ask if we can learn from existing conﬁgurations.
+Formally, this is called “transfer learning”; i.e., the transfer of
+information from selected “source” software conﬁgurations
+running on one environment to learn a model for predicting
+the performance of some “target” conﬁgurations in a different
+environment. Transfer learning has been extensively explored
+in other areas of software analytics [13], [14], [15], [16], [17],
+[18]. This is a practical possibility since often when a software
+is being deployed in a new environment, there are examples
+of the system already executing under a different environ-
+ment. To the best of our knowledge, this paper is among the
+earliest studies to apply transfer learning for performance
+optimization. Our proposed method is signiﬁcantly faster
+than any current state-of-the-art methods in identifying near-
+optimum conﬁgurations for a software system.
+Transfer learning can only be useful in cases where the
+source environment is similar to the target environment. If
+the source and the target are not similar, knowledge should
+not be transferred. In such situations, transfer learning can
+be unsuccessful and can lead to a negative transfer. Prior
+work on transfer learning focused on “What to transfer” and
+“How to transfer”, by implicitly assuming that the source
+and target are related to each other. However, those work
+failed to address “From where (whence) to transfer” [19].
+Jamshidi et al. [20] alluded to this and explained when trans-
+fer learning works but, did not provide a method which can
+help in selecting a suitable source.
+The issue of identifying a suitable source is a common
+problem in transfer learning. To address this, some research-
+ers [18], [21], [22], [23] have recently proposed the use of the
+bellwether effect, which states that:
+
+Rahul Krishna is with the Department of Computer Science, Columbia Univer-
+sity, New York, NY 10027 USA. E-mail: i.m.ralk@gmail.com.
+
+Vivek Nair and Tim Menzies is with the Department of Computer Science,
+North Carolina State University, Raleigh, NC 27695 USA.
+E-mail: {vivekaxl, tim.menzies}@gmail.com.
+
+Pooyan Jamshidi is with the Department of Computer Science and Engi-
+neering, University of South Carolina, Columbia, SC 29208 USA.
+E-mail: pooyan.jamshidi@gmail.com.
+Manuscript received 2 June 2019; revised 7 Feb. 2020; accepted 10 Mar. 2020.
+Date of publication 30 Mar. 2020; date of current version 10 Dec. 2021.
+(Corresponding author: Rahul Krishna.)
+Recommended for acceptance by M. Kim.
+Digital Object Identiﬁer no. 10.1109/TSE.2020.2983927
+2956
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+0098-5589 © 2020 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See ht_tps://www.ieee.org/publications/rights/index.html for more information.
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_2-->“When analyzing a community of software data, there is at
+least one exemplary source data, called bellwether(s), which
+best deﬁnes predictors for all the remaining datasets ...”
+Inspired by the success of bellwethers in other areas, this
+paper deﬁnes and evaluates a new transfer learner for soft-
+ware conﬁguration called Bellwether Transfer Learner
+(henceforth referred to as BEETLE). BEETLE can perform
+knowledge transfer using just a few samples from a care-
+fully identiﬁed source environment(s).
+For evaluation, we explore ﬁve real-world software
+systems from different domains– a video encoder, a SAT
+solver, a SQL database, a high-performance C-compiler,
+and a streaming data analytics tool (measured under 57
+enviroments overall). In each case, we discovered that
+BEETLE found conﬁgurations as good as or better than
+those found by other state-of-the-art transfer learners
+while requiring only 1
+7th of the measurements needed by
+those other methods. Reducing the number of measure-
+ments is an important consideration since collecting data
+in this domain can be computationally and monetarily
+expensive.
+Overall, this work makes the following contributions:
+1)
+Source selection: We show that the bellwether effect
+exists in performance optimization and that we can
+use this to discover suitable sources (called bell-
+wether environments) to perform transfer learning
+(see Section 7).
+2)
+Cheap source selection: BEETLE, using bellwethers,
+evaluates at most  10% of the conﬁguration space
+(see Section 4).
+3)
+Simple Transfer learning using Bellwethers: We develop
+a novel transfer learning algorithm using bellwether
+called BEETLE that exploits the bellwether environ-
+ment to construct a simple transfer learner (see
+Section 4).
+4)
+More effective than non-transfer learning: We show that
+using the BEETLE is better than non-transfer learning
+approaches. It is also lot more economical (see
+Section 7).
+5)
+More effective than state-of-the-art methods: Conﬁgura-
+tions discovered using the bellwether environment
+are better than the state-of-the-art methods [24], [25]
+(see Section 7).
+6)
+Reproduction Package: To assist other researchers, a
+reproduction package with all our scripts and data
+are available online (see https://git.io/fjsky).
+The rest of this article is structured as follows: The
+remainder of this section presents the research questions
+asked here (Section 1.1) answered in this paper. Section 2
+presents some motivation for this work. Section 3 describes
+the problem formulation and explains the concept of Bell-
+wethers. Section 4 describes BEETLE followed by a quick
+overview of the prior work in transfer learning in perfor-
+mance conﬁguration optimization in Section 5. In Section 6,
+we present experimental setup and followed by answers to
+research questions in Section 7. In Section 8, we discuss our
+ﬁndings further and answer some additional questions per-
+taining to our results. Section 9 discusses some threats to
+validity, related work and conclusion are presented in Sec-
+tions 10 and 11 respectively.
+1.1
+Research Questions
+RQ1:
+Does there exist a Bellwether Environment?First, we ask
+if there exist bellwether environments to train trans-
+fer
+learners
+for
+performance
+optimization.
+We
+hypothesize that, if these bellwether environments
+exist, we can improve the efﬁcacy of transfer learning.
+Result: We ﬁnd that bellwether environments are
+prevalent in performance optimization. That is, in
+each of the software systems, there exists at least one
+environment that can be used to construct superior
+transfer learners.
+RQ2:
+How many performance measurements are required to dis-
+cover bellwether environments?Having established that
+bellwether environments are prevalent, the purpose
+of this research question is to establish how many
+performance measurements are needed in each of
+the environments to discover these bellwether envi-
+ronments.
+Result: We can discover a potential bellwether envi-
+ronment by measuring as little as 10 percent of the
+total conﬁgurations across all the software system.
+RQ3:
+How does BEETLE compare with other non-transfer-
+learning based methods?The alternative to transfer
+learning is just to use the target data to ﬁnd the near-
+optimal conﬁgurations. In the literature are many
+examples of this “non-transfer” approach [7], [10],
+[12], [26] and for our comparisons, we used the cur-
+rent state-of-the-art performance optimization model
+proposed by Nair et al. [10].
+Result: Our experiments demonstrate that transfer
+learning using bellwethers (BEETLE) outperforms
+other methods that do not use transfer learning both
+in terms of cost and the quality of the model.
+RQ4:
+How does BEETLE compare to state-of-the-art transfer
+learners?The ﬁnal research question compares BEE-
+TLE with two other state-of-the-art transfer learners
+used commonly in performance optimization (for
+details see Section 5). The purpose of this research
+question is to determine if a simple transfer learner
+like BEETLE with carefully selected source environ-
+ments can perform as well as other complex transfer
+learners that do not perform any source selection.
+Result: We show that a simple transfer learning using
+bellwether environment (BEETLE) just as good as (or
+better than) current state-of-the-art transfer learners.
+2
+MOTIVATION
+With the appearance of continuous software engineering
+and devops, conﬁgurability has become a primary concern of
+software engineers. System administrators today develop
+and use different versions software programs under running
+several different workloads and in numerous environments.
+In doing so, they try to apply software engineering methods
+to best conﬁgure these software systems. Despite their best
+efforts, the available evidence is that they need to be better
+assited in making all the conﬁguration decisions. Xu et al. [1]
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2957
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_3-->reports that, when left to their own judgementments,
+developers ignore up to 80 percent of conﬁguration
+options, which exposes them to many potential prob-
+lems. For this reason, the research community is devot-
+ing a lot of effort to conﬁguration studies, as witnessed
+by many recent software engineering research publica-
+tions [4], [5], [6], [7], [8], [9], [10], [12], [27]. For details,
+see Section 10 for the additional related work.
+Without automatic support (e.g., with systems like BEE-
+TLE), humans ﬁnd it difﬁcult to settle on their initial choice
+for software conﬁgurations. The available evidence [2], [3],
+[28] shows that system administrators frequently make
+poor conﬁguration choices. Typically, off-the-shelf defaults
+are used, which often behave poorly. There are various
+examples presented in the literature which have established
+that choosing default conﬁguration can lead to sub-optimal
+performance. For instance, Van Aken et al. report that the
+default MySQL conﬁgurations in 2016 assume that it will be
+installed on a machine that has 160 MB of RAM (which, at
+that time, was incorrect by, at least, an order of magni-
+tude) [2]. Also, Herodotou et al. [28] report that default set-
+tings for Hadoop results in the worst possible performance.
+Traditional approaches to ﬁnding good conﬁguration are
+very resource intensive. A typical approach uses sensitivity
+analysis [29], where performance models are learned by
+measuring the performance of the system under a limited
+number of sampled conﬁgurations. While this approach is
+cheaper and more effective than manual exploration, it still
+incurs the expense of extensive data collection about the
+software [3], [4], [7], [8], [10], [12], [26], [27], [30]. This is
+undesirable since this data collection has to be repeated if
+ever the software is updated or the environment of the sys-
+tem changes abruptly. While we cannot tame the pace of
+change in modern software systems, we can reduce the data
+collection effort required to react to that change. The experi-
+ments of this paper make the case that BEETLE scales to
+some large conﬁguration problems, better than the prior
+state of the art. Further, it does so using fewer measure-
+ments than existing state-of-the-art methods.
+Further, we note that BEETLE is particularly recom-
+mended in highly dynamic projects where the environ-
+ments keep changing. When context changes, so to must the
+solutions applied by software engineers. When frequently
+re-computing best conﬁgurations, it becomes vitally impor-
+tant that computation cost is kept to a minimum. Amongst
+the space of known conﬁguration tools, we most endorse
+BEETLE for very dynamic environments. We say this since,
+of all the systems surveyed here, BEETLE has the lowest
+CPU cost (and we conjecture that this is so since BEETLE
+makes the best use of old conﬁgurations).
+As a more concerete example, consider an organization
+that runs, say, N heavy Apache Spark workloads on the
+cloud. To optimize the performance of Apache Spark on the
+given workloads, the DevOps Team need to ﬁnd the opti-
+mal solutions for each of these workloads, i.e., conduct per-
+formance optimization N times. This setup has two major
+shortcomings: hardware change and workload change.
+Hardware Change. Even though the DevOps engineer of a
+software system performs a performance optimization for a
+speciﬁc workload in its staging environment, as soon as
+the software is moved to the production environment
+the optimal conﬁguration found previously may be inac-
+curate. This problem is further accentuated if the pro-
+duction environment changes due to the ever-expanding
+cloud portfolios.
+Workload Change. The developers of a database system
+can optimize the system for a read-heavy workload, how-
+ever, the optimal conﬁguration may change once the work-
+load changes to, say, a write-heavy counterpart. The reason
+is that if the workload changes, different functionalities of
+the software might get activated more often and so the non-
+functional behavior changes too. This means that as soon as
+a new workload is introduced (new feature in the organ-
+ization’s product) or if the workload changes, the process of
+performance optimization needs to be repeated.
+Given the fragility of traditional performance optimiza-
+tion, it is imperative that we develop a method to learn
+from our previous experiences and hence reduce the burden
+of having to ﬁnd optimum conﬁgurations ad nauseam.
+3
+DEFINITIONS AND PROBLEM STATEMENT
+Conﬁguration. A software system, S, may offer a number of
+conﬁguration options that can be changed. We denote the
+total number of conﬁguration options of a software system
+S as N. A conﬁguration option of the software system can
+either be a (1) continuous numeric value or a (2) categorical
+value. This distinction is very important since it impacts the
+choice of machine learning algorithms. The conﬁguration
+options in all software systems studied in this paper are a
+combination of both categorical and continuous in nature.
+The learning algorithm used in this paper namely, Regres-
+sion Trees, are particularly well suited to handle such a com-
+bination of continuous and categorical data.
+A conﬁguration is represented by ci, where i represents
+the ith conﬁguration of a system. A set of all conﬁgurations
+is called the conﬁguration space, denoted as C. Formally, C is
+Fig. 1. Traditional transfer learning compared with using bellwethers to
+discover near optimal conﬁgurations.
+Fig. 2. Some conﬁguration options for SQLite.
+2958
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_4-->a Cartesian product of all possible options C = Dom(c1) 
+Dom(c2)      Dom(cN), where DomðciÞ is either R (Real
+Numbers) or B (Catergorical/Boolean value) and N is the
+number of conﬁguration options.
+As a simple example, consider a subset of conﬁguration
+options from SQLite, i.e., S  SQLite. This is shown in
+Fig. 2. The subset of SQLite offers three conﬁguration
+options namely, ATOMIC (atomic delete), USE_LFS (use
+large ﬁle storage), and SECURE (secure delete), ie., N ¼ 3.
+The last column contains the latency in ms when various
+combinations of these options are chosen.
+Environment. As deﬁned by Jamshidi et al.[20], the differ-
+ent ways a software system is deployed and used is called
+its environment (e). The environment is usually deﬁned in
+terms of: (1) workload (w): the input which the system oper-
+ates upon; (2) hardware (h): the hardware on which the
+system is running; and (3) version (v): the state of the
+software.
+Note that, other environmental changes might be possi-
+ble (e.g., JVM version used, etc.). For example, consider
+software system Apache Storm, here we must ensure that
+an appropriate JVM is installed in an environment before
+it can be deployed in that environment. Indeed, the selec-
+tion of one version of a JVM over another can have a
+profound performance impact. However, the perceived
+improvement in the performance is due to the optimiza-
+tions in JVM, not the original software system being stud-
+ied. Therefore, in this paper, we do not alter these other
+factors which do not have a direct impact on the perfor-
+mance of the software system.
+The following criteria is used to deﬁne an environment:
+1)
+Environmental factors of the software systems that
+we can vary in the deployment stack of the system.
+This prevents us from varying factors such as the
+JVM version, CPU frequency, system software, etc.,
+which deﬁne the deployment stack and not the soft-
+ware system.
+2)
+Common changes developers choose to alter in the
+software system. In practice, it is these factors that
+affect the performance of systems the most [20], [24],
+[25], [31].
+3)
+Factors that are most amenable for transfer learning.
+Preliminary studies have shown that factors such as
+workload, hardware, and software version lend
+themselves very well to transfer learning [20], [25].
+For a more detailed description of the factors that were
+changed and those that were left unchanged, see Table 1.
+Formally, we say an environment is ee ¼ fw; h; vg where
+w  W, h  H, and v  V . Here, W; H; V are the space of all
+possible hardware changes H; all possible software versions
+V , and all possible workload changes W. With this, the envi-
+ronment space is deﬁned as E  fW  H  V g, i.e., a subset
+of environmental conditions ee for various workloads, hard-
+ware, and environments.
+Performance. For each enviroment ee, the instances in our
+data are of the form fðc1; y1Þ; . . . ; ðcN; yNÞg, where ci is a
+vector of conﬁgurations of the ith example and it has a cor-
+responding performance measure yi 2 YS;c;e associated with
+it. We denote the performance measure associated with a
+TABLE 1
+Overview of the Real-World Subject Systems
+jCj:Number of Conﬁgurations sampled per environment, N=Number of conﬁguration options, jEj: Number of Environments, jHj: Hardware, jWj: Workloads,
+and jV j: Versions.
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2959
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_5-->given conﬁguration (ci) by y ¼ fðciÞ. We consider the prob-
+lem of ﬁnding the near-optimal conﬁgurations (c	) such that
+fðc	Þ is better than other conﬁgurations in CA;e, i.e.,
+fðc	Þ 
+ fðcÞ 8c 2 CA;h;w;v n c	
+for min objective
+fðc	Þ  fðcÞ 8c 2 CA;h;w;v n c	
+for max objective
+Bellwethers. In the context of performance optimization, the
+bellwether effect states that: For a conﬁgurable system, when
+performance measurements are made under different environ-
+ments, then among those environments there exists one exemplary
+environment, called the bellwether, which can be used determine
+near optimum conﬁguration for other environments for that sys-
+tem. We show that, when performing transfer learning,
+there are exemplar source environments called the bell-
+wether environment(s) (B ¼ es1; es2; . . . ; esn  E), which are
+the best source environment(s) to ﬁnd near-optimal conﬁgu-
+ration for the rest of the environments (8e 2 E n B).
+Problem Statement: The problem statement of this paper:
+Find a near-optimal conﬁguration for a target environ-
+ment (Set), by learning from the measurements (hc; yi)
+for the same system operating in different source envi-
+ronments (Ses).
+In other words, we aim to reuse the measurements from
+a system operating in an environment to optimize the same
+system operating in the different environment thereby
+reducing the number of measurements required to ﬁnd the
+near-optimal conﬁguration.
+4
+BEETLE: BELLWETHER TRANSFER LEARNER
+This section describes BEETLE, a bellwether based approach
+that ﬁnds the near-optimal conﬁguration using the knowl-
+edge in the “bellwether” environment. BEETLE can be sepa-
+rated into two main steps: (i) Discovery: ﬁnding the bellwether
+environment, and (ii) Transfer: using the bellwether environ-
+ment to ﬁnd the near-optimal conﬁguration for target envi-
+ronments. These steps will are explained in greater detail in
+Sections 4.1 and 4.2. We outline it below,
+1)
+Discovery: Leverages the existence of the bellwether
+effect to discover which of the available environments
+are best suited to be a source enviroment (known as
+the bellwether environment). To do this, BEETLE uses
+a racing algorithm to sequentially evaluate candidate
+environments [32]. In short,
+a)
+A fraction (about 10 percent) of all available data
+is sampled. A prediction model is built with
+these sampled datasets.
+b)
+Each enviroment is used as a source to build a
+prediction model and all the others are used as
+targets in a round-robin fashion.
+c)
+Performance of all the enviroments are measured
+and are statistically ranked from the best source
+environemnt to the worst. Environments with a
+poor performance (i.e., those ranked last) are
+eliminated.
+d)
+For the remaining enviroments, another 10 percent
+of the samples are added and the steps (a)–(c) are
+repeated.
+e)
+When the ranking order doesn’t change for a
+ﬁxed number of repeats, we terminate the process
+and nominate the best ranked enviroment(s) as
+the bellwether.
+2)
+Transfer: Next, to perform transfer learning, we just
+use these bellwether environments to train a perfor-
+mance prediction model with regression trees [33].
+We conjecture that once a bellwether source environment is
+identiﬁed, it is possible to build a simple transfer model
+without any complex methods and still be able to discover
+near-optimal conﬁgurations in a target environment.
+4.1
+Discovery: Finding Bellwether Environments
+In the previous work on bellwethers [18], the discovery pro-
+cess involved a round-robin experimentation comprised of
+the following steps:
+1)
+Pick an enviroment eei from the space of all available
+enviroments, i.e., eei 2 E.
+2)
+Use eej as a source to build a prediction model.
+3)
+Using all the other enviroments eej 2 E and eej 6¼ eei as
+the target, determine the prediction performance of eei.
+4)
+Next, repeat the steps by choosing a different eei 2 E
+5)
+Finally, rank the performances of all the enviroments
+and pick the best ranked enviroment(s) as bell-
+wether(s).
+The above methodology is a form of an exhaustive
+search. While it worked for the relatively small datasets in
+[18], [21], the amount of data in this paper is sufﬁciently
+large (see Table 1) that scoring all candidates using every
+sample is too costly. More formally, let us say that we have
+M candidate enviroments with N measurements each. The
+classical approach, described above, will construct M mod-
+els. If we assume that the model construction time is a func-
+tion of number of samples fðNÞ, then for one round in the
+round-robin, the computation time will OðM  fðNÞÞ. Since
+this is repeated M times for each enviroment, the total
+computational complexity is OðM2  fðnÞÞ. When M and/or
+N is/are extremely large, it becomes necessary to seek alter-
+native methods. Therefore, in this paper, we use a racing
+algorithm to achieve computational speedups.
+Instead of evaluating every available instance to deter-
+mine the best source enviroment, Racing algorithms take the
+following steps:
+
+Sample a small fraction of instances from the original
+enviroments to minimize computational costs.
+
+Evaluate the performance of enviroments statistically.
+
+Discarded
+the
+enviroments
+with
+the
+poorest
+performance.
+
+Repeated the process with the remaining datasets
+with slightly larger sample size.
+Fig. 3a shows how BEETLE eliminates inferior environ-
+ments at every iteration (thus reducing the overall num-
+ber of environments evaluated). Since each iteration only
+uses a small sample of the available data, the model
+building time also reduces signiﬁcantly. It has been
+shown that racing algorithms are extremely effective in
+model selection when the size of the data is arbitrarily
+large [32], [34].
+2960
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_6-->In Fig. 3b, we illustrate the discovery of the bellwether
+environments with an example. Here, there are two groups
+of environments:
+(i)
+Group 1: Environments e1;e2; ... ;e7, for which perfor-
+mance measurements have been gathered. One or more
+these environment(s) are potentially bellwether(s).
+(ii)
+Group 2: Environments e8; e9; . . . ; e12, these represent
+the target environments, for which need to deter-
+mine an optimal conﬁguration.
+In the discovery process, BEETLE’s objective is to ﬁnd
+bellwethers from among the environments in Group 1. And,
+later in the Transfer phase, we use the bellwether enviro-
+ments to ﬁnd the near-optimal conﬁguration for the target
+environments from Group 2. Note that, for the enviroments
+in Group 2, we do have to make any measurements regarding
+it’s performance. Having found bellwether enviroment(s)
+from Group 1, it is sufﬁcient to just use the bellwether
+enviroment(s) to predict the optimal conﬁgurations for the
+enviroments in Group 2.
+Fig. 3d outlines a pseudocode for the algorithm used to
+ﬁnd bellwethers. The key steps are listed below:
+
+Lines 3–5: Randomly sample a small subset of conﬁg-
+urations from the source environments. The size of
+the subset (of conﬁgurations) is controlled by a pre-
+deﬁned parameter frac, which deﬁnes the percent of
+conﬁgurations to be sampled in each iteration.
+
+Line 6–7: Calculate sampling cost for the conﬁgurations.
+
+Line 8–9: Use the sampled conﬁgurations from each
+environment as a source build a prediction model with
+regression trees. For all the remaining enviroments,
+this regression tree model is used to predict for opti-
+mum conﬁguration. After using every enviroment as a
+source, the environments are ranked from best to worst
+using the evaluation criteria discussed in Section 6.2.
+Fig. 3. BEETLE framework and Pseudocode.
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2961
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_7-->
+Line 10–14: We check to see if the rankings of the
+enviroments have changed since the last iteration. If
+not, then a “life” is lost. We go back to Line 3 and
+repeat the process. When all lives are expired, or we
+run out of the budget, the search process terminates.
+This acts as an early stopping criteria, we need not
+sample more data if those samples do not help in
+improving the outcome.
+
+Line 15–17: If there is some change in the rankings,
+then new conﬁguration samples are informative and
+the environments that are ranked last are eliminated.
+These environments are not able to ﬁnd near-optimal
+conﬁgurations for the other environments and there-
+fore cannot be bellwethers.
+
+Line 18: Once we have exhausted all the lives or the
+sampling budget, we simply return the source proj-
+ect with the best rank. These would be the bellwether
+enviroments.
+On line 6–7 we measure the sampling cost. In our case,
+we use the number of samples as a proxy for cost. This is
+because
+each
+measurement
+consumes
+computational
+resources, which in turn has a monetary cost. Therefore, it
+is a commonplace to set a budget and sample such that the
+budget is honored. Our choice of using the number of
+measurements as a cost measure was an engineering judg-
+ment; this can be replaced by any user-deﬁned cost func-
+tion such as (1) the actual cost, or (2) the wallclock time.
+The accuracy of either of the above is dependent on the
+business context. If one is either constrained by the runtime
+or there is a large variance in the measurements of time per
+conﬁguration, then the wallclock time might be a more rea-
+sonable measure. On the other hand, if the cost of measure-
+ments is the limiting factor, it makes sense to use the actual
+measurement cost. Using the number of samples encom-
+passes these two factors since it both costs more money and
+takes time to obtain more samples. In the ideal case, we
+would like to have performance measurements for all pos-
+sible conﬁgurations of a software system. But this is not
+practical because certain systems have over 250 unique con-
+ﬁgurations (see Table 1).
+It is entirely possible for the FindBellwether method to
+identify multiple bellwethers (e.g., in the case of Fig. 3b the
+bellwethers were e1 and e2). When mutliple bellwethers are
+found, we may use (a) any one of the bellwether enviro-
+ments at random, (b) use all the enviroments, or (c) use heu-
+ristics based on human intuition. In this paper, we pick one
+enviroment from among the bellwethers at random. As
+long as the chosen project is among the bellwether enviro-
+ments, the results remain unchanged.
+The BEETLE approach assumes that a ﬁxed set of enviro-
+ments exist from which we pick one or more bellwethers.
+But, approach would work just as well where new measure-
+ments from new enviroments are added. Speciﬁcally, when
+more environments are added into a project, it is possible
+that the newly added environment could be the bellwether.
+Therefore, we recommend repeating FindBellwether method
+prior to using the new enviroment. Note that, repeating
+FindBellwether for new enviroments would add minimal
+computational overhead since the measurements have
+already been made for the new enviroments. Also note that,
+this approach of revisiting FindBellwether on availability of
+new data, has been previously been proposed in other
+domains in software engineering [18], [21].
+4.2
+Transfer: Using the Bellwether Environments
+Once the bellwether environment is identiﬁed, it can be used
+to ﬁnd the near-optimal conﬁgurations of target environ-
+ments. As shown in Fig. 3c, FindBellwether eliminates enviro-
+ments that are not potentially bellwethers and returns only
+the candidate bellwether enviroments. For the remaining tar-
+get enviroments, we use the model built with the bellwether
+enviroments to identify the near optimal conﬁgurations.
+Fig. 3e outlines the pseudocode used to perform the
+transfer. The key steps are listed below:
+
+Line 9-10: We use the FindBellwether from Fig. 3d to
+identify the bellwether enviroments.
+
+Line 13-14: If there exists more than one bellwether,
+we randomly chose one among them be used as the
+bellwether enviroment.
+
+Line 15-16: The conﬁgurations from the bellwether and
+their corresponding performance measures are used
+to build a prediction model using regression trees.
+
+Line 17-18: Predict the performances of various con-
+ﬁgurations from the target enviroment.
+
+Line 19-20: Return the best conﬁguration for the
+target.
+Note that, on Line 10, we use regression trees to make pre-
+dictions. It has been the most preferred prediction algorithm
+in this domain [7], [10], [26]. This is primarily because much
+of the data used in this domain are a mixture numerical and
+categorical attributes. Given conﬁguration measurement in
+the form fðci; yiÞg, ci is a vector of categorical/numeric val-
+ues and yi is a continuous numeric value. For such data,
+regression trees are the best suited prediction algorithms [12],
+[24], [27], [30].
+In terms of computational complexity in comparison
+with previous methods [18], [21], BEETLE offers noticible
+speedups. Given that we have M enviroments and n meas-
+urements in each enviroment, we may categorize the speed-
+ups into the following cases:
+
+Best Case: Here, we expect the racing algorithm of BEE-
+TLE to eliminate atleast half of the non-bellwether
+enviroments at every iteration. This gives us a recur-
+rence relation of TðMÞ ¼ TðM=2Þ þ fðnÞ, which gives
+us a best case complexity of Oðlog2ðMÞ  fðnÞÞ.
+
+Worst Case: Here, we expect the racing algorithm of
+BEETLE to eliminate just one non-bellwether enviro-
+ment at every iteration. This gives us a recurrence
+relation of TðMÞ ¼ TðM  1Þ þ fðnÞ, which gives us
+a worst case complexity of OðM2  fðnÞÞ. Note that
+this worst case is same as the complexity of [18], [21].
+In practice, we note that the average case speedup is
+somewhere in between that of the best case (i.e., Oðlog2ðMÞ 
+fðnÞÞ) and the worst case (i.e., OðM2  fðnÞÞ).
+5
+OTHER TRANSFER LEARNING METHODS
+This section describes the methods we use to compare BEE-
+TLE against. These alternatives are (a) two state-of-the-
+art transfer learners for performance optimization: Valov
+2962
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_8-->et al. [24] and Jamshidi et al. [25]; and (b) a non-transfer learner:
+Nair et al. [12].
+5.1
+Transfer Learning With Linear Regression
+Valov et al. [24] proposed an approach for transferring perfor-
+mance models of software systems across platforms with dif-
+ferent hardware settings. The method (as shown in Fig. 4(a))
+consists of the following two components:
+
+Performance prediction model: The conﬁgurations on a
+source hardware are sampled using Sobol sampling.
+The number of conﬁgurations is given by T  Nf,
+where T ¼ 3; 4; 5 is the training coefﬁcient and Nf is
+the number of conﬁguration options. These conﬁgu-
+rations are used to construct a Regression Tree model.
+
+Transfer Model: To transfer the predictions from the
+source to the target, a linear regression model is
+used since it was found to provide good approxima-
+tions of the transfer function. To construct this
+model, a small number of random conﬁgurations are
+obtained from both the source and the target. Note that
+this is a shortcoming since, without making some
+preliminary measurements on the target, one cannot
+begin to perform transfer learning.
+5.2
+Transfer Learning With Gaussian Process
+Jamshidi et al. [25] took a slightly different approach to
+transfer learning. They used Multi-Task Gaussian Processes
+(GP) to ﬁnd the relatedness between the performance meas-
+ures in source and the target. The relationships between
+input conﬁgurations were captured in the GP model using a
+covariance matrix that deﬁned the kernel function to con-
+struct the Gaussian processes model. To encode the relation-
+ships between the measured performance of the source and
+the target, a scaling factor is used with the above kernel.
+The new kernel function is deﬁned as follows:
+kðs; t; fðsÞ; fðtÞÞ ¼ ktðs; tÞ  kxxðfðsÞ; fðtÞÞ;
+(1)
+where ktðs; tÞ represents the multiplicative scaling factor.
+ktðs; tÞ is given by the correlation between source f(s)
+and target f(t) function, while kxx is the covariance func-
+tion for input environments (s & t). The essence of this
+(summarized in Fig. 4(a)) method is that the kernel
+captures the interdependence between the source and
+target environments.
+5.3
+Non-Transfer Learning Performance
+Optimization
+A performance optimization model with no transfer was
+proposed by Nair et al. [12] in FSE ’17. It works as follows:
+1)
+Sample a small set of measurements of conﬁgura-
+tions from the target environment.
+2)
+Construct performance model with regression trees.
+3)
+Predict for near-optimal conﬁgurations.
+The key distinction here is that unlike transfer learners,
+that use a different source environment to build to predict
+for near-optimal conﬁgurations in a target environment, a
+non-transfer method such as this uses conﬁgurations from
+within the target environment to predict for near-optimal
+conﬁgurations.
+6
+EXPERIMENTAL SETUP
+6.1
+Subject Systems
+In this study, we selected ﬁve conﬁgurable software systems
+from different domains, with different functionalities, and
+written in different programming languages. We selected
+these real-world software systems since their characteristics
+cover a broad spectrum of scenarios. Brieﬂy,
+
+SPEAR is an industrial strength bit-vector arithmetic
+decision procedure and Boolean satisﬁability (SAT)
+solver. It is designed for proving software veriﬁca-
+tion conditions, and it is used for bug hunting. It con-
+sists of a binary conﬁguration space with 14 options
+with 214 or 16,384 conﬁgurations. We measured how
+long it takes to solve an SAT problem in all 214 con-
+ﬁgurations in 10 environments.
+
+X264 is a video encoder that compresses video ﬁles
+and has 16 conﬁgurations options to adjust output
+quality, encoder types, and encoding heuristics. Due
+to the cost of sampling the entire conﬁguration
+space, we randomly sample 4,000 conﬁgurations in
+21 environments.
+
+SQLITE is a lightweight relational database manage-
+ment system, which has 14 conﬁguration options to
+Fig. 4. Pseudocodes of other transfer learning methods.
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2963
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_9-->change indexing and features for size compression.
+Due to the cost of sampling and a limited budget, we
+use 1,000 randomly selected conﬁgurations in 15 dif-
+ferent environments.
+
+SAC is a compiler for high-performance computing.
+The SaC compiler implements a large number of
+high-level and low-level optimizations to tune pro-
+grams for efﬁcient parallel executions. It has 50 con-
+ﬁguration options to control optimization options.
+We measure the execution time of the program for
+846 conﬁgurations in 5 enviroments.
+
+STORM is a distributed stream processing framework
+which is used for data analytics. We measure the
+latency of the benchmark in 2,048 randomly selected
+conﬁgurations in 4 environments.
+Table 1 lists the details of the software systems used in this
+paper. Here, jNj is the number of conﬁguration options avail-
+able in the software system. If the options for each conﬁgura-
+tion is binary, then there can be as much as 2jNj possible
+conﬁgurations for a given system,1 since it is not possible for
+us measure the performance of all possible conﬁgurations, we
+measure the performance of a subset of the 2jNj samples, this
+subset is denoted by jCj. The performance of each of the jCj
+conﬁgurations are measured under different hardware (H),
+workloads (W), and software versions (V ). A unique combi-
+nation of H;W;V constitutes an enviroment which is denoted
+by E. Note that, measuring the performance of jCj conﬁgura-
+tions in each of the jEj enviroments can be very costly and
+time consuming. Therefore, instead of all combinations of
+H  W  V , we measure the performance in only a subset of
+the enviroments (the total number is denoted by jEj).
+6.2
+Evaluation Criterion
+Typically, performance models are evaluated based on
+accuracy or error using measures such as Mean Magnitude of
+Relative error (abbrv. MMRE) which is given by:
+MMRE ¼ jpredicted  actualj
+actual
+ 100:
+It has recently been shown that exact measures like MMRE
+can be somewhat misleading to assess conﬁgurations [12],
+[27], [35]. An alternative is to use rank-based metrics that com-
+pute the difference between the relative rankings of the per-
+formance scores [12], [27]. The key intuition behind relative
+rankings is that the raw accuracy (as measured by MMRE) is
+less important than the rank-ordering of conﬁgurations
+from best to worst. As long as a model can preserve the
+order of the rankings of the conﬁgurations, it is still possible
+to determine which conﬁguration is the most optimum. We
+can quantify this by measuring the differences in ranking
+between the actual rank and the predicted rank. More for-
+mally, rank-difference Rd is measured as
+Rd ¼ jRankðPredictedÞ  RankðActualÞj:
+We note that rank difference is still not particularly informa-
+tive. This is because it ignores the distribution of perfor-
+mance scores and a small difference in performance measure can
+lead to a large rank difference and vice-versa [36].
+To illustrate the challenges with Rd and MMRE, consider
+the example in Fig. 5 where we are trying to ﬁnd a conﬁgura-
+tion with the minimum value. Here, although the difference
+between the predicted value and the actual value is only 0.02,
+the rank difference Rd is 90. But this does not tell us if Rd ¼ 90
+is good or bad. While, in the same Fig. 5, when we calculate
+MMRE we get an error of only 22 percent, this may convey a
+false sense of accuracy. In the same example, let us say that the
+maximum value permissible is 0.11, then according to Fig. 5,
+our predicted value for the best performance (which recall is
+supposed to the lowest) is the highest permissible value of 0.11.
+Therefore, to obtain a realistic estimate of optimality of a
+conﬁguration, in this paper, we propose a measure called Nor-
+malized Absolute Residual (NAR) inspired by Generational Dis-
+tance or Inverted Generation Distance used commonly is search
+based software engineering [37], [38], [39]. It represents the
+ratio of (a) difference between the actual performance value of
+the optimal conﬁguration and the predicted performace value
+of the optimal conﬁguration, and (b) The absolute difference
+between the maximum and minimum possible performace val-
+ues. Formally
+NAR ¼
+jminðfðcÞÞ  fðc	Þj
+maxðfðcÞÞ  minðfðcÞÞ  100:
+(2)
+Where minðfðcÞÞ is the value of the true minima of conﬁgura-
+tion c, fðc	Þ is the predicted value of the minima, and
+maxðfðcÞÞ is the largest performance value of a conﬁguration.
+This measure is equivalent to Absolute Residual between pre-
+dicted and actual, normalized to lie between 0 to 100 percent
+(hence the name Normalized Absolute Residual or NAR).
+According to this formulation, the lower the NAR, the better.
+Reﬂecting back on Fig. 5, we see that the NAR is 100 percent
+which is exact what is expected when a predicted “minima”
+(0.11) is equal to the actual “maxima” (also 0.11).
+6.3
+Statistical Validation
+Our experiments are all subjected to inherent randomness
+introduced by sampling conﬁgurations or by a different
+source and target environments. To overcome this, we use
+30 repeated runs, each time with a different random number
+seed. The repeated runs provide us with sufﬁciently large
+sample size for statistical comparisons. Each repeated run
+collects the values of NAR.
+To rank these 30 numbers collected as above, we use the
+Scott-Knott test recommended by Mittas and Angelis [40]:
+Fig. 5. A contrived example to illustrate the challenges with MMRE and
+rank based measures.
+1. On the other hand, if there are joj possible options, then there may
+be jojN possible conﬁgurations.
+2964
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_10-->
+A list of treatments, sorted by their mean value, are
+split at the point that maximizes the expected value
+of the difference in their mean before after the split.
+
+That split is accepted if, between the two splits, (a)
+there is a statistically signiﬁcant difference using a
+hypothesis test H, and (b) the difference between the
+two splits is not due to a small effect.
+
+Recurse on both splits if the split is acceptable.
+
+Once no more splits are found, they are “ranked”
+smallest to largest (based on their median value).
+In our work, in order to judge the statistical signiﬁcance
+we use a non-parametric bootstrap test with 95 percent conﬁ-
+dence [41]. Also, to make sure that the statistical signiﬁcance
+is not due to the presence of small effects, we use an A12
+test [42]. Brieﬂy, the A12 test measures the probability that
+one split has a lower NAR values than another. If the two
+splits are equivalent, then A12 ¼ 0:5. Likewise if A12  0:6,
+then 60 percent of the times, values of one split are signiﬁ-
+cantly smaller that the other. In such a case, it can be claimed
+that there is a signiﬁcant effect to justify the hypothesis test.
+We use these two tests (bootstrap and A12) since these are
+non-parametric and have been previously demonstrated to
+be informative [43], [44], [45], [46], [47], [48].
+7
+RESULTS
+RQ1 : Does there exist a Bellwether Environment?
+Purpose. The ﬁrst research question seeks to establish the
+presence of bellwether environments within different envi-
+ronments of a software system. If there exists a bellwether
+environment, then identifying that environment can greatly
+reduce the cost of ﬁnding a near-optimal conﬁguration for
+different environments.
+Approach. For each subject software system, we use the
+environments to perform a pair-wise comparison as follows:
+1)
+We pick one environment as a source and evaluate all
+conﬁgurations to construct a regression tree model.
+2)
+The remaining environments are used as targets. For
+every target environment, we use the regression tree
+model constructed above to predict for the best
+conﬁguration.
+3)
+Then, we measure the NAR of the predictions (see
+Section 6.2).
+4)
+Afterwards, we repeat steps 1, 2, and 3 for all the
+other source environments and gather the outcomes.
+We repeat the whole process above 30 times and use the
+Scott-Knott test to rank each environment best to worst.
+Result. Our results are shown in Fig. 6. Overall, we ﬁnd
+that there is always at least one environment (the bellwether
+environment) in all the subject systems, that is much supe-
+rior to others. Note that, STORM is an interesting case, where
+all the environments are ranked 1, which means that all the
+environments are equally useful as a bellwether environ-
+ment —in such cases, any randomly selected environment
+could serve as a bellwether. Further, we note that the vari-
+ance in the bellwether environments are much lower com-
+pared to other environments. Low variance indicates the
+low median NAR is not an effect of randomness in our
+experiments and hence increases our conﬁdence in the exis-
+tence of bellwethers.
+Please note, in this speciﬁc experiment, we use all mea-
+sured conﬁgurations (i.e., 100 percent of jCj in Table 1) to
+determine if bellwethers exist. This ensures that the exis-
+tence of bellwethers is not biased by how we sampled the
+conﬁguration space. Later, in RQ2, we will restrict our study
+Fig. 6. Median NAR of 30 repeats. Median NAR is the normalized absolute residual values as described in Equation (2), and IQR the difference
+between 75th percentile and 25th percentile found during multiple repeats. Lines with a dot in the middle (
+ ), show the median as a round dot within
+the IQR. All the results are sorted by the median NAR: a lower median value is better. The left-hand column (Rank) ranks the various techniques where
+lower ranks are better. Overall, we ﬁnd that there is always at least one environment, denoted in light gray, that is much superior (lower NAR) to others.
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2965
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_11-->to determine what fraction of the samples would be ade-
+quate to ﬁnd the bellwethers.
+One may be tempted to argue that the answer to this ques-
+tion trivially could be answered as “yes” since it is unlikely
+that all environments exhibit identical performance and there
+will always be some environment that can make better predic-
+tions. However, observe that the environments ranked ﬁrst
+performs much better than the rest (with certain exceptions),
+and hence, the difference between the bellwether environment
+and others is not coincidental. Further, by exhaustively com-
+paring the performance of all available environments, we dem-
+onstrate that it is ill advised to randomly pick any available
+source lest we risk choosing a sub-optimal conﬁguration
+setting.
+RQ2 : How many measurements are required to discover
+bellwether environments?
+Purpose. The bellwether environments found in RQ1
+required us to use 100 percent of the measured performance
+values from all the environments.2 Sampling all conﬁgura-
+tions may not be practical, since that may take an extremely
+long time [20]. Thus, we ask if we can ﬁnd the bellwether
+environments sooner using fewer samples. Further, we ask
+how many such samples are required.
+Approach. We used the racing algorithm discussed in
+Section 4.1 to incrementally sample the conﬁgurations until
+a bellwether environment has been discovered. It works as
+follows:
+1)
+We start from 1 percent of conﬁgurations from each
+environment and assume that every environment is
+a potential bellwether environment.
+2)
+Then, we increment the number of conﬁgurations in
+steps of 1 percent and measure the NAR values.
+3)
+We rank the environments and eliminate those that
+do not show much promise.
+4)
+We repeat the above steps until we cannot eliminate
+any more environments.
+When the above discover process terminates, we note that
+only a fraction of the available samples are used to discover
+the bellwether. We measure the number of samples required
+for estimating the bellwether. Further, to understand if the
+smaller sample size is sufﬁcient to identify a near-optimal
+conﬁguration, we compare the performance of the discov-
+ered bellwether environment with 100 percent with the pre-
+dicted bellwether environment using a smaller sample size.
+Result: Table 2 summarizes our ﬁndings. We ﬁnd:
+
+In all 5 cases, the racing algorithm for ﬁnding bell-
+wether terminated after using the following percent-
+age of samples:
+1)
+x264: 10.21 percent of 4,000 samples
+2)
+SQLite: 11.42 percent of 1,000 samples
+3)
+Spear: 13.79 percent of 16,384 samples
+4)
+SaC: 15.4 percent of 846 samples
+5)
+Storm: 17.40 percent of 2,048 samples
+
+Further, from Table 2, when compared with the
+NAR values obtained with using all 100 percent of
+the available samples (Columns 2 and 3) to the
+NAR values when using only the fraction required
+to ﬁnd the bellwether using the racing algorithm
+(Columns 4 and 5), we see that the difference which
+is formally is given by D% ¼ NAR100%  NAR10%
+j
+j
+is very minimal. We note that these differences
+(Delta%) are:
+1)
+1 percent in SQLite;
+2)
+0 percent in Spear and Storm;
+3)
+0.55 percent in x264; and
+4)
+0.36 percent in SaC
+These results are most encouraging in that we need only
+about 10 percent of the samples to determine the bellwether:
+RQ3 : How does BEETLE compare with other non  transfer
+learning based methods?
+Purpose. We explore how BEETLE compares to a non-
+transfer learning approach. For our experiment, we use the
+non-transfer performance optimizer proposed by Nair
+et al. [12]. Both BEETLE and Nair et al.’s methods seek to
+achieve the same goal—ﬁnd the optimal conﬁguration in a
+target environment. BEETLE uses conﬁgurations from a dif-
+ferent source to achieve this, whereas the non-transfer learner
+uses conﬁgurations from within the target. Please note BEE-
+TLE can use anywhere between 0–100 percent of the conﬁg-
+urations from the bellwether environment. In the previous
+RQs, we showed that 10 percent was adequate when using
+the bellwether environment.
+Approach. Our setup involves evaluating the Win/Loss
+ratio of BEETLE to the non-transfer learning algorithm while
+predicting for the optimal conﬁguration. Comparing against
+true optima, we deﬁne “win” as cases where BEETLE has a
+better (or same) NAR as the non-transfer learner. If the non-
+transfer learner has a better NAR, that counts as a “loss”.
+Result. Our results are shown in Figs. 7 and 8. In Fig. 7, the
+x-axis represents the number of conﬁgurations (expressed in
+%) to train the non-transfer learner and BEETLE, and the
+y-axis represents the number of wins/losses. We observe:
+
+Better performance: In 4
+5 systems, BEETLE “wins” sig-
+niﬁcantly more than it “losses”. This means that
+BEETLE is better than (or similar to) non-transfer
+learning methods.
+
+Lower cost: Regarding cost, we note that BEETLE out-
+performs
+the
+non-transfer
+learner
+signiﬁcantly,
+“winning” at conﬁgurations of 10 to 100 percent of
+the original sample size. Further, when we look at the
+trade-off between performance and number of meas-
+urements in Fig. 8, we note that BEETLE achieves a
+NAR close to zero with around 100 samples. Also, the
+TABLE 2
+Effectiveness of Source Selection Method
+Subject System
+100% Samples
+FindBellwether
+Difference (D%)
+Median
+IQR
+Median
+IQR
+Median
+IQR
+SQLite
+0.8
+1.13
+1.8
+2.48
+1.0
+1.35
+Spear
+0.1
+0.1
+0.1
+0
+0.0
+0.0
+x264
+0.35
+1.62
+0.9
+1.06
+0.55
+0.16
+Storm
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+SaC
+0.27
+0.14
+0.63
+7.4
+0.36
+6.9
+2. Note, except for SPEAR, we only have measured a subset of all
+possible conﬁguration space since we were limited by the time and the
+cost required to make exhaustive measurements
+2966
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_12-->non-transfer learning method of Nair et al. [12] has
+signiﬁcantly larger NAR while also requiring more
+samples.
+RQ4 : How does BEETLE compare to state  of  the  art
+methods?
+Purpose. The main motivation of this work is to show that
+the source environment can have a signiﬁcant impact on
+transfer learning. In this research question, we seek to com-
+pare BEETLE with other state-of-the-art transfer learners by
+Jamshidi et al. [25] and Valov et al. [24].
+Approach. We perform transfer learning the methods
+proposed by Valov et al. [24] and Jamshidi et al. [25]
+(see Section 5). Then we measure the NAR values and com-
+pare them statistically using Skott-Knott tests. Finally, we
+rank the methods from best to worst based on their Skott-
+Knott ranks.
+Result. Our results are shown in Fig. 9. In this ﬁgure, the
+best transfer learner is ranked 1. We note that in 4 out of 5
+cases, BEETLE performs just as well as (or better than) the
+state-of-the-art. This result is encouraging in that it points to
+a signiﬁcant impact on choosing a good source environment
+can have on the performance of transfer learners. Further,
+in Fig. 10 we compare the number of performance measure-
+ments required to construct the transfer learners (note the
+logarithmic scale on the vertical axis). Here, we note that
+BEETLE uses an order of magnitude fewer samples (13%
+on average) that the other methods. The total number of
+available samples for each software system is shown in the
+second column of Table 1 (see values corresponding to jCj).
+Based on these results, we note that BEETLE requires far
+fewer measurements compared to the other transfer-learn-
+ing methods.
+8
+DISCUSSION
+This section addresses some additional questions that may
+arise with regards to BEETLE’s real-world applicability.
+What is the effect of BEETLE on the day to day business of a
+software engineer?From an industrial perspective, BEETLE
+can be used in at least the following ways:
+
+Consider an organization which has to optimize
+their software system for different clients (who have
+different workload and hardware—different AWS
+subscriptions). While on-boarding new clients, the
+company might not be able to afford to invest exten-
+sive resources in ﬁnding the near-optimal conﬁgura-
+tion to appease the client. State-of-the-art transfer
+learning techniques would expect the organization
+to provide a source workload (or environment) for
+this task. But without a subject matter expert (SME)
+with the relevant knowledge, it is hard for humans
+to select a suitable source. BEETLE removes the need
+for such SMEs since it automates source selection, along
+with transferring knowledge between the source and the
+target environment.
+Fig. 8. Trade-off between the quality of the conﬁgurations and the cost to
+build the model for X264. The cost to ﬁnd a good conﬁguration using bell-
+wethers is much lower than that of non-transfer-learning methods.
+Fig. 7. Win/Loss analysis of learning from the bellwether environment and target environment using Scott Knott. The x-axis represents the % of avail-
+able samples used to build a model. The y-axis is the count.
+Fig. 9. Comparison between state-of-the-art transfer learners and BEE-
+TLE. The best transfer learner is shaded gray. The “ranks” shown in the
+left-hand-side column come from the statistical analysis described in
+Section 6.3.
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2967
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_13-->
+Consider an organization, which needs to migrate all
+their workload from a legacy platform to a different
+cloud platform (e.g., AWS to AZURE or vice versa).
+Such an organization now has many workloads that
+they need to optimize; however, they lack experience
+and performance measurements, on the new plat-
+form to accomplish this goal. In such cases, BEETLE
+provides a way to discover an ideal source to transfer
+knowledge to enable efﬁcient migration of workloads.
+How complex is BEETLE compared to other methods? BEE-
+TLE is among the easiest transfer learning methods cur-
+rently available. In comparison with the state-of-the-art
+methods studied here, we require only few measurements
+of software systems running under different environ-
+ments, we can build a findbellwether method that com-
+prises of an all-pairs round-robin comparison followed by
+elimination of poorly performing enviroments. Then,
+transfer learning uses one of many off-the-shelf machine
+learners to build a prediction model (here we use Regres-
+sion Trees). In this paper, we demonstrate that this method
+is just as powerful as other methods while being an order
+of magnitude cheaper in terms of the number of measure-
+ments required.
+What are the impact of different hyperparameter choices?
+With all the transfer learners and predictors discussed
+here, there are a number of internal parameters that may
+(or may not) have a signiﬁcant impact on the outcomes of
+this study. We identify two key hyperparameters that
+affect BEETLE namely, Budget and Lives. As shown in
+Fig. 3d, both these hyperparameters determine when to
+stop sampling the source and declare the bellwethers.
+These bellwethers subsequently affect transfer learning. To
+study the effect of these hyperparameters, we plot the
+trade-off between the budget and lives versus NAR. This
+is shown in Fig. 11. Here,
+
+Budget: There is discernible impact of larger budget
+on the performance of bellwethers. We note that the
+performance is directly related to the budget, i.e., as
+the budget increases the NAR value decreases (lower
+NAR values are better). This is to be expected, an
+increased
+budget
+permits
+an
+larger
+sample
+to
+construct transfer learners, thereby improving the
+likelihood of ﬁnding a near optimal solution.
+
+Lives: Although lower lives seems to correspond to
+larger NAR (worse). The relationship between the
+number of lives and NAR is less pronounced than
+that between Budget and NAR. That said, we noted
+that having 5 or lives generally corresponds to better
+NAR values. Thus, in all the experiments in this
+paper, we use 5 lives as default.
+Is BEETLE applicable in other domains? In principle, yes.
+BEETLE could be applied to any transfer learning applica-
+tion, where the choice of the source data impacts the perfor-
+mance of transfer learning. This can be applied to problems
+such as conﬁguring big data systems [3], ﬁnding suitable
+cloud conﬁguration for a workload [49], [50], conﬁguring
+hyperparameters of machine learning algorithms [51], [52],
+runtime adaptation of robotic systems [25]. In these applica-
+tions, the correct choice of source datasets using bellwethers
+can help to reduce the amount of time it takes to discover a
+near-optimal conﬁguration setting.
+Can BEETLE identify bellwethers in completely dissimilar
+environments?In theory, yes. Given a software system, BEE-
+TLE currently looks for an environment which can be used
+to ﬁnd a near-optimal conﬁguration for a majority of other
+environments for that software system. Therefore, given
+performance measurements in various environments, BEE-
+TLE can assist in discovering a suitable source environment
+to transfer knowledge across environments comprised of
+different hardware, software versions, and workloads.
+When are bellwethers ineffective?The existence of bell-
+wethers depends on the following:
+
+Metrics used: Finding bellwether using metrics that
+are not justiﬁable, may be unsuccessful, for example,
+discovering bellwethers in performance optimiza-
+tion, by measuring MMRE instead of NAR may
+fail [12].
+
+Different Software System: Bellwethers of a certain
+software system ‘A’ may not work for software sys-
+tem ‘B.’ In other words, it cannot be used for cases
+where the conﬁguration spaces across environment
+are not consistent.
+
+Different Performance Measures: Bellwether discovered
+for one performance measure (time) may not work
+for other performance measures (throughput).
+Fig. 10. Number of samples required by BEETLE (in light gary) v/s the
+other two state-of-the-art transfer learners (in gray). Note: The other two
+transfer learners require that all available data be used for transfer learn-
+ing therefore the chart shows one bar for both transfer learners.
+Fig. 11. The trade-off between the budget of the search, the number of
+lives, and the NAR (quality) of the solutions for x264. Performance
+depends on the budget and number of lives, i.e., as the budget increases
+the NAR value decreases; likewise, as the number lives increases, the
+NAR improves.
+2968
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_14-->9
+THREATS TO VALIDITY
+As with any empirical study, biases can affect the ﬁnal
+results. Therefore, any conclusions of this work must be
+considered with the following issues in mind:
+
+Evaluation Bias: In RQ2, RQ3 and RQ4, we have shown
+the performance of BEETLE by comparing them using
+statistical tests on their NAR to draw conclusions
+regarding their performance when compared to other
+transfer learning and non-transfer-learning learning
+methods. While those results are true, the conclusions
+are scoped by the evaluation metrics we used to write
+this paper (i.e., NAR). It is possible that with other
+measurements, there may be slightly different conclu-
+sions. This is to be explored in future research.
+
+Construct Validity: At various places in this report,
+we made engineering decisions about (e.g.,) choice
+of machine learning models (in our case decision
+tree regression), step-size for incremental sampling,
+etc. While these decisions were made using advice
+from the literature, we acknowledge that other con-
+structs might lead to other conclusions.
+
+External Validity: For this study, we have selected a
+diverse set of subject systems, and a large number
+of environment changes from the data collected by
+Jamshidi et al. [20] for their studies. The perfor-
+mance measures were gathered on known software
+environments such as AWS, Azure, and NUC.
+There is a possibility that measurement of other per-
+formance measures or availability of additional
+performance measures may result in a different out-
+come. Therefore, one has to be careful when gener-
+alizing our ﬁndings to other subject systems and
+environment changes. Even though we tried to run
+our experiment on a variety of software systems
+from different domains, we do not claim that our
+results generalize beyond the speciﬁc case studies
+explored here. That said, to enable reproducibility,
+we have shared our scripts and the gather perfor-
+mance data.
+
+Statistical Validity: To increase the validity of our
+results, we applied Scott-Knott tests (which in turn
+comprises of two statistical tests, bootstrap, and the
+a12). Hence, anytime in this paper, we reported that
+“X was different from Y”, then that report was based
+on Scott-Knott tests.
+
+Sampling Bias: Our conclusions are based on the per-
+formance measure of the ﬁve software systems col-
+lected by Jamshidi et al. [20] for their studies.
+Different initial samples may have lead to different
+conclusions. That said, we note that our samples are
+sufﬁciently large, so we have some conﬁdence that
+these samples represent an interesting range of con-
+ﬁgurations and their performances. As evidenced by
+our results that are remarkably stable over 30
+repeated runs.
+
+Learner Bias: There are various models used in per-
+formance optimization such as Gaussian Process [25],
+Regression
+Trees
+[7],
+[26],
+[27],
+and
+Bagging,
+Random
+Forest,
+and
+Support
+Vector
+Machines
+(SVMs) [5]. It is possible that changing the learner
+used may change our ﬁndings. However, we strive
+to minimize the uncertainty by choosing Decision
+Tree Regressor, which is the machine learning algo-
+rithm that has most consistently been used in the
+domain of performance modeling and optimiza-
+tion [7], [26], [27]. Further, we have made available
+our replication package that enables one to replace
+Decision Tree with any other machine learning
+model quickly.
+10
+RELATED WORK
+Performance Optimization. Modern software systems come
+with a large number of conﬁguration options. For example,
+in APACHE (a popular web server) there are around 600 dif-
+ferent conﬁguration options and in HADOOP, as of version
+2.0.0, there are around 150 different conﬁguration options,
+and the number of options is constantly growing [1]. These
+conﬁguration options control the internal properties of the
+system such as memory and response times. Given the large
+number of conﬁgurations, it becomes increasingly difﬁcult
+to assess the impact of the conﬁguration options on the sys-
+tem’s performance. To address this issue, a common prac-
+tice is to employ performance prediction models to estimate
+the performance of the system under these conﬁgura-
+tions [26], [31], [53], [54], [55], [56]. To leverage the full bene-
+ﬁt of a software system and its features, researchers
+augment performance prediction models to enable perfor-
+mance optimization [8], [12].
+Performance optimization is an essential challenge in soft-
+ware engineering. As shown in the next few paragraphs, this
+problem
+has
+attracted
+much
+recent
+research
+interest.
+Approaches that use meta-heuristic search algorithms to
+explore the conﬁguration space of Hadoop for high-perform-
+ing conﬁgurations have been proposed [9]. It has been
+reported that such meta-heuristic search can ﬁnd conﬁgura-
+tions options that perform signiﬁcantly better than baseline
+default conﬁgurations. In other work, a control-theoretic
+framework called SmartConf to automatically set and dynami-
+cally adjust performance-sensitive conﬁgurations to optimize
+conﬁguration options [57]. For the speciﬁc case of deep learn-
+ing clusters, a job scheduler called Optimus has been devel-
+oped to determine conﬁguration options that optimize
+training speed and resource allocations [59]. Performance
+optimization has also been extensively explored in other
+domains such as Systems Research [60], [61] and Cloud Com-
+puting [11], [49], [50], [61], [62].
+Much of the performance optimization tasks introduced
+above require access to measurements of the software sys-
+tem
+under
+various
+conﬁguration
+settings.
+However,
+obtaining these performance measurements can cost a sig-
+niﬁcant amount of time and money. For example, in one of
+the software systems studied here (X264), it takes over
+1,536 hours to obtain performance measurements for 11
+out the 16 possible conﬁguration options [24]. This is in
+addition
+to
+other
+time-consuming
+tasks
+involved
+in
+commissioning these systems such as setup, tear down, etc.
+Further, making performance measurements can cost an
+exorbitant amount of money, e.g., it cost several thousand
+dollars to obtain of 2,048 conﬁgurations on X264 deployed
+in AWS c4.large.
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2969
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_15-->Transfer Learning. When a software system is deployed in
+a new environment, not every user can afford to repeat the
+costly process of building a new performance model to ﬁnd
+an optimum conﬁguration for that new environment.
+Instead, researchers propose the use of transfer learning to
+reuse
+the
+measurements
+made
+for
+previous
+environ-
+ments [24], [25], [63], [64]. Jamshidi et al. [25], conducted a
+preliminary exploratory study of transfer learning in perfor-
+mance optimization to identify transferable knowledge
+between a source and a target environment, ranging from
+easily exploitable relationships to more subtle ones. They
+demonstrated that information about inﬂuential conﬁgura-
+tion options could be exploited in transfer learning and that
+knowledge about performance behavior can be transferred.
+Following this, a number of transfer learning methods
+were developed to predict for the optimum conﬁgurations
+in a new target environment, using the performance meas-
+ures of another source environment as a proxy. Several
+researchers have shown that transfer learning can decrease
+the cost of learning signiﬁcantly [20], [24], [25], [64].
+All transfer learning methods place implicit faith in the
+quality of the source. A poor source can signiﬁcantly deteri-
+orate the performance of transfer learners.
+Source Selection With Bellwethers.It is advised that the
+source used for transfer learning must be chosen with care to
+ensure optimum performance [52], [65], [66]. An incorrect
+choice of the source may result in the all too common negative
+transferphenomenon [52], [67], [68], [69]. A negative transfer
+can be particularly damaging in that it often leads to perfor-
+mance degradation [20], [52]. A preferred way to avoid nega-
+tive transfer is with source selection. Many methods have been
+proposed for identifying a suitable source for transfer learn-
+ing [18], [21], [52]. Of these, source selection using the bell-
+wether effect is one of the simplest. It has been effective in
+several domains of software engineering [18], [22], [23].
+Besides negative transfer, previous approaches suffer
+from a lack of scalability. For example, Google Visor [65]
+Jamshidi et al. [25] rely on a Gaussian process which known
+to not scaling to large amounts of data in high dimensional
+spaces [70] Accordingly, in this work, we introduce the
+notion of source selection with bellwether effect for transfer
+learning in performance optimization. With this, we develop
+a Bellwether Transfer Learner called BEETLE. We show that,
+for performance optimization, BEETLE can outperform both
+non-transfer and the transfer learning methods.
+11
+CONCLUSION
+Our approach, BEETLE, exploits the bellwether effect—there
+are one or more bellwether environments which can be used
+to ﬁnd good conﬁgurations for the rest of the environments.
+We also propose a new transfer learning method, called BEE-
+TLE, which exploits this phenomenon. As shown in this
+paper, BEETLE can quickly identify the bellwether environ-
+ments with only a few measurements ( 10%) and use it to
+ﬁnd the near-optimal solutions in the target environments.
+Further, after extensive experiments with ﬁve highly-conﬁg-
+urable systems demonstrating, we show that BEETLE:
+
+Identiﬁes
+suitable
+sources
+to
+construct
+transfer
+learners;
+
+Finds near-optimal conﬁgurations with only a small
+number of measurements (an average of 13:5%  1
+7th
+of the available number of samples);
+
+Performs as well as non-transfer learning approaches;
+and
+
+Performs as well as state-of-the-art transfer learners.
+Based on our experiments, we demonstrate our initial
+problem–“whence to learn?” is an important question, and,
+A good source with a simple transfer learner is better
+than source agnostic complex transfer learners.
+REFERENCES
+[1]
+T. Xu, L. Jin, X. Fan, Y. Zhou, S. Pasupathy, and R. Talwadker,
+“Hey, you have given me too many knobs!: Understanding
+and
+dealing
+with
+over-designed
+conﬁguration
+in
+system
+software,” in Proc. 10th Joint Meeting Found. Softw. Eng., 2015,
+pp. 307–319.
+[2]
+D. Van Aken, A. Pavlo, G. J. Gordon, and B. Zhang, “Automatic
+database management system tuning through large-scale machine
+learning,” in Proc. Int. Conf. Manage. Data, 2017, pp. 1009–1024.
+[3]
+P. Jamshidi and G. Casale, “An uncertainty-aware approach to optimal
+conﬁguration of stream processing systems,” in Proc. Symp. Model.
+Anal. Simul. Comput. Telecommun. Syst., 2016, pp. 39–48.
+[4]
+N. Siegmund et al., “Predicting performance via automated
+feature-interaction detection,” in Proc. Int. Conf. Softw. Eng., 2012,
+pp. 167–177.
+[5]
+P. Valov, J. Guo, and K. Czarnecki, “Empirical comparison of
+regression methods for variability-aware performance prediction,”
+in Proc. 19th Int. Conf. Softw. Product Line, 2015, pp. 186–190.
+[6]
+N. Siegmund, A. Grebhahn, S. Apel, and C. K€astner, “Performance-
+inﬂuence models for highly conﬁgurable systems,” in Proc. 10th Joint
+Meeting Found. Softw. Eng., 2015, pp. 284–294.
+[7]
+A. Sarkar, J. Guo, N. Siegmund, S. Apel, and K. Czarnecki,
+“Cost-efﬁcient sampling for performance prediction of conﬁgu-
+rable systems (T),” in Proc. Int. Conf. Automated Softw. Eng., 2015,
+pp. 342–352.
+[8]
+J. Oh, D. Batory, M. Myers, and N. Siegmund, “Finding near-optimal
+conﬁgurations in product lines by random sampling,” in Proc. 11th
+Joint Meeting Found. Softw. Eng., 2017, pp. 61–71.
+[9]
+C. Tang, K. Sullivan, and B. Ray, “Searching for high-performing
+software conﬁgurations with metaheuristic algorithms,” in Proc.
+40th Int. Conf. Softw. Eng., 2018, pp. 354–355.
+[10] V. Nair, T. Menzies, N. Siegmund, and S. Apel, “Faster discovery
+of faster system conﬁgurations with spectral learning,” Automated
+Softw. Eng., vol. 25, pp. 247–277, 2018.
+[11] C.-J. Hsu, V. Nair, T. Menzies, and V. Freeh, “Micky: A cheaper
+alternative for selecting cloud instances,” in Proc. IEEE 11th Int.
+Conf. Cloud Comput., 2018, pp. 409–416.
+[12] V. Nair, T. Menzies, N. Siegmund, and S. Apel, “Using bad learn-
+ers to ﬁnd good conﬁgurations,” in Proc. 11th Joint Meeting Found.
+Softw. Eng., 2017, pp. 257–267.
+[13] J. Nam, S. J. Pan, and S. Kim, “Transfer defect learning,” in Proc.
+Int. Conf. Softw. Eng., 2013, pp. 382–391.
+[14] E. Kocaguneli and T. Menzies, “How to ﬁnd relevant data for
+effort estimation?” in Proc. Int. Symp. Empir. Softw. Eng. Meas.,
+2011, pp. 255–264.
+[15] E. Kocaguneli, T. Menzies, and E. Mendes, “Transfer learning in
+effort estimation,” Empir. Softw. Eng., vol. 20, pp. 813–843, 2015.
+[16] B. Turhan, T. Menzies, A. B. Bener, and J. Di Stefano, “On the rela-
+tive value of cross-company and within-company data for defect
+prediction,” Empir. Softw. Eng., vol. 14, pp. 540–578, 2009.
+[17] F. Peters, T. Menzies, and L. Layman, “LACE2: Better privacy-
+preserving data sharing for cross project defect prediction,” in
+Proc. Int. Conf. Softw. Eng., 2015, pp. 801–811.
+[18] R. Krishna and T. Menzies, “Bellwethers: A baseline method
+for transfer learning,” IEEE Trans. Softw. Eng., vol. 45, no. 11,
+pp. 1081–1105, Nov. 2019.
+[19] S. J. Pan and Q. Yang, “A survey on transfer learning,” IEEE Trans.
+Knowl. Data Eng., vol. 22, no. 10, pp. 1345–1359, Oct. 2010.
+[20] P. Jamshidi, N. Siegmund, M. Velez, C. K€astner, A. Patel, and
+Y. Agarwal, “Transfer learning for performance modeling of con-
+ﬁgurable systems: An exploratory analysis,” in Proc. Int. Conf.
+Automated Softw. Eng., 2017, pp. 497–508.
+2970
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_16-->[21] R. Krishna, T. Menzies, and W. Fu, “Too much automation? The
+bellwether effect and its implications for transfer learning,” in
+Proc. Int. Conf. Automated Softw. Eng., 2016, pp. 122–131.
+[22] S. Mensah, J. Keung, S. G. MacDonell, M. F. Bosu, and K. E. Bennin,
+“Investigating the signiﬁcance of bellwether effect to improve soft-
+ware effort estimation,” in Proc. Int. Conf. Softw. Qual. Rel. Secur.,
+2017, pp. 340–351.
+[23] S. Mensah, J. Keung, M. F. Bosu, K. E. Bennin, and P. K. Kudjo, “A
+stratiﬁcation and sampling model for bellwether moving win-
+dow,” in Proc. Int. Conf. Softw. Eng. Knowl. Eng., 2017, pp. 481–486.
+[24] P. Valov, J.-C. Petkovich, J. Guo, S. Fischmeister, and K. Czarnecki,
+“Transferring performance prediction models across different hard-
+ware platforms,” in Proc. Int. Conf. Perform. Eng., 2017, pp. 39–50.
+[25] P. Jamshidi, M. Velez, C. K€astner, N. Siegmund, and P. Kawthekar,
+“Transfer learning for improving model predictions in highly con-
+ﬁgurable software,” in Proc. Symp. Softw. Eng. Adaptive Self-Manag.
+Syst., 2017, pp. 31–41.
+[26] J. Guo, K. Czarnecki, S. Apel, N. Siegmund, and A. Wasowski,
+“Variability-aware performance prediction: A statistical learning
+approach,” in Proc. Int. Conf. Automated Softw. Eng., 2013, pp. 301–311.
+[27] V. Nair, Z. Yu, T. Menzies, N. Siegmund, and S. Apel, “Finding
+faster conﬁgurations using FLASH,” in IEEE Trans. Softw. Eng., to
+be published, doi: 10.1109/TSE.2018.2870895.
+[28] H. Herodotou et al., “Starﬁsh: A self-tuning system for big
+data analytics,” in Proc. Conf. Innovative Data Syst. Res., 2011,
+pp. 261–272.
+[29] A. Saltelli et al., Sensitivity Analysis, vol. 1. New York, NY, USA:
+Wiley, 2000.
+[30] J. Guo et al., “Data-efﬁcient performance learning for conﬁgurable
+systems,” Empir. Softw. Eng., vol. 23, pp. 1826–1867, 2018.
+[31] P. Valov, J. Guo, and K. Czarnecki, “Empirical comparison of
+regression methods for variability-aware performance prediction,”
+in Proc. Int. Conf. Softw. Product Line, 2015, pp. 186–190.
+[32] M. Birattari, T. St€utzle, L. Paquete, and K. Varrentrapp, “A racing
+algorithm for conﬁguring metaheuristics,” in Proc. 4th Annu. Conf.
+Genetic Evol. Comput., 2002, pp. 11–18.
+[33] L. Breiman, Classiﬁcation and Regression Trees. Evanston, IL, USA:
+Routledge, 2017.
+[34] P.-L. Loh and S. Nowozin, “Faster Hoeffding racing: Bernstein
+races via Jackknife estimates,” in Proc. Int. Conf. Algorithmic Learn.
+Theory, 2013, pp. 203–217.
+[35] T. Foss, E. Stensrud, B. Kitchenham, and I. Myrtveit, “A simula-
+tion study of the model evaluation criterion MMRE,” IEEE Trans.
+Softw. Eng., vol. 29, no. 11, pp. 985–995, Nov. 2003.
+[36] C. Trubiani, P. Jamshidi, J. Cito, W. Shang, Z. M. Jiang, and
+M. Borg, “Performance issues? Hey DevOps, mind the uncertainty!”
+IEEE Softw., vol. 36, no. 2, pp. 110–117, Mar./Apr. 2019.
+[37] S. Wang, S. Ali, T. Yue, Y. Li, and M. Liaaen, “A practical guide to
+select quality indicators for assessing pareto-based search algo-
+rithms in search-based software engineering,” in Proc. IEEE/ACM
+38th Int. Conf. Softw. Eng., 2016, pp. 631–642.
+[38] J. Chen, V. Nair, R. Krishna, and T. Menzies, ““Sampling” as a
+baseline optimizer for search-based software engineering,” IEEE
+Trans. Softw. Eng., vol. 45, no. 6, pp. 597–614, Jun. 2019.
+[39] K. Deb, A. Pratap, S. Agarwal, and T. Meyarivan, “A fast and elit-
+ist multiobjective genetic algorithm: NSGA-II,” IEEE Trans. Evol.
+Comput., vol. 6, no. 2, pp. 182–197, Apr. 2002.
+[40] N. Mittas and L. Angelis, “Ranking and clustering software cost
+estimation models through a multiple comparisons algorithm,”
+IEEE Trans. Softw. Eng., vol. 39, no. 4, pp. 537–551, Apr. 2013.
+[41] R. J. Tibshirani and B. Efron, An Introduction to the Bootstrap,
+vol. 57. New York, NY, USA: Chapman and Hall, 1993.
+[42] A. Vargha and H. D. Delaney, “A critique and improvement of the
+CL common language effect size statistics of McGraw and Wong,”
+J. Educ. Behavioral Statist., vol. 25, pp. 101–132, 2000.
+[43] N. L. Leech and A. J. Onwuegbuzie, “A call for greater use of non-
+parametric statistics,” in Proc. Annu. Meeting Mid-South Educ. Res.
+Assoc., 2002, pp. 1–27.
+[44] S. Poulding and J. A. Clark, “Efﬁcient software veriﬁcation: Statis-
+tical testing using automated search,” IEEE Trans. Softw. Eng.,
+vol. 36, no. 6, pp. 763–777, Nov./Dec. 2010.
+[45] A. Arcuri and L. Briand, “A practical guide for using statistical
+tests to assess randomized algorithms in software engineering,”
+in Proc. 33rd Int. Conf. Softw. Eng., 2011, pp. 1–10.
+[46] M. J. Shepperd and S. G. MacDonell, “Evaluating prediction sys-
+tems in software project estimation,” Inf. Softw. Technol., vol. 54,
+pp. 820–827, 2012.
+[47] V. B. Kampenes, T. Dyba
+, J. E. Hannay, and D. I. K. Sjøberg, “A sys-
+tematic review of effect size in software engineering experiments,”
+Inf. Softw. Technol., vol. 49, pp. 1073–1086, 2007.
+[48] E. Kocaguneli, T. Zimmermann, C. Bird, N. Nagappan, and
+T. Menzies, “Distributed development considered harmful?” in
+Proc. Int. Conf. Softw. Eng., 2013, pp. 882–890.
+[49] C.-J. Hsu, V. Nair, T. Menzies, and V. W. Freeh, “Scout: An experi-
+enced guide to ﬁnd the best cloud conﬁguration,” 2018, arXiv:
+1803.01296.
+[50] C.-J. Hsu, V. Nair, V. W. Freeh, and T. Menzies, “Low-level aug-
+mented Bayesian optimization for ﬁnding the best cloud VM,” in
+Proc. Int. Conf. Distrib. Comput. Syst., 2018, pp. 660–670.
+[51] W. Fu, T. Menzies, and X. Shen, “Tuning for software analytics: Is
+it really necessary?” Inf. Softw. Technol., vol. 76, pp. 135–146, 2016.
+[52] M. J. Afridi, A. Ross, and E. M. Shapiro, “On automated source
+selection for transfer learning in convolutional neural networks,”
+J. Pattern Recognit., vol. 73, pp. 65–75, 2018.
+[53] K. Hoste, A. Phansalkar, L. Eeckhout, A. Georges, L. K. John, and
+K. De Bosschere, “Performance prediction based on inherent pro-
+gram similarity,” in Proc. Int. Conf. Parallel Archit. Compilation
+Techn., 2006, pp. 114–122.
+[54] F. Hutter, L. Xu, H. H. Hoos, and K. Leyton-Brown, “Algorithm
+runtime prediction: Methods & evaluation,” Artif. Intell., vol. 206,
+pp. 79–111, 2014.
+[55] E. Thereska, B. Doebel, A. X. Zheng, and P. Nobel, “Practical per-
+formance models for complex, popular applications,” ACM SIG-
+METRICS Perform. Eval. Rev., vol. 38, pp. 1–12, 2010.
+[56] D. Westermann, J. Happe, R. Krebs, and R. Farahbod, “Automated
+inference of goal-oriented performance prediction functions,” in
+Proc. Int. Conf. Automated Softw. Eng., 2012, pp. 190–199.
+[57] S. Wang, C. Li, H. Hoffmann, S. Lu, W. Sentosa, and A. I. Kistijantoro,
+“Understanding and auto-adjusting performance-sensitive conﬁgu-
+rations,” in Proc. 23rd Int. Conf. Archit. Support Program. Lang. Operat-
+ing Syst., 2018, pp. 154–168.
+[58] Y. Peng, Y. Bao, Y. Chen, C. Wu, and C. Guo, “Optimus: An efﬁ-
+cient dynamic resource scheduler for deep learning clusters,” in
+Proc. 13th EuroSys Conf., 2018, pp. 1–14.
+[59] Y. Zhu et al., “BestConﬁg: Tapping the performance potential of
+systems via automatic conﬁguration tuning,” in Proc. Symp. Cloud
+Comput., 2017, pp. 338–350.
+[60] S. W. C. Li, H. Hoffmann, S. Lu, S. W. Sentosa, and A. I. Kisti-
+jantoro, “Understanding and auto-adjusting performance-sen-
+sitive conﬁgurations,” in ACM SIGPLAN Notices, vol. 53, no. 2,
+pp. 154–168, 2018.
+[61] O. Alipourfard, H. H. Liu, J. Chen, S. Venkataraman, M. Yu, and
+M. Zhang, “CherryPick: Adaptively unearthing the best cloud
+conﬁgurations for big data analytics,” in Proc. Symp. Netw. Syst.
+Des. Implementation, 2017, pp. 469–482.
+[62] N. J. Yadwadkar, B. Hariharan, J. E. Gonzalez, B. Smith, and
+R. H. Katz, “Selecting the best VM across multiple public clouds:
+A data-driven performance modeling approach,” in Proc. Symp.
+Cloud Comput., 2017, pp. 452–465.
+[63] H. Chen, W. Zhang, and G. Jiang, “Experience transfer for the con-
+ﬁguration tuning in large-scale computing systems,” IEEE Trans.
+Knowl. Data Eng., vol. 23, no. 3, pp. 388–401, Mar. 2011.
+[64] D. Golovin, B. Solnik, S. Moitra, G. Kochanski, J. Karro, and
+D. Sculley, “Google Vizier: A service for black-box optimization,”
+in Proc. 23rd ACM SIGKDD Int. Conf. Knowl. Discov. Data Mining,
+2017, pp. 1487–1495.
+[65] J. Yosinski, J. Clune, Y. Bengio, and H. Lipson, “How transferable
+are features in deep neural networks?” in Proc. Int. Conf. Neural
+Inf. Process. Syst., 2014, pp. 3320–3328.
+[66] M. Long, Y. Cao, J. Wang, and M. Jordan, “Learning transferable
+features with deep adaptation networks,” in Proc. Int. Conf. Mach.
+Learn., 2015, pp. 97–105.
+[67] S. Ben-David and R. Schuller, “Exploiting task relatedness for
+multiple task learning,” in Learning Theory and Kernel Machines.
+Berlin, Germany: Springer, pp. 1–4, 2003.
+[68] M. T. Rosenstein, Z. Marx, L. P. Kaelbling, and T. G. Dietterich,
+“To transfer or not to transfer,” in Proc. NIPS Workshop Inductive
+Transfer, 2005, pp. 1–4.
+[69] S. J. Pan and Q. Yang, “A survey on transfer learning,” IEEE Trans.
+Knowl. Data Eng., vol. 22, no. 10, pp. 1345–1359, Oct. 2010.
+[70] C. E. Rasmussen, “Gaussian processes in machine learning,” in,
+Advanced Lectures on Machine Learning. Berlin, Germany: Springer,
+2004.
+KRISHNA ET AL.: WHENCE TO LEARN? TRANSFERRING KNOWLEDGE IN CONFIGURABLE SYSTEMS USING BEETLE
+2971
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap
+<--page_17-->Rahul Krishna received the PhD degree from
+NC State University, Raleigh, North Carolina. He
+is a postdoctoral researcher in computer science
+with Columbia University. His current research
+explores ways to use machine learning to gener-
+ate actionable insights for building reliable soft-
+ware
+systems.
+His
+other
+research
+interests
+include program analysis, artiﬁcial intelligence,
+and security. For more information, please visit
+http://rkrsn.us.
+Vivek Nair received the graduate and PhD
+degrees from the Department of Computer Sci-
+ence, North Carolina State University, Raleigh,
+North Carolina. His primary interest lies in explor-
+ing possibilities of using multiobjective optimiza-
+tion to solve problems in software engineering. At
+NCSU, he was working on performance predic-
+tion models of highly conﬁgurable systems. He
+received the master’s degree and worked in the
+mobile industry for two years before returning to
+graduate school. For more information, please
+visit http://vivekaxl.com.
+Pooyan Jamshidi is an assistant professor with the
+University of South Carolina. His general research
+interests include at the intersection of systems/soft-
+ware and machine learning. He directs the AISys
+Lab. For more information, please visit (https://
+pooyanjamshidi.github.io/AISys/), where he investi-
+gates the development of novel algorithmic and the-
+oretically principled methods for machine learning
+systems. Prior to his current position, he was a
+research associate with Carnegie Mellon University
+and Imperial College London, where he primarily
+worked on transfer learning for performance understanding of highly-
+conﬁgurable systems.
+Tim Menzies (Fellow, IEEE) is a professor in CS
+at NcState. His research interests include soft-
+ware engineering (SE), data mining, artiﬁcial
+intelligence, search-based SE, and open access
+science. For more information, please visit http://
+menzies.us
+" For more information on this or any other computing topic,
+please visit our Digital Library at www.computer.org/csdl.
+2972
+IEEE TRANSACTIONS ON SOFTWARE ENGINEERING, VOL. 47, NO. 12, DECEMBER 2021
+horized licensed use limited to: PONTIFICIA UNIVERSIDADE CATOLICA DO RIO DE JANEIRO. Downloaded on January 22,2025 at 21:47:17 UTC from IEEE Xplore.  Restrictions ap

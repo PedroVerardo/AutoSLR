@@ -1,1 +1,1 @@
-from .pdf_request_model import PdfRequestModel
+from .pdf_request_model import PdfRequestModel, PdfQuestionModel

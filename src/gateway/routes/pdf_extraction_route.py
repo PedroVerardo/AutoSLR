@@ -4,23 +4,14 @@ import json
 import os
 from typing import Dict, Any
 
+from ..config import get_producer, send_to_kafka
 from ..models import PdfRequestModel
+from ..config import ExtractionMethod
 
 router = APIRouter()
 
-def get_kafka_producer():
-    producer_config = {
-        'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092'),
-        'client.id': 'pdf_producer'
-    }
-    return Producer(producer_config)
-
-def send_to_kafka(producer: Producer, topic: str, message: Dict[str, Any]):
-    producer.produce(topic, key="key", value=json.dumps(message))
-    producer.flush()
-
 @router.post("/pdf-extraction")
-async def pdf_extraction(request: PdfRequestModel, producer: Producer = Depends(get_kafka_producer)):
+async def pdf_extraction(request: PdfRequestModel):
     """
     Endpoint to trigger PDF extraction.
     Args:
@@ -28,11 +19,11 @@ async def pdf_extraction(request: PdfRequestModel, producer: Producer = Depends(
     Returns:
         dict: Status of the extraction process.
     """
-    topic = 'pdf_topic'
+    topic = 'pdf_extraction_topic'
     message = {
         "archive_name": request.archive_name,
-        #"extraction_method": request.extraction_method,
         "section_pattern": request.section_pattern
     }
-    send_to_kafka(producer, topic, message)
+    send_to_kafka(ExtractionMethod.STANDARD, message)
     return {"status": "PDF extraction triggered"}
+

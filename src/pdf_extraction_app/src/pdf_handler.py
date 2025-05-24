@@ -5,7 +5,17 @@ import fitz
 # Removed unused import of RegexPattern
 
 class PDFHandler:
-
+    regex_patterns = {
+        "non_ascii": "[\\x00-\\x08\\x0B-\\x1F\\x7F-\\x9F\\xA0]",
+        "unicode_spaces": "[\\u00A0\\u2000-\\u200F\\u2028\\u2029\\u202F\\u3000]",
+        "introduction": "\\n*\\s*[Ii][Nn][Tt][Rr][Oo][Dd][Uu][Cc][Tt][Ii][Oo][Nn]\\s*\\n*",
+        "references": "\\n\\s*[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\\s*\\n",
+        "numeric_point_section": "\\n(\\d)\\.\\s+([A-Za-z0-9\\s\\-_:;,.!?()'\"`]+)<--bold-->\\n",
+        "rome_point_section": "(?<=\\n)([IVXLCDM]+\\.\\s+[A-Z][^\\n]+\\n)",
+        "numeric_section": "^(\\d+)\\s+.+",
+        "table_description": "(TABLE|Table|table)\\s*\\d+\\.[\\s\\S]+?",
+        "citation1": "\\[(\\d)\\]\\s*([^\\[]+)"
+    }
     @staticmethod
     def try_open(pdf_path: str):
         try:
@@ -97,7 +107,7 @@ class PDFHandler:
             return None
     
     @staticmethod
-    def extract_text_with_regex(text: str, regex_pattern: str) -> list[str]:
+    def extract_text_with_regex(text: str, regex_pattern: str) -> dict[str, dict[str, str]]:
         try:
             results = {}
             matches = list(re.finditer(regex_pattern, text, re.MULTILINE))
@@ -122,7 +132,7 @@ class PDFHandler:
 
 if __name__ == "__main__":
     # simple usage for futher reference
-    path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf/ScienceDirect/Arcaini2020.pdf"
+    path = "/home/pedro/Documents/Rag_test/grpc/papers_pdf/Scopus/Arcaini2020.pdf"
     
     doc = PDFHandler.try_open(path)
 
@@ -132,7 +142,7 @@ if __name__ == "__main__":
     metadata = PDFHandler.get_metadata(doc)
     # print("Metadata:", metadata)
 
-    regex_pattern = r"\n(\d)\.\s+(?!\d)[\w\s]+<--bold-->\n"
+    regex_pattern = PDFHandler.regex_patterns["numeric_section"]
 
     extracted_text = PDFHandler.extract_text_with_regex(text, regex_pattern)
 

@@ -1,104 +1,135 @@
-from database import get_db
+from .session import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sentence_transformers import SentenceTransformer
 import logging
-from ..models import Article, Segment, Chunk
-
+from ..models import Article, Segment, Chunk, ChatHistory
 
 logging.basicConfig(level=logging.INFO)
 
-async def insert_article(db: Session, article: Article, auto_commit: bool=False):
+def insert_article(db: Session, article: Article, auto_commit: bool=False):
     try:
-        db.add(article)
-        db.flush()  
+        db.add(article) 
+        db.flush()
         
         if auto_commit:
             db.commit()
             
-        return True, article.id
+        return False, article.id
     except IntegrityError:
         db.rollback()
-        return False, f"Article with title '{article.title}' already exists."
+        return True, f"Article with title '{article.title}' already exists."
     except Exception as e:
         db.rollback()
-        return False, f"Error inserting article: {e}"
+        return True, f"Error inserting article: {e}"
 
-async def insert_segment(db: Session, segment: Segment, auto_commit: bool=False):
-    if not segment.article_id:
-        return False, "Segment must have an article_id"
+def insert_segment(db: Session, segment: Segment, auto_commit: bool=False):
+    if segment.article_id is None:
+        return True, "Segment must have an article_id"
     
     try:
         db.add(segment)
-        db.flush()  
+        db.flush()
         
         if auto_commit:
             db.commit()
             
-        return True, segment.id
+        return False, segment.id
     except Exception as e:
         db.rollback()
-        return False, f"Error inserting segment: {e}"
+        return True, f"Error inserting segment: {e}"
 
-async def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
-    if not chunk.segment_id:
-        return False, "Chunk must have a segment_id"
+def insert_chunk(db: Session, chunk: Chunk, auto_commit: bool=False):
+    if chunk.segment_id is None:
+        return True, "Chunk must have a segment_id"
     
     try:
         db.add(chunk)
-        db.flush()  
         
         if auto_commit:
             db.commit()
             
-        return True, chunk.id
+        return False, chunk.id
     except Exception as e:
         db.rollback()
-        return False, f"Error inserting chunk: {e}"
+        return True, f"Error inserting chunk: {e}"
     
-async def insert_article_with_segments(db: Session, article: Article, segments: list[Segment]):
-    try:
-        article_success, article_result = insert_article(db, article)
-        if not article_success:
-            db.rollback()
-            return False, article_result
-        
-        for segment in segments:
-            segment.article_id = article.id
-            segment_success, segment_result = insert_segment(db, segment)
-            if not segment_success:
-                db.rollback()
-                return False, segment_result
-        
-        db.commit()
-        return True, "Successfully inserted article with segments"
-    except Exception as e:
-        db.rollback()
-        return False, f"Error during insertion: {e}"
+def insert_question_and_answer(db: Session, chat_history: ChatHistory, auto_commit: bool=False):
+    if not chat_history.article_id:
+        return True, "ChatHistory must be associated with one or more articles ids"
     
-async def insert_article_with_segments_and_chunks(db: Session, article: Article, segments: list[Segment], chunks_list: list[list[Chunk]]):
     try:
-        article_success, article_result = insert_article(db, article)
-        if not article_success:
-            db.rollback()
-            return False, article_result
+        db.add(chat_history)
         
-        for i, segment in enumerate(segments):
-            segment.article_id = article.id
-            segment_success, segment_result = insert_segment(db, segment)
-            if not segment_success:
-                db.rollback()
-                return False, segment_result
+        if auto_commit:
+            db.commit()
             
-            if i < len(chunks_list):
-                for chunk in chunks_list[i]:
-                    chunk.segment_id = segment.id
-                    chunk_success, chunk_result = insert_chunk(db, chunk)
-                    if not chunk_success:
-                        db.rollback()
-                        return False, chunk_result
-        
-        db.commit()
-        return True, "Successfully inserted article with segments and chunks"
+        return False, chat_history.id
     except Exception as e:
         db.rollback()
-        return False, f"Error during insertion: {e}"
+        return True, f"Error inserting chat history: {e}"
+    
+def batch_insert_segments(db: Session, segment_objects: list[Segment], auto_commit=False):
+    try:
+        segment_values = [(seg.article_id, seg.segment_title, seg.segment_title_vector, seg.segment_text) for seg in segment_objects]
+        
+        cursor = db.connection().connection.cursor()
+        cursor.executemany(
+            "INSERT INTO segments (article_id, segment_title, segment_title_vector, segment_text) VALUES (%s, %s, %s, %s) RETURNING id", 
+            segment_values
+        )
+        
+        segment_ids = [row[0] for row in cursor.fetchall()]
+        
+        for i, segment_obj in enumerate(segment_objects):
+            segment_obj.id = segment_ids[i]
+            
+        if auto_commit:
+            db.commit()
+            
+        return False, segment_ids
+        
+    except Exception as e:
+        if auto_commit:
+            db.rollback()
+        return True, str(e)
+
+def batch_insert_chunks(db: Session, chunk_objects: list[Chunk], auto_commit=False):
+    try:
+        chunk_values = [(chunk.id, chunk.chunk_text, chunk.chunk_vector) for chunk in chunk_objects]
+        
+        cursor = db.connection().connection.cursor()
+        cursor.executemany(
+            "INSERT INTO chunks (segment_id, chunk_text, chunk_vector) VALUES (%s, %s, %s) RETURNING id", 
+            chunk_values
+        )
+        
+        chunk_ids = [row[0] for row in cursor.fetchall()]
+        
+        for i, chunk_obj in enumerate(chunk_objects):
+            chunk_obj.id = chunk_ids[i]
+            
+        if auto_commit:
+            db.commit()
+            
+        return False, chunk_ids
+        
+    except Exception as e:
+        if auto_commit:
+            db.rollback()
+        return True, str(e)
+    
+def insert_question_and_answer(db: Session, chat_history: ChatHistory, auto_commit=False):
+    if not chat_history.article_id:
+        return True, "ChatHistory must be associated with one or more articles ids"
+    
+    try:
+        db.add(chat_history)
+        
+        if auto_commit:
+            db.commit()
+            
+        return False, chat_history.id
+    except Exception as e:
+        db.rollback()
+        return True, f"Error inserting chat history: {e}"

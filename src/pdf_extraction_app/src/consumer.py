@@ -1,69 +1,30 @@
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer, KafkaError, Producer
 from confluent_kafka.admin import AdminClient, NewTopic
+import numpy as np
+import google.generativeai as genai
+from dotenv import load_dotenv
 
 import json
 import time
 import os
 import logging
+import datetime
 
-from pdf_handler import PDFHandler
+from .pdf_handler import PDFHandler
+from .pdf_crud_process import process_crud_message
+from .pdf_extraction_process import process_extraction_message
+from ..models import ServiceType
+from ..config import KafkaConfig, EmbeddingConfig
+from ..database import insert_article, insert_segment, insert_chunk, batch_insert_segments, batch_insert_chunks
+from ..database import get_db
+from ..models import Article, Segment, Chunk
+from ..utils.chunking import ChunkText
+from ..database.session import Base, engine
 
-# TODO: change the print to logging or to opentelemetry
-# TODO: thinking how to personalize the regex pattern with the specific tag
-# TODO: implement the migration of the database
+# TODO: Add logging configuration
+# TODO: Add the separation between the embedding and the pdf extraction
 
-def process_message(message):
-    """
-    Process the Kafka message, extract titles from the PDF, and return them.
-
-    Args:
-        message (dict): The Kafka message containing the PDF path.
-
-    Returns:
-        list[str]: A list of titles extracted from the PDF.
-    """
-    archive_name = message.get("archive_name")
-    section_pattern = message.get("section_pattern")
-    data_path = os.getenv('DATA_PATH', '/home/pedro/Documents/Rag_test/grpc/papers_pdf')
-
-    # Initialize pdf_path to None
-    pdf_path = None
-
-    for root, dirs, files in os.walk(data_path):
-        for file in files:
-            if archive_name in file and file.lower().endswith('.pdf'):
-                pdf_path = os.path.join(root, file)
-                logging.info(f"Found matching PDF: {pdf_path}")
-                break
-    
-    if pdf_path is None:
-        logging.error(f"PDF file not found for title: {archive_name}")
-        return []
-
-    doc = PDFHandler.try_open(pdf_path)
-
-    if not doc:
-        print(f"Failed to open PDF: {pdf_path}")
-        return []
-    
-    tag = "bold"
-    
-    text, _ = PDFHandler.tagged_extraction(doc, tag)
-    if not text:
-        logging.error(f"Failed to extract text from PDF: {pdf_path}")
-        return []
-    
-    section_pattern = fr"\n(\d)\.\s+(?!\d)[\w\s]+<--{tag}-->\n"
-
-    extracted_text = PDFHandler.extract_text_with_regex(text, section_pattern)
-
-    if not extracted_text:
-        logging.error(f"No text extracted using regex pattern: {section_pattern}")
-        return []
-
-    titles = [value['title'] for value in extracted_text.values()]
-    doc.close()
-    return titles
+db = get_db()
 
 def ensure_topic_exists(topic_name, bootstrap_servers):
     admin_client = AdminClient({'bootstrap.servers': bootstrap_servers})
@@ -71,7 +32,13 @@ def ensure_topic_exists(topic_name, bootstrap_servers):
     if topic_name not in topic_metadata.topics:
         print(f"Creating topic: {topic_name}")
         new_topic = NewTopic(topic_name, num_partitions=1, replication_factor=1)
-        admin_client.create_topics([new_topic])
+        fs = admin_client.create_topics([new_topic])
+        for topic, f in fs.items():
+            try:
+                f.result()
+                print(f"Topic {topic} created successfully.")
+            except Exception as e:
+                print(f"Failed to create topic {topic}: {e}")
     else:
         print(f"Topic {topic_name} already exists.")
 
@@ -79,16 +46,16 @@ def main():
     """
     Main function to consume messages from Kafka and process them.
     """
-    consumer_config = {
-        'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092'),
-        'group.id': 'pdf_consumer_group',
-        'auto.offset.reset': 'earliest'
-    }
+    consumer = Consumer(KafkaConfig.get_consumer_config())
+    model = EmbeddingConfig.load_embedding_model()
+    data_path = os.getenv('DATA_PATH', '/home/pedro/Documents/Rag_test/grpc/papers_pdf')
+    load_dotenv()
+    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-    consumer = Consumer(consumer_config)
+    llm_model = genai.GenerativeModel('gemini-1.5-flash')
 
     try:
-        consumer.subscribe(['pdf_topic'])
+        consumer.subscribe(['pdf_extraction_topic', 'pdf_crud_topic'])
 
         while True:
             msg = consumer.poll(1.0)
@@ -104,23 +71,27 @@ def main():
 
             try:
                 message_value = json.loads(msg.value().decode('utf-8'))
-                print(f"Received message: {message_value}")
-                titles = process_message(message_value)
-                if titles:
-                    print("Extracted Titles:")
-                    for title in titles:
-                        print(f"- {title}")
-                else:
-                    print("No titles found.")
+                topic = msg.topic()
+                if topic == 'pdf_extraction_topic':
+                    print(process_extraction_message(message_value, model,data_path, db))
+                elif topic == 'pdf_crud_topic':
+                    print(process_crud_message(message_value, model, llm_model, db))
+
             except json.JSONDecodeError:
                 print("Failed to decode message as JSON.")
 
     except KeyboardInterrupt:
         print("Consumer interrupted by user.")
     finally:
+        db.close()
         consumer.close()
 
 if __name__ == "__main__":
-    ensure_topic_exists('pdf_topic', 'localhost:9092')
+    ensure_topic_exists('pdf_extraction_topic', 'localhost:9092')
+    ensure_topic_exists('pdf_crud_topic', 'localhost:9092')
+
+    with engine.begin() as connection:
+        Base.metadata.create_all(bind=connection)
+
     time.sleep(5)
     main()

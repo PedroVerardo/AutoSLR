@@ -1,0 +1,2086 @@
+<--page_start:1-->
+Analyzing the Impact of Workloads on Modeling the<--size=22.3-->
+Performance of Conﬁgurable Software Systems<--size=22.5-->
+
+Stefan M¨uhlbauer<--size=10.3-->
+Leipzig University<--size=9.4-->
+Florian Sattler<--size=10.3-->
+Saarland University<--size=9.4-->
+Saarland Informatics Campus<--size=9.4-->
+
+Christian Kaltenecker<--size=10.3-->
+Saarland University<--size=9.4-->
+Saarland Informatics Campus<--size=9.4-->
+
+Johannes Dorn<--size=10.3-->
+Leipzig University<--size=9.4-->
+
+Sven Apel<--size=10.3-->
+Saarland University<--size=9.4-->
+Saarland Informatics Campus<--size=9.4-->
+
+Norbert Siegmund<--size=10.3-->
+Leipzig University<--size=9.4-->
+ScaDS.AI Dresden/Leipzig<--size=9.4-->
+
+Abstract—Modern software systems often exhibit numerous<--size=8.5-->
+conﬁguration options to tailor them to user requirements,<--size=8.5-->
+including the system’s performance behavior. Performance models<--size=8.3-->
+derived via machine learning are an established approach<--size=8.5-->
+for estimating and optimizing conﬁguration-dependent software<--size=8.4-->
+performance. Most existing approaches in this area rely on<--size=8.5-->
+software performance measurements conducted with a single<--size=8.5-->
+workload (i.e., input fed to a system). This single workload,<--size=8.5-->
+however, is often not representative of a software system’s<--size=8.5-->
+real-world application scenarios. Understanding to what extent<--size=8.5-->
+conﬁguration and workload—individually and combined—cause<--size=8.4-->
+a software system’s performance to vary is key to understand<--size=8.5-->
+whether performance models are generalizable across different<--size=8.5-->
+conﬁgurations and workloads. Yet, so far, this aspect has not been<--size=8.3-->
+systematically studied.<--size=8.4-->
+To ﬁll this gap, we conducted a systematic empirical study<--size=8.5-->
+across 25 258 conﬁgurations from nine real-world conﬁgurable<--size=8.5-->
+software systems to investigate the effects of workload variation at<--size=8.3-->
+system-level performance and for individual conﬁguration options.<--size=8.3-->
+We explore driving causes for workload–conﬁguration interactions<--size=8.3-->
+by enriching performance observations with option-speciﬁc code<--size=8.4-->
+coverage information.<--size=8.4-->
+Our results demonstrate that workloads can induce substantial<--size=8.3-->
+performance variation and interact with conﬁguration options,<--size=8.5-->
+often in non-monotonous ways. This limits not only the generaliz-<--size=8.3-->
+ability of single-workload models, but also challenges assumptions<--size=8.3-->
+for existing transfer-learning techniques. As a result, workloads<--size=8.4-->
+should be considered when building performance prediction<--size=8.5-->
+models to maintain and improve representativeness and reliability.<--size=8.3-->
+
+I. INTRODUCTION<--size=9.4-->
+
+Most modern software systems can be customized by means<--size=9.3-->
+of conﬁguration options enabling desired functionality or<--size=9.5-->
+tweaking non-functional aspects, such as performance or energy<--size=9.3-->
+consumption. The relationship between conﬁguration choices<--size=9.4-->
+and their inﬂuence on performance has been extensively studied<--size=9.3-->
+in the literature [1]–[10]. The backbone of performance estima-<--size=9.3-->
+tion are prediction models that map a given conﬁguration to the<--size=9.3-->
+estimated performance value. Learning performance models<--size=9.5-->
+relies on a training set of conﬁguration-speciﬁc performance<--size=9.4-->
+measurements. In state-of-the-art approaches, observations<--size=9.5-->
+usually rely on only single-workload measurements that aim<--size=9.4-->
+at reﬂecting performance behavior of a typical real-world<--size=9.5-->
+application scenario.<--size=9.4-->
+
+400<--size=4.5-->
+600<--size=4.5-->
+800<--size=4.5-->
+1000<--size=4.5-->
+Throughput (transactions / second)<--size=4.9-->
+
+0.000<--size=4.5-->
+
+0.002<--size=4.5-->
+
+0.004<--size=4.5-->
+
+0.006<--size=4.5-->
+
+0.008<--size=4.5-->
+
+Density of congurations<--size=4.9-->
+
+Scale factor 2<--size=4.5-->
+median<--size=4.5-->
+Scale factor 8<--size=4.5-->
+median<--size=4.5-->
+
+Figure 1: Throughput distribution of 1954 conﬁgurations of the<--size=9.3-->
+database system H2 for the TPC-C benchmark at two different<--size=9.3-->
+scale factors.<--size=9.4-->
+
+It is almost folklore that choice of the workload (i.e., the<--size=9.5-->
+input fed to the software system) inﬂuences the performance<--size=9.4-->
+of software systems in different ways [11], as has been shown<--size=9.3-->
+for the domains of SAT solving [12], [13], compilation [14],<--size=9.4-->
+[15], video transcoding [16], [17], data compression [18], and<--size=9.3-->
+code veriﬁcation [19]. Beside apparent interactions, such as<--size=9.5-->
+performance scaling with the size of a workload, qualitative<--size=9.5-->
+aspects can result in intricate and inadvertent performance<--size=9.5-->
+variations.<--size=9.4-->
+Take as an example two performance throughput distributions<--size=9.3-->
+across the conﬁguration space of the database system H2<--size=9.5-->
+in Figure 1. Here, the exact same conﬁgurations on two<--size=9.5-->
+different parameterizations of the benchmark TPC-C have<--size=9.5-->
+been measured. In this setting, the scale factor controls the<--size=9.5-->
+modeled number of warehouses.<--size=9.4-->
+While for most conﬁgurations, throughput decreases when<--size=9.4-->
+the scale factor is increased some conﬁgurations achieve even a<--size=9.3-->
+higher throughput1. This example illustrates that conﬁguration-<--size=9.3-->
+dependent performance can be highly sensitive to workload<--size=9.5-->
+variation and that the performance behavior under different<--size=9.5-->
+workloads can change in unexpected ways. In turn, this can<--size=9.5-->
+render performance models based on a single workload useless,<--size=9.3-->
+unless the conﬁguration options’ sensitivity to workloads is<--size=9.5-->
+accounted for.<--size=9.4-->
+
+1A similar workload-speciﬁc performance distribution was described by<--size=5.6-->
+Pereira et al. for the video encoder X264 [17].<--size=7.5-->
+
+<--image width=756.0 height=752.0-->
+<--image width=756.0 height=752.0-->
+2085<--size=8.0-->
+
+2023 IEEE/ACM 45th International Conference on Software Engineering (ICSE)<--size=10.0-->
+
+1558-1225/23/$31.00 ©2023 IEEE<--size=8.0-->
+DOI 10.1109/ICSE48619.2023.00176<--size=8.0-->
+
+2023 IEEE/ACM 45th International Conference on Software Engineering (ICSE) | 978-1-6654-5701-9/23/$31.00 ©2023 IEEE | DOI: 10.1109/ICSE48619.2023.00176<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:1-->
+
+<--page_start:2-->
+To address this limitation, two different approaches have<--size=9.5-->
+been pursued in the literature: performance modeling (1) based<--size=9.3-->
+on existing knowledge [20]–[24], and (2) for a combined<--size=9.5-->
+conﬁguration-workload problem space [19], [25].<--size=9.4-->
+
+The ﬁrst approach relies on transfer-learning techniques,<--size=9.5-->
+in which, given an existing performance model, in a second<--size=9.5-->
+step only the differences to a new environment or workload<--size=9.5-->
+are learned. A transfer function encodes which conﬁguration<--size=9.4-->
+options’ inﬂuences on performance are sensitive to workload<--size=9.4-->
+variation. While transfer learning is an effective strategy that is<--size=9.3-->
+not limited to varying workloads [20]–[24], its main limitation<--size=9.3-->
+is that the transfer function is speciﬁc to the differences between<--size=9.3-->
+two environments.<--size=9.4-->
+
+In contrast to transfer learning, a second and more generalist<--size=9.3-->
+approach is to consider the input fed to a software system as<--size=9.4-->
+a further dimension for modeling performance. A workload is<--size=9.3-->
+characterized by properties that—individually or in conjunction<--size=9.3-->
+with software conﬁguration options—inﬂuence performance.<--size=9.5-->
+For such a strategy to work, one requires in-depth knowledge<--size=9.3-->
+of the characteristics of a workload that inﬂuence performance,<--size=9.3-->
+let alone these characteristics can be mathematically modeled<--size=9.3-->
+at all. This strategy has been effectively tested for a variety<--size=9.5-->
+of application domains, such as program veriﬁcation [19]<--size=9.5-->
+and high-performance computing [25]. However, the added<--size=9.5-->
+complexity comes at substantial cost. Not only does it require<--size=9.3-->
+substantially more measurements, one often lacks knowledge<--size=9.4-->
+of which performance-relevant characteristics best describe<--size=9.5-->
+a workload (e.g., what makes a program hard to verify or<--size=9.5-->
+optimize).<--size=9.4-->
+
+The existing body of research [1]–[10], [26]–[29] conﬁrms<--size=9.4-->
+the prevalence and importance of the inﬂuence of the workload<--size=9.3-->
+on the performance of software systems. All these works are<--size=9.4-->
+aware of the workload dimension as a factor of performance<--size=9.4-->
+variation, yet little is known about the quality and driving<--size=9.5-->
+factors of the interplay between conﬁguration options and<--size=9.5-->
+workloads. Are workloads and conﬁgurations as two factors<--size=9.5-->
+inﬂuencing software performance orthogonal and can be treated<--size=9.3-->
+independently, or does their interplay give rise to intricate and<--size=9.3-->
+inadvertent performance behavior? For example, varying the<--size=9.4-->
+workload had a non-uniform effect on different conﬁgurations<--size=9.3-->
+of the database system H2 (cf. Fig. 1), suggesting a speciﬁc<--size=9.5-->
+interaction between certain conﬁguration options and the<--size=9.5-->
+workload.<--size=9.4-->
+
+We have conducted an empirical study that sheds light<--size=9.5-->
+on whether and how choices of conﬁguration and workload<--size=9.5-->
+interact with regard to performance. Speciﬁcally, we have<--size=9.5-->
+analyzed 25 258 conﬁgurations from nine conﬁgurable real-<--size=9.5-->
+world software systems to obtain a broad picture of the<--size=9.5-->
+interaction of conﬁguration and workload when learning<--size=9.5-->
+performance models and estimating performance (i.e., response<--size=9.3-->
+time). Aside from studying the sole effects of workload<--size=9.5-->
+variation on performance behavior, we explore what drives<--size=9.5-->
+the interaction between workload and conﬁguration. To this<--size=9.5-->
+end, we enrich performance observations with corresponding<--size=9.4-->
+coverage data to understand workload variation with respect<--size=9.5-->
+to the executed code.<--size=9.4-->
+
+We found that varying the workload can inﬂuence<--size=9.5-->
+conﬁguration-dependent software performance in different<--size=9.5-->
+ways, including non-linear and non-monotonous effects. As<--size=9.5-->
+a key take-away, we provide empirical evidence that single-<--size=9.5-->
+workload approaches do not generalize across workload vari-<--size=9.4-->
+ations and that even existing transfer-learning techniques are<--size=9.4-->
+too limited to address non-monotonous performance variations<--size=9.3-->
+induced by qualitative workload changes. We demonstrate how<--size=9.3-->
+coverage testing can outline a path to screen for workload-<--size=9.5-->
+sensitive conﬁguration options.<--size=9.4-->
+
+To summarize, we make the following contributions:<--size=9.4-->
+– An empirical study of 25 258 conﬁgurations from nine<--size=9.4-->
+
+conﬁgurable software systems on whether and how in-<--size=9.5-->
+teractions of workload and conﬁguration affect software<--size=9.4-->
+performance;<--size=9.4-->
+– A detailed analysis illustrating that (1) system-level<--size=9.4-->
+
+performance, and (2) the performance inﬂuence of indi-<--size=9.4-->
+vidual conﬁguration options can be sensitive to workload<--size=9.3-->
+variation and often exhibit a non-monotonous relationship,<--size=9.3-->
+caused by variation in the execution of option-speciﬁc<--size=9.5-->
+code;<--size=9.4-->
+– A critical reﬂection of the suitability of single-workload<--size=9.4-->
+
+models for predicting conﬁguration-dependent perfor-<--size=9.5-->
+mance and assumptions of state-of-the-art transfer-learning<--size=9.3-->
+approaches in this area;<--size=9.4-->
+– An archived repository on zenodo.org2with supplementary<--size=9.3-->
+
+material, including performance and coverage measure-<--size=9.5-->
+ments, conﬁgurations, and an interactive dashboard for<--size=9.5-->
+data exploration to reproduce all analyses and additional<--size=9.3-->
+visualizations left out due to space limitations.<--size=9.4-->
+
+II. PRELIMINARIES AND RELATED WORK<--size=9.4-->
+
+Software performance emerges from a variety of factors<--size=9.5-->
+including conﬁguration, workload, and hardware setup. In what<--size=9.3-->
+follows, we revisit work that models the relationship between<--size=9.3-->
+such factors (individually or in combinations) and software<--size=9.5-->
+performance.<--size=9.4-->
+
+A. Performance Prediction Models<--size=9.4-->
+
+Conﬁgurable software systems is an umbrella term for any<--size=9.3-->
+kind of software system that exhibits conﬁguration options to<--size=9.3-->
+customize its functionality [30]. While the primary purpose<--size=9.5-->
+of conﬁguration options is to select and tune functionality,<--size=9.5-->
+each conﬁguration choice may also have implications on<--size=9.5-->
+non-functional properties (e.g., execution time or memory<--size=9.5-->
+usage)—be it intentional or not. Performance prediction models<--size=9.3-->
+approximate non-functional properties, such as execution time<--size=9.3-->
+or memory usage, as a function of software conﬁgurations<--size=9.5-->
+c ∈C, formally, Π : C →R.<--size=9.4-->
+
+Such black-box models do not rely on an understanding<--size=9.5-->
+of the internals of a conﬁgurable software system, but are<--size=9.5-->
+learned from a training set of conﬁguration-speciﬁc perfor-<--size=9.5-->
+mance observations. In this vein, ﬁnding conﬁgurations with<--size=9.4-->
+optimal performance [26]–[29] and estimating the performance<--size=9.3-->
+
+2https://doi.org/10.5281/zenodo.7504284<--size=5.6-->
+
+2086<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:2-->
+
+<--page_start:3-->
+for arbitrary conﬁgurations of the conﬁguration space is<--size=9.5-->
+an established line of research [1]–[10]. Over the decade,<--size=9.5-->
+several different learning and modeling techniques have shown<--size=9.3-->
+to be effective to learn conﬁguration-dependent software<--size=9.5-->
+performance, including probabilistic programming [1], multiple<--size=9.3-->
+linear regression [2], classiﬁcation and regression trees [5]–[7],<--size=9.3-->
+Fourier learning [8], [9], and deep neural networks [3], [4],<--size=9.5-->
+[10]. The set of conﬁgurations for training can be sampled from<--size=9.3-->
+the conﬁguration space using a variety of different sampling<--size=9.4-->
+techniques [31], [32]. All sampling techniques aim at yielding<--size=9.3-->
+a representative sample, either by covering the main effects<--size=9.5-->
+of conﬁguration options and interactions among them [33] or<--size=9.4-->
+by sampling uniformly from the conﬁguration space [29], [34].<--size=9.3-->
+Most sampling techniques share the perspective of treating<--size=9.5-->
+a conﬁgurable software system as a black-box model at<--size=9.5-->
+application-level granularity. Recent work has incorporated<--size=9.5-->
+feature location techniques to guide sampling effort towards<--size=9.5-->
+relevant conﬁguration options [35], [36] or to model non-<--size=9.5-->
+functional properties at ﬁner granularity [37], [38].<--size=9.4-->
+
+B. Varying Workloads<--size=9.4-->
+
+When assessing the performance of a software system, one<--size=9.3-->
+asks how well a certain operation is executed, or, phrased<--size=9.5-->
+differently, how well an input fed to the software system is<--size=9.5-->
+processed. In the context of this study, we will refer to such<--size=9.4-->
+inputs as workloads. By nature, the workload of a software<--size=9.5-->
+system is application-speciﬁc, such as a series of queries and<--size=9.4-->
+transactions fed to a database system or a sequence of raw<--size=9.5-->
+image ﬁles processed by a video encoder. Workloads can often<--size=9.3-->
+be distinguished by the characteristics they exhibit, such as the<--size=9.3-->
+amount and type of data to be processed (text, binary data).<--size=9.4-->
+
+In practice, a useful workload for assessing performance<--size=9.5-->
+should closely resemble the real-world scenario that the system<--size=9.3-->
+under test will be deployed in. To achieve this, a well-deﬁned<--size=9.3-->
+and widely employed technique in performance engineering is<--size=9.3-->
+workload characterization [39], [40]. To select a representative<--size=9.3-->
+workload, it is imperative to explore workload characteristics<--size=9.4-->
+and validate a workload with real-world observations. This can<--size=9.3-->
+be achieved by constructing workloads from usage patterns [41]<--size=9.3-->
+or by increasing the workload coverage using a mix of different<--size=9.3-->
+workloads rather than a single one [42].<--size=9.4-->
+
+While workload characterization and benchmark construction<--size=9.3-->
+is domain-speciﬁc, there are numerous examples of this task<--size=9.4-->
+being driven by community efforts. For instance, the non-proﬁt<--size=9.3-->
+organizations Transaction Processing Performance Council<--size=9.5-->
+(TPC) and Standard Performance Evaluation Corporation<--size=9.5-->
+(SPEC) provide large bodies of benchmarks for data-centric<--size=9.5-->
+applications and across different domains, respectively.<--size=9.4-->
+
+C. Workloads and Performance Prediction<--size=9.4-->
+
+Different approaches have been proposed to tackle the<--size=9.5-->
+problem of workload sensitivity in performance prediction.<--size=9.4-->
+
+a) Workload-aware Performance Modeling: Extending<--size=9.5-->
+on workload characterization (cf. Section II-B), a strategy that<--size=9.3-->
+embraces workload diversity is to incorporate workload char-<--size=9.4-->
+acteristics into the problem space of a performance prediction<--size=9.3-->
+
+model. Here, performance is modeled as a function of both<--size=9.5-->
+the conﬁguration options explicitly exhibited by the software<--size=9.4-->
+system as well as the workload characteristics, formally<--size=9.5-->
+Π : C × W →R. The combined problem space enables<--size=9.4-->
+learning performance models that generalize to workloads<--size=9.5-->
+that exhibit characteristics denoted by W since we can<--size=9.5-->
+screen for performance-relevant combinations of options and<--size=9.4-->
+workload characteristics. This domain-speciﬁc strategy has<--size=9.5-->
+been successfully applied to domains such as program veriﬁ-<--size=9.4-->
+cation [19], algorithm selection [43], or the parametrization of<--size=9.3-->
+the Java microbenchmark harness [44]. In these instances, the<--size=9.3-->
+characteristics (varying aspects of a workload) are explicitly<--size=9.5-->
+speciﬁed and do not require further characterization.<--size=9.4-->
+
+Its main disadvantages are twofold: The combined problem<--size=9.3-->
+space (conﬁguration and workload dimension) requires substan-<--size=9.3-->
+tially more observations to screen for identifying performance-<--size=9.3-->
+relevant options, characteristics, and interactions thereof. In<--size=9.5-->
+addition, previous work found that only few conﬁguration<--size=9.5-->
+options are sensitive to workload variation [21]. That is, the<--size=9.5-->
+problem of identifying meaningful, but sparse predictors is<--size=9.5-->
+exacerbated since one must not only identify performance-<--size=9.5-->
+relevant conﬁguration options but also workload-sensitive ones.<--size=9.3-->
+It is not possible to ﬁnd such a characterization in every case.<--size=9.3-->
+Even worse, a chosen characterization can be wrong and omit<--size=9.3-->
+important factors or overestimate unimportant factors.<--size=9.4-->
+
+At large, the notion of the inﬂuence of workloads on<--size=9.5-->
+conﬁguration-dependent performance remains the exception<--size=9.5-->
+in the literature: While a study related to ours explores and<--size=9.5-->
+conﬁrms the presence of interactions between the workload and<--size=9.3-->
+conﬁguration options [45], only few researchers even consider<--size=9.3-->
+this dimension of the problem space.<--size=9.4-->
+
+b) Transfer Learning for Performance Models: Another<--size=9.4-->
+strategy for workload-aware performance prediction builds on<--size=9.3-->
+the fact that, across different workloads, only few conﬁguration<--size=9.3-->
+options are in fact workload sensitive [21]. One ﬁrst trains a<--size=9.4-->
+model on a standard workload and, subsequently, adapts it to<--size=9.4-->
+a different workload of choice. Contrary to a generalizable<--size=9.5-->
+workload-aware model, transfer-learning strategies focus on<--size=9.5-->
+approximating a transfer function that, without characterizing<--size=9.4-->
+the workload, encodes the information on which conﬁguration<--size=9.3-->
+options are sensitive to differences between a source and<--size=9.5-->
+target pair of workloads. Training a workload-speciﬁc model<--size=9.4-->
+and adapting it on demand provides an effective means to<--size=9.5-->
+reuse performance models, which is not only limited to<--size=9.5-->
+workloads [20], [23], [24], [46]. The main shortcoming of<--size=9.5-->
+transfer learning is that it does not generalize to arbitrary<--size=9.5-->
+workloads, since a transfer function is tailored to a speciﬁc<--size=9.5-->
+target workload. Basically, one trades generalizability for<--size=9.5-->
+measurement cost, because learning a transfer function requires<--size=9.3-->
+substantially fewer training samples.<--size=9.4-->
+
+While both directions (workload-aware performance mod-<--size=9.5-->
+eling and transfer learning) are effective means to handle<--size=9.5-->
+workload sensitivity, to the best of our knowledge, there<--size=9.5-->
+is no systematic assessment of the factors that drive the<--size=9.5-->
+interaction between conﬁguration and workload with regard<--size=9.5-->
+to performance. Understanding scenarios that are associated<--size=9.5-->
+
+2087<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:3-->
+
+<--page_start:4-->
+with or even cause incongruent performance inﬂuences across<--size=9.3-->
+workloads (1) help practitioners to employ established analysis<--size=9.3-->
+techniques more effectively and (2) motivate researchers to<--size=9.5-->
+devise analysis techniques dedicated to such scenarios.<--size=9.4-->
+
+III. STUDY DESIGN<--size=9.4-->
+In what follows, we describe our research questions and<--size=9.5-->
+measurement setup. We make all performance measurement<--size=9.5-->
+data, conﬁgurations, workloads, and learned performance<--size=9.5-->
+models available on the paper’s companion Web site.<--size=9.4-->
+
+A. Research Questions<--size=9.4-->
+
+The ﬁrst two research questions are concerned with the work-<--size=9.3-->
+load sensitivity of the studied software systems’ performance<--size=9.4-->
+behavior. We ﬁrst take a look at the entire system (RQ1) and<--size=9.4-->
+its conﬁgurations and, subsequently, to individual conﬁguration<--size=9.3-->
+options (RQ2). In Sec. V, we explore possible driving factors<--size=9.3-->
+and indicators for workload-speciﬁc performance variation of<--size=9.4-->
+conﬁguration options (RQ3).<--size=9.4-->
+
+1) Performance Variation Across Workloads: Performance<--size=9.4-->
+variation may arise from workload variation [11]. In a practical<--size=9.3-->
+setting, the question arises whether, and if so, to what<--size=9.5-->
+extent an existing workload-speciﬁc performance model is<--size=9.5-->
+representative of the performance behavior of also other<--size=9.5-->
+workloads. That is, can a model estimating the performance<--size=9.5-->
+of different conﬁgurations be reused for the same software<--size=9.5-->
+system but run with a different workload? Clearly, it depends.<--size=9.3-->
+But, analyzing systematically how the degree of similarity of<--size=9.4-->
+workloads and corresponding performance behaviors varies<--size=9.5-->
+across the conﬁguration space provides insights into the extent<--size=9.3-->
+the strategies of transferring performance models (outlined in<--size=9.4-->
+Section II-C) might be applicable. To this end, we formulate<--size=9.4-->
+the following research question:<--size=9.4-->
+
+RQ1<--size=9.4-->
+To what extent does performance behavior vary<--size=9.4-->
+across workloads and conﬁgurations?<--size=9.4-->
+
+2) Option Inﬂuence Across Workloads: The global per-<--size=9.5-->
+formance behavior emerges from the inﬂuences of several<--size=9.5-->
+individual options and their interaction as well as the combined<--size=9.3-->
+inﬂuence with the workload on performance. To understand<--size=9.5-->
+which conﬁguration options are driving performance variation,<--size=9.3-->
+in general, and which are workload sensitive, in particular, we<--size=9.3-->
+state the following research question:<--size=9.4-->
+
+RQ2<--size=9.4-->
+To what extent do inﬂuences of individual conﬁg-<--size=9.3-->
+uration options depend on the workload?<--size=9.4-->
+
+B. Experiment Setup<--size=9.4-->
+
+1) Subject System Selection: We have selected nine con-<--size=9.5-->
+ﬁgurable software systems for our study. To ensure that our<--size=9.5-->
+ﬁndings are not speciﬁc to one domain or ecosystem, we<--size=9.5-->
+include a mix of Java and C/C++ systems from different<--size=9.5-->
+application domains (cf. Table I). In particular, we include<--size=9.5-->
+systems studied in previous and related work [17], [35], [37],<--size=9.4-->
+and we incorporate further ones with comparable size and<--size=9.5-->
+conﬁguration complexity (in terms of numbers of conﬁgurations<--size=9.3-->
+
+Table I: Subject System Characteristics<--size=9.4-->
+
+System<--size=7.5-->
+Lang.<--size=7.4-->
+Domain<--size=7.5-->
+Version<--size=7.5-->
+# O<--size=7.4-->
+# C<--size=7.5-->
+# W<--size=7.5-->
+
+JUMP3R<--size=6.0-->
+Java<--size=7.5-->
+Audio Encoder<--size=7.5-->
+1.0.4<--size=7.5-->
+16<--size=7.4-->
+4 196<--size=7.5-->
+6<--size=7.5-->
+KANZI<--size=6.0-->
+Java<--size=7.5-->
+File Compressor<--size=7.5-->
+1.9<--size=7.5-->
+24<--size=7.4-->
+4 112<--size=7.5-->
+9<--size=7.5-->
+DCONVERT<--size=5.9-->
+Java<--size=7.5-->
+Image Scaling<--size=7.5-->
+1.0.0-α7<--size=7.5-->
+18<--size=7.4-->
+6 764<--size=7.5-->
+12<--size=7.5-->
+H2<--size=6.0-->
+Java<--size=7.5-->
+Database<--size=7.5-->
+1.4.200<--size=7.5-->
+16<--size=7.4-->
+1 954<--size=7.5-->
+8<--size=7.5-->
+BATIK<--size=6.0-->
+Java<--size=7.5-->
+SVG Rasterizer<--size=7.5-->
+1.14<--size=7.5-->
+10<--size=7.4-->
+1 919<--size=7.5-->
+11<--size=7.5-->
+
+XZ<--size=6.0-->
+C/C++<--size=7.4-->
+File Compressor<--size=7.5-->
+5.2.0<--size=7.5-->
+33<--size=7.4-->
+1 999<--size=7.5-->
+13<--size=7.5-->
+LRZIP<--size=6.0-->
+C/C++<--size=7.4-->
+File Compressor<--size=7.5-->
+0.651<--size=7.5-->
+11<--size=7.4-->
+190<--size=7.5-->
+13<--size=7.5-->
+X264<--size=6.0-->
+C/C++<--size=7.4-->
+Video Encoder<--size=7.5-->
+baee400. . . 25<--size=7.4-->
+3 113<--size=7.5-->
+9<--size=7.5-->
+Z3<--size=6.0-->
+C/C++<--size=7.4-->
+SMT Solver<--size=7.5-->
+4.8.14<--size=7.5-->
+12<--size=7.4-->
+1 011<--size=7.5-->
+12<--size=7.5-->
+
+# O: No. of options, # C: No. of conﬁgurations, # W: No. of workloads tested<--size=7.5-->
+
+and conﬁguration options). All systems operate by processing<--size=9.3-->
+a domain-speciﬁc workload fed to them. Our study treats<--size=9.5-->
+execution time as the key performance indicator with the<--size=9.5-->
+exception of H2, for which we consider throughput.<--size=9.4-->
+
+2) Workload Selection: Our study relies on a selection of<--size=9.4-->
+workloads for each domain or software system. Ideally, each<--size=9.4-->
+set of workloads is diverse enough to be representative of<--size=9.5-->
+most possible use cases. We selected the workload sets in this<--size=9.3-->
+spirit, but cannot always guarantee a measurable degree of<--size=9.5-->
+diversity and representativeness prior to conducting the actual<--size=9.3-->
+measurements. Basically, this it what motivates this study in<--size=9.4-->
+the ﬁrst place. Nevertheless, we discuss this aspect as a threat<--size=9.3-->
+to validity in Section VII.<--size=9.4-->
+
+Next, we outline the nine subject systems along with the<--size=9.5-->
+workloads tested.<--size=9.4-->
+
+For the audio encoder JUMP3R, the measured task was<--size=9.5-->
+to encode raw WAVE audio signals to MP3. We selected a<--size=9.5-->
+number of different audio ﬁles from the Wikimedia Commons<--size=9.3-->
+collection3and varied the ﬁle size/signal length, sampling rate,<--size=9.3-->
+and number of channels. Both applications share all workloads.<--size=9.3-->
+
+For the video encoder X264, the measured task was to<--size=9.5-->
+encode raw video frames (y4m format). We selected a number<--size=9.3-->
+of ﬁles from the “derf collection”4, a set of test media for a<--size=9.5-->
+variety of use cases. The frame ﬁles vary in resolution (low/SD<--size=9.3-->
+up to 4K) and ﬁle size. For ﬁles with 4K resolution, we limited<--size=9.3-->
+our measurements to encoding a subset of consecutive frames.<--size=9.3-->
+
+For the ﬁle compression tools KANZI, XZ, and LRZIP, we<--size=9.5-->
+used a variety of community compression benchmarks that<--size=9.5-->
+represent different goals, including mixes of ﬁles of different<--size=9.4-->
+types (text, binary, structured data, etc.) or single-type ﬁles.<--size=9.5-->
+We augmented this set of workloads with custom data, such as<--size=9.3-->
+the Hubble Deepﬁeld image and a binary of the Linux kernel.<--size=9.3-->
+Beyond this set of workloads, for XZ and LRZIP, we added<--size=9.5-->
+different parameterizations of the UIQ2 benchmark5to study<--size=9.4-->
+the effect of varying ﬁle sizes.<--size=9.4-->
+
+For the SMT solver Z3, the measured task was to decide the<--size=9.3-->
+satisﬁability (ﬁnd a solution or counter example) of a range of<--size=9.3-->
+logical problems expressed in the SMT2 format. We selected the<--size=9.3-->
+six longest-running problem instances from z3’s performance<--size=9.4-->
+test suite and augmented it with additional instances from the<--size=9.3-->
+
+3https://commons.wikimedia.org/wiki/Category:Images<--size=5.6-->
+4https://media.xiph.org/video/derf/<--size=5.6-->
+5http://mattmahoney.net/dc/uiq/<--size=5.6-->
+
+2088<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:4-->
+
+<--page_start:5-->
+SMT2-Lib repository6, to cover different types of logic and to<--size=9.3-->
+increase diversity.<--size=9.4-->
+
+For the SVG rasterizer BATIK, the measured task was to<--size=9.5-->
+transform a SVG vector graphic into a bitmap. We selected a<--size=9.3-->
+number of resources from the Wikimedia Commons collection,<--size=9.3-->
+primarily varying in terms of ﬁle size.<--size=9.4-->
+
+For the embedded database H2, we used a selection of<--size=9.5-->
+four benchmarks (SmallBank, TPC-H, YCSB, Voter) from<--size=9.5-->
+OLTPBENCH [47], a load generator for databases. For each<--size=9.4-->
+benchmark, we varied the scale factor, which controls the<--size=9.5-->
+complexity (number of entities modeled) in each scenario.<--size=9.4-->
+
+For the image scaler DCONVERT, the measured task was<--size=9.5-->
+to transform resources (image ﬁles, Photoshop sketches) at<--size=9.5-->
+different scales (useful for Android development). We selected<--size=9.3-->
+ﬁles that reﬂect DCONVERT’s documented input formats (JPEG,<--size=9.3-->
+PNG, PSD, and SVG) and vary in ﬁle size.<--size=9.4-->
+
+3) Conﬁguration Sampling: For each subject system, we<--size=9.5-->
+sampled a set of conﬁgurations. As exhaustive coverage of<--size=9.5-->
+the conﬁguration space is infeasible due to combinatorial<--size=9.5-->
+explosion [48], for binary conﬁguration options, we combine<--size=9.4-->
+several coverage-based sampling strategies and uniform random<--size=9.3-->
+sampling into an ensemble approach: We employ option-wise<--size=9.3-->
+and negative option-wise sampling [2], where each option<--size=9.5-->
+is enabled once (i.e., in, at least, one conﬁguration), or all<--size=9.5-->
+except one, respectively. In addition, we use pairwise sampling,<--size=9.3-->
+where two-way combinations of conﬁguration options are<--size=9.5-->
+systematically selected. Interactions of higher degree could<--size=9.5-->
+be found accordingly, however, full interaction coverage is<--size=9.5-->
+computationally prohibitively expensive [48]. Last, we augment<--size=9.3-->
+our sample set with a random sample that is, at least, the size<--size=9.3-->
+of the coverage-based sample. To achieve a nearly uniform<--size=9.5-->
+random sample, we used distance-based sampling [34]. If a<--size=9.5-->
+software system exhibited numeric conﬁguration options, we<--size=9.4-->
+varied them across, at least, two levels to measure their effect.<--size=9.3-->
+
+4) Coverage Proﬁling: To assess what lines of code are<--size=9.5-->
+executed for each combination of workload and software<--size=9.5-->
+conﬁguration, we used two separate approaches for Java and<--size=9.4-->
+C/C++. For Java, we used the on-the-ﬂy proﬁler JACOCO7,<--size=9.5-->
+which intercepts byte code running on the JVM at run-time.<--size=9.5-->
+For C/C++, we added instrumentation code to the software<--size=9.5-->
+systems using CLANG/LLVM8to collect coverage information.<--size=9.3-->
+We split the performance measurement and coverage analysis<--size=9.3-->
+runs to avoid distortion from the proﬁling overhead.<--size=9.4-->
+
+5) Measurements: We conducted all experiments on three<--size=9.4-->
+different compute clusters, where all machines within a compute<--size=9.3-->
+cluster had an identical hardware setup: cluster A with an Intel<--size=9.3-->
+Xeon E5-2630v4 CPU (2.2 GHz) and 256 GB of RAM, cluster<--size=9.3-->
+B with an Intel Core i7-8559U CPU (2.7 GHz) and 32 GB of<--size=9.4-->
+RAM, and cluster C with an Intel Core i5-8259U (2.3 GHz)<--size=9.5-->
+and 32 GB of RAM. All clusters ran a headless Debian 10<--size=9.5-->
+installation (kernel 4.19.0-17 for cluster A and 4.19.0-14 for<--size=9.4-->
+clusters B and C). To minimize measurement noise, we used<--size=9.4-->
+
+6https://smt-comp.github.io/2017/benchmarks.html<--size=5.6-->
+7JACOCO: https://www.jacoco.org/jacoco/trunk/doc/<--size=7.5-->
+8LLVM: https://clang.llvm.org/docs/SourceBasedCodeCoverage.html<--size=5.6-->
+
+a controlled environment, where no additional user processes<--size=9.4-->
+were running in the background, and no other than necessary<--size=9.4-->
+packages were installed. We ran each subject system exclusively<--size=9.3-->
+on a single cluster: H2 on cluster A; DCONVERT and BATIK<--size=9.4-->
+on cluster B; the remaining systems on cluster C.<--size=9.4-->
+
+We collect performance data using the tools GNU TIME<--size=9.5-->
+(execution time) and OLTPBENCH (throughput). For all data<--size=9.4-->
+points, we report the median performance across ﬁve repetitions<--size=9.3-->
+(except for H2), which has shown to be a good trade-off<--size=9.5-->
+between variance and measurement effort [49]. Across these<--size=9.4-->
+repetitions, most conﬁgurations exhibit only little variation (e.g.,<--size=9.3-->
+only a few seconds for whole-system benchmarks which run for<--size=9.3-->
+several minutes): The ratio of conﬁgurations with a coefﬁcient<--size=9.3-->
+of variation (standard deviation divided by the mean) of less<--size=9.4-->
+than 10 % ranges from 91 % (LRZIP) to 99 % (X264). For H2,<--size=9.3-->
+we omitted the repetitions as, in a pre-study running on the<--size=9.5-->
+identical cluster setup, we found that, across all benchmarks,<--size=9.4-->
+the coefﬁcient of variation of the throughput was consistently<--size=9.3-->
+below 5 %.<--size=9.4-->
+
+IV. STUDY RESULTS<--size=9.4-->
+
+In this section, we present the results of our empirical<--size=9.5-->
+study with regard to variation of system-level performance<--size=9.5-->
+distributions (RQ1) and the performance inﬂuence of individual<--size=9.3-->
+conﬁguration options (RQ2).<--size=9.4-->
+
+A. Comparing Performance Distributions (RQ1)<--size=9.4-->
+
+1) Operationalization: We answer RQ1 by pairwisely com-<--size=9.3-->
+paring the performance distributions from different workloads<--size=9.3-->
+(cf. the comparison in Figure 1) and by determining whether any<--size=9.3-->
+two distributions are similar or, if not, can be transformed into<--size=9.3-->
+each other: For the former case, we tested all combinbations of<--size=9.3-->
+workload-speciﬁc performance observations with the Wilcoxon<--size=9.3-->
+signed-rank test9[52]. We rejected the null hypothesis H0<--size=9.5-->
+at α = 0.95. To account for overpowering due to high and<--size=9.4-->
+different sample sizes (cf. Table I), we further checked effect<--size=9.4-->
+sizes to weed out negligible effects. Following the interpretation<--size=9.3-->
+guidelines from Romano et al. [53], for no combination,<--size=9.5-->
+Cliff’s δ [54] exceeded a threshold effect size of |δ > 0.147|.<--size=9.4-->
+For the latter case, we are speciﬁcally interested in what type of<--size=9.3-->
+transformation is necessary as this determines how complex a<--size=9.3-->
+workload interacts with conﬁguration options. Speciﬁcally, we<--size=9.3-->
+categorize each pair of workloads with respect to the following<--size=9.3-->
+aspects:<--size=9.4-->
+
+1) Linear Correlation: To test whether both performance<--size=9.5-->
+
+distributions are shifted by a constant value or scaled by a<--size=9.3-->
+constant factor, we compute for each pair of distributions<--size=9.3-->
+Pearson’s correlation coefﬁcient r. To discard the sign of<--size=9.3-->
+relationship, we use the absolute value and a threshold of<--size=9.3-->
+|r| > 0.6 to indicate a linear relationship.<--size=9.4-->
+2) Monotonous Correlation: We test whether there is a<--size=9.5-->
+
+monotonous relationship between the two performance<--size=9.5-->
+distributions. We use Kendall’s rank correlation coefﬁcient<--size=9.3-->
+
+9We use non-parametric methods since performance-distributions are often<--size=5.6-->
+long-tailed and multi-modal [50], [51] and thus fail to meet requirements for<--size=7.5-->
+parametric methods.<--size=7.5-->
+
+2089<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:5-->
+
+<--page_start:6-->
+Table II: Three disjoint categories and criteria of relationships<--size=9.3-->
+between pairs of workload-speciﬁc performance distributions.<--size=9.3-->
+
+Category<--size=7.5-->
+Criteria<--size=7.5-->
+
+LT<--size=7.5-->
+Linear transformation<--size=7.5-->
+r∗≥0.6<--size=7.5-->
+XMT<--size=7.5-->
+Monotonous transformation<--size=7.5-->
+r∗< 0.6 and τ∗≥0.6<--size=7.5-->
+NMT<--size=7.5-->
+Non-monotonous transformation<--size=7.5-->
+(otherwise)<--size=7.5-->
+
+Table III: Frequency of each category (cf. Table II) for each<--size=9.5-->
+software system studied and pairs of workloads.<--size=9.4-->
+
+System<--size=7.5-->
+Σpairs<--size=7.5-->
+LT<--size=7.5-->
+XMT<--size=7.5-->
+NMT<--size=7.5-->
+abs<--size=7.5-->
+rel<--size=7.5-->
+abs<--size=7.5-->
+rel<--size=7.5-->
+abs<--size=7.5-->
+rel<--size=7.5-->
+
+JUMP3R<--size=6.0-->
+15<--size=7.5-->
+15<--size=7.5-->
+100.0 %<--size=7.5-->
+0<--size=7.5-->
+0 %<--size=7.5-->
+0<--size=7.5-->
+0 %<--size=7.5-->
+KANZI<--size=6.0-->
+36<--size=7.5-->
+28<--size=7.5-->
+77.8 %<--size=7.5-->
+4<--size=7.5-->
+11.1 %<--size=7.5-->
+4<--size=7.5-->
+11.1 %<--size=7.5-->
+DCONVERT<--size=5.9-->
+66<--size=7.5-->
+29<--size=7.5-->
+43.9 %<--size=7.5-->
+0<--size=7.5-->
+0 %<--size=7.5-->
+37<--size=7.5-->
+56.1 %<--size=7.5-->
+H2<--size=6.0-->
+28<--size=7.5-->
+13<--size=7.5-->
+46.4 %<--size=7.5-->
+0<--size=7.5-->
+0 %<--size=7.5-->
+15<--size=7.5-->
+53.6 %<--size=7.5-->
+BATIK<--size=6.0-->
+55<--size=7.5-->
+28<--size=7.5-->
+50.9 %<--size=7.5-->
+8<--size=7.5-->
+14.6 %<--size=7.5-->
+19<--size=7.5-->
+34.6 %<--size=7.5-->
+
+XZ<--size=6.0-->
+78<--size=7.5-->
+65<--size=7.5-->
+83.3 %<--size=7.5-->
+1<--size=7.5-->
+1.3 %<--size=7.5-->
+12<--size=7.5-->
+15.4 %<--size=7.5-->
+LRZIP<--size=6.0-->
+78<--size=7.5-->
+57<--size=7.5-->
+73.0 %<--size=7.5-->
+13<--size=7.5-->
+16.7 %<--size=7.5-->
+8<--size=7.5-->
+10.3 %<--size=7.5-->
+X264<--size=6.0-->
+36<--size=7.5-->
+36<--size=7.5-->
+100 %<--size=7.5-->
+0<--size=7.5-->
+0 %<--size=7.5-->
+0<--size=7.5-->
+0 %<--size=7.5-->
+Z3<--size=6.0-->
+66<--size=7.5-->
+10<--size=7.5-->
+15.2 %<--size=7.5-->
+1<--size=7.5-->
+1.5 %<--size=7.5-->
+55<--size=7.5-->
+83.3 %<--size=7.5-->
+
+τ [55] and a threshold of |τ| > 0.6 for a monotonous<--size=9.4-->
+relationship.<--size=9.4-->
+Based on these two correlation measures, we composed three<--size=9.3-->
+categories that each pair of performance distributions can<--size=9.5-->
+be categorized into. If both distributions exhibit a strong<--size=9.5-->
+linear relationship, we classify them as linearly transformable<--size=9.3-->
+( LT ). If we observe a strong monotonous, but not a linear<--size=9.5-->
+relationship, we classify such pairs as exclusively monotonously<--size=9.3-->
+transformable into a separate category ( XMT ). Last, we have<--size=9.3-->
+the pairs with a non-monotonous relationship ( NMT ). We<--size=9.5-->
+summarize the category criteria as well as the category counts<--size=9.3-->
+in Table III.<--size=9.4-->
+
+2) Results: We list the results of our classiﬁcation in<--size=9.5-->
+Table III. The observed range of relationships across the<--size=9.5-->
+nine software systems exhibit no type that prevails across<--size=9.5-->
+all software systems. All software systems, at least in part,<--size=9.5-->
+exhibit performance distributions that can be transformed into<--size=9.3-->
+one another using a linear transformation ( LT ). In particular,<--size=9.3-->
+for JUMP3R and X264, we observe solely such behavior. The<--size=9.3-->
+presence of linear transformations corroborates experimental<--size=9.4-->
+insights from Jamshidi et al., who encoded differences between<--size=9.3-->
+performance distributions using linear functions [21].<--size=9.4-->
+
+Exclusively monotonous transformations ( XMT ) are the<--size=9.5-->
+exception and are found only in ﬁve out of the nine systems<--size=9.4-->
+(KANZI, BATIK, XZ, LRZIP, Z3), twice with only one workload<--size=9.3-->
+pair each (XZ and Z3). For all, except two systems (JUMP3R<--size=9.4-->
+and X264), we observe non-monotonous relationships ( NMT )<--size=9.3-->
+with differing prevalence. For three systems (DCONVERT, H2,<--size=9.3-->
+and Z3), the majority of transformations required is non-<--size=9.5-->
+monotonous; for the other four systems (KANZI, BATIK, XZ,<--size=9.5-->
+LRZIP), more than 10 % of workload pairs fall into this<--size=7.6-->
+category.<--size=9.4-->
+
+Summary (RQ1): Varying the workload causes a substantial<--size=9.3-->
+amount of variation among performance distributions. Across<--size=9.3-->
+workloads, we observed mostly linear (for six of the nine<--size=9.5-->
+subject systems), but to a large extent, also non-monotonous<--size=9.3-->
+relationships (for three of the nine subject systems).<--size=9.4-->
+
+B. Workload Sensitivity of Individual Options (RQ2)<--size=9.4-->
+
+1) Operationalization: To address RQ2, we need to deter-<--size=9.4-->
+mine the conﬁguration options’ inﬂuence on performance and<--size=9.3-->
+assess their variation across workloads.<--size=9.4-->
+
+Explanatory Model: To obtain accurate and interpretable<--size=9.3-->
+performance inﬂuences per option, we learn an explanatory<--size=9.5-->
+performance model based on the entire sample set using<--size=9.5-->
+multiple linear regression [1], [2], [9]. Each variable in the<--size=9.5-->
+linear model corresponds to an option, and each coefﬁcient<--size=9.5-->
+represents the corresponding option’s inﬂuence on performance.<--size=9.3-->
+We limit the set of independent variables to individual options<--size=9.3-->
+(rather than including higher-order interactions) to be consistent<--size=9.3-->
+with the feature location used for RQ3, where we determine<--size=9.5-->
+option-speciﬁc, yet not interaction-speciﬁc code segments.<--size=9.4-->
+
+Standardization: To facilitate the comparison of regression<--size=9.3-->
+coefﬁcients across workloads, we follow common practice<--size=9.5-->
+in machine learning and standardize our dependent variable<--size=9.5-->
+by subtracting the population’s mean performance and divide<--size=9.4-->
+the result by the respective standard deviation. Henceforth,<--size=9.5-->
+we refer to these standardized regression coefﬁcients as<--size=9.5-->
+relative performance inﬂuences. A beneﬁcial side effect of<--size=9.5-->
+standardization is that the observed variation of regression<--size=9.5-->
+coefﬁcients for each conﬁguration option cannot be attributed<--size=9.3-->
+to shifting or scaling effects ( LT ). This way, we can pin<--size=9.5-->
+down the non-linear or explicitly non-monotonous effect that<--size=9.4-->
+workloads may exercise on performance.<--size=9.4-->
+
+Handling Multicollinearity: Multicollinearity is a standard<--size=9.3-->
+problem in statistics and arises when features are correlated [56].<--size=9.3-->
+It can, for instance, be caused from groups of mutually<--size=9.5-->
+exclusive conﬁguration options and result in distorted regression<--size=9.3-->
+coefﬁcients [1]. Although the model’s prediction accuracy<--size=9.5-->
+remains unaffected, we cannot trust and easily interpret the<--size=9.5-->
+calculated coefﬁcients. To mitigate this problem and, in<--size=9.5-->
+particular, to ensure that the obtained performance inﬂuences<--size=9.4-->
+remain interpretable, we follow best practices and remove<--size=9.5-->
+speciﬁc conﬁguration options from the sample that cause<--size=9.5-->
+multicollinearity [1]. For the training step, we exclude all<--size=9.5-->
+mandatory conﬁguration options since these, by deﬁnition,<--size=9.5-->
+cannot contribute to performance variation. In addition, for each<--size=9.3-->
+group of mutually exclusive conﬁguration options, we discard<--size=9.3-->
+one group member when learning a model. These measures<--size=9.5-->
+reduced multicollinearity to a negligible degree [57]. After these<--size=9.3-->
+corrections, we observed no conﬁguration options exceeding a<--size=9.3-->
+variance inﬂation factor (indicating multicollinearity) of 5.<--size=9.4-->
+
+2) Results: Our results show a wide variety of degrees of<--size=9.4-->
+workload sensitivity. Due to the size of our empirical study and<--size=9.3-->
+space limitations, we selected three conﬁguration options that<--size=9.3-->
+showcase different characteristic traits of workload sensitivity<--size=9.3-->
+that we observed. An exhaustive analysis for all conﬁguration<--size=9.3-->
+
+2090<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:6-->
+
+<--page_start:7-->
+options is illustrated in terms of an interactive dashboard<--size=9.5-->
+provided as supplementary material. We strongly invite the<--size=9.5-->
+interested reader to use this interactive dashboard to explore<--size=9.4-->
+all distributions and results obtained in this study.<--size=9.4-->
+
+In Figure 2, we show the distribution of conﬁguration<--size=9.5-->
+options’ performance inﬂuences for three of the nine software<--size=9.3-->
+systems (JUMP3R, Z3, and H2). Each vertical bar depicts<--size=9.5-->
+the relative performance inﬂuence under a speciﬁc workload,<--size=9.4-->
+the colored ranges depict positive (green) and negative (red)<--size=9.5-->
+performance inﬂuences. The following patterns refer to one<--size=9.5-->
+row in Figures 2a, 2b, and 2c (conﬁguration option) for one<--size=9.5-->
+subject system each.<--size=9.4-->
+
+a) Conditional Inﬂuence: For some conﬁguration options,<--size=9.3-->
+we observe that they affect performance only under speciﬁc<--size=9.5-->
+workloads and remain non-inﬂuential otherwise. An example<--size=9.4-->
+of such conditional inﬂuence is the conﬁguration option Mono<--size=9.3-->
+of the MP3 encoder JUMP3R. We illustrate the performance<--size=9.5-->
+inﬂuence of this option across six workloads presented as bars<--size=9.3-->
+in the last row of bars in Figure 3a. Selecting this option<--size=9.5-->
+reduced the execution time substantially for two workloads,<--size=9.5-->
+whereas, for the other workloads, the effect was far smaller.<--size=9.4-->
+
+According to the documentation of JUMP3R10, selecting this<--size=9.3-->
+option for stereo ﬁles (i.e., audio ﬁles with two channels)<--size=9.5-->
+results in averaging them into one channel. Indeed, the two<--size=9.5-->
+workloads described with reduced execution time the only ones<--size=9.3-->
+that exhibit two audio channels in this selection. Hence, this<--size=9.4-->
+example illustrates how a workload characteristic can condition<--size=9.3-->
+the performance inﬂuence of a conﬁguration option.<--size=9.4-->
+
+b) High Spread: Another pattern we found is that the<--size=9.5-->
+performance inﬂuence of most (relevant) conﬁguration options<--size=9.3-->
+exhibits a large spread. For example, option proof of the<--size=9.5-->
+SMT solver Z3 can both increase or decrease the execution<--size=9.5-->
+time, as shown in Figure 3b (row 3). Compared to the<--size=9.5-->
+example above, we cannot attribute this variation to an apparent<--size=9.3-->
+workload characteristic. The global parameter proof enables<--size=9.5-->
+tracking information, which is used for proof generation in<--size=9.5-->
+the case a problem instance is unsatisﬁable. Each workload<--size=9.5-->
+in our selection contains multiple problem instances to decide<--size=9.3-->
+satisﬁability for. We conjecture that the ratio of satisﬁable to<--size=9.4-->
+unsatisﬁable instances likely accounts for this high variation.<--size=9.4-->
+From the user’s perspective, any input to the solver is opaque<--size=9.3-->
+in that satisﬁability as a workload characteristic cannot be<--size=9.5-->
+determined practically without a solver.<--size=9.4-->
+
+c) Scaling Anomaly: The scaling anomaly pattern is<--size=9.5-->
+shown for the conﬁguration option MVSTORE of the database<--size=9.3-->
+system H2 in Figure 3c (left). This option controls which<--size=9.5-->
+storage engine, either the newer multi-version store or the<--size=9.5-->
+legacy page store, is used. We observe that selecting the newer<--size=9.3-->
+multi-version store increases the measured throughput for all<--size=9.4-->
+but one benchmark scenario. Using the Yahoo! Cloud Serving<--size=9.3-->
+Benchmark (YCSB) with two different scale factors (which<--size=9.5-->
+control the workload complexity, expressed as number of rows),<--size=9.3-->
+we found that the lower complexity parameterization (ycsb-<--size=9.5-->
+600) resulted in lower throughput. This is in stark contrast to<--size=9.3-->
+
+10JUMP3R: https://github.com/Sciss/jump3r/blob/master/README.md<--size=6.0-->
+
+3<--size=6.3-->
+2<--size=6.3-->
+1<--size=6.3-->
+0<--size=6.3-->
+1<--size=6.3-->
+2<--size=6.3-->
+3<--size=6.3-->
+Standardized Performance Influence<--size=6.3-->
+
+Mono<--size=6.3-->
+NoRes<--size=6.3-->
+Stereo<--size=6.3-->
+JointStereo<--size=6.3-->
+
+VBRRange<--size=6.3-->
+SwapBytes<--size=6.3-->
+
+CRC<--size=6.3-->
+Freeformat<--size=6.3-->
+MidSideStereo<--size=6.3-->
+
+CBR<--size=6.3-->
+Resampling<--size=6.3-->
+
+Downmix<--size=6.3-->
+ReplayGainFast<--size=6.3-->
+ReplayGainAccurate<--size=6.3-->
+
+(a) Distribution of conﬁguration options’ performance inﬂuences under<--size=8.3-->
+different workloads for JUMP3R.<--size=8.4-->
+
+2<--size=6.3-->
+0<--size=6.3-->
+2<--size=6.3-->
+Standardized Performance Influence<--size=6.3-->
+
+auto_config<--size=6.3-->
+dump_models<--size=6.3-->
+
+type_check<--size=6.3-->
+smtlib2_compliant<--size=6.3-->
+well_sorted_check<--size=6.3-->
+
+stats<--size=6.3-->
+model<--size=6.3-->
+model_validate<--size=6.3-->
+
+unsat_core<--size=6.3-->
+
+proof<--size=6.3-->
+debug_ref_count<--size=6.3-->
+
+trace<--size=6.3-->
+
+(b) Distribution of conﬁguration options’ performance inﬂuences under<--size=8.3-->
+different workloads for Z3.<--size=8.4-->
+
+3<--size=6.3-->
+2<--size=6.3-->
+1<--size=6.3-->
+0<--size=6.3-->
+1<--size=6.3-->
+2<--size=6.3-->
+3<--size=6.3-->
+Standardized Performance Influence<--size=6.3-->
+
+RECOMPILE_ALWAYS<--size=6.3-->
+
+COMPRESS<--size=6.3-->
+DEFRAG_ALWAYS<--size=6.3-->
+
+DROP_RESTRICT<--size=6.3-->
+IGNORE_CATALOGS<--size=6.3-->
+
+REUSE_SPACE<--size=6.3-->
+OPTIMIZE_DISTINCT<--size=6.3-->
+
+OPTIMIZE_OR<--size=6.3-->
+OPTIMIZE_IN_SELECT<--size=6.3-->
+OPTIMIZE_TWO_EQUALS<--size=6.3-->
+OPTIMIZE_INSERT_FROM...<--size=6.3-->
+OPTIMIZE_EVALUATABLE...<--size=6.3-->
+
+OPTIMIZE_IN_LIST<--size=6.3-->
+PAGE_STORE_INTERNAL...<--size=6.3-->
+
+PAGE_STORE_TRIM<--size=6.3-->
+
+MVSTORE<--size=6.3-->
+
+(c) Distribution of conﬁguration options’ performance inﬂuences under<--size=8.3-->
+different workloads for H2.<--size=8.4-->
+
+Figure 2: Distribution of conﬁguration options’ performance<--size=9.4-->
+inﬂuences under different workloads for JUMP3R, Z3, and H2.<--size=9.3-->
+Each vertical bar in a row depicts the performance inﬂuence of<--size=9.3-->
+an individual option under a speciﬁc workload. The observed<--size=9.4-->
+ranges of positive and negative inﬂuences are highlighted in<--size=9.5-->
+green and red, respectively.<--size=9.4-->
+
+the expectation that a more complex workload would show<--size=9.5-->
+lower throughput. While it is possible that some optimizations<--size=9.3-->
+of the multi-version store are effective only under higher load,<--size=9.3-->
+this example demonstrates that performance inﬂuence is not<--size=9.5-->
+guaranteed to scale with the workload as expected.<--size=9.3-->
+
+2091<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:7-->
+
+<--page_start:8-->
+Summary (RQ2): Workloads can affect performance in-<--size=9.5-->
+ﬂuences of conﬁguration options in various ways (e.g.,<--size=9.5-->
+conditioning inﬂuence, introducing variance, having outliers).<--size=9.3-->
+We can correlate some variation of performance inﬂuences<--size=9.4-->
+with workload characteristics, yet identifying relevant work-<--size=9.3-->
+load characteristics is highly domain-speciﬁc and cannot be<--size=9.3-->
+considered trivial.<--size=9.4-->
+
+V. EXPLORING CAUSES OF WORKLOAD SENSITIVITY<--size=9.4-->
+
+The results for the ﬁrst two research questions demonstrate<--size=9.3-->
+sensitivity of the inﬂuence of conﬁguration options to the work-<--size=9.3-->
+load due to non-monotonous interactions, which is consistent<--size=9.4-->
+with the ﬁndings of a related study [45]. Before we discuss<--size=9.5-->
+implications for performance modeling in the Section VI,<--size=9.5-->
+we investigate the underlying factors that drive workload<--size=9.5-->
+sensitivity.<--size=9.4-->
+
+We hypothesize that executions under different workloads<--size=9.5-->
+also exhibit variation with respect to what code sections are<--size=9.5-->
+executed (and which are not) and how this code is used (e.g.,<--size=9.3-->
+number of method invocations or loop iterations). Differences<--size=9.3-->
+in performance inﬂuences of individual methods may stem<--size=9.5-->
+from differences in program execution. Depending on whether<--size=9.3-->
+an option is active or what value it has been set to, we may visit<--size=9.3-->
+different code sections of the program or do so with varying<--size=9.4-->
+frequency. To investigate to what extent one could infer or<--size=9.5-->
+even explain performance variations based on different code<--size=9.5-->
+execution proﬁles, we apply standard code-coverage analyses<--size=9.4-->
+under different conﬁgurations and workloads. Our research<--size=9.5-->
+question is as follows:<--size=9.4-->
+
+RQ3<--size=9.4-->
+Does the variation of performance inﬂuence of<--size=9.5-->
+conﬁguration options across workloads correlate<--size=9.3-->
+with differences in the respective execution foot-<--size=9.4-->
+print?<--size=9.4-->
+
+Exploiting a potential relationship between workload sen-<--size=9.5-->
+sitivity of conﬁguration options and differences in software<--size=9.5-->
+execution could be beneﬁcial. Instead of testing various com-<--size=9.4-->
+binations of conﬁgurations and workloads, code analysis can<--size=9.4-->
+serve as a cost-effective way to detect workload sensitivity of<--size=9.3-->
+individual options by identifying workload-speciﬁc differences<--size=9.3-->
+in program execution.<--size=9.4-->
+
+A. Operationalization<--size=9.4-->
+
+To explore whether and to what extent performance variations<--size=9.3-->
+correlate with variations in the execution paths (that stem<--size=9.5-->
+from the interplay of the given workload and conﬁguration),<--size=9.5-->
+we employ an analysis based on code coverage informa-<--size=9.5-->
+tion (cf. Sec. III-B4).<--size=9.4-->
+
+We combine performance observations with code coverage<--size=9.4-->
+data to evaluate the execution under different workloads,<--size=9.5-->
+speciﬁcally focusing on code sections implementing option-<--size=9.5-->
+speciﬁc functionality. By comparing the coverage of this code,<--size=9.3-->
+we can develop hypothetical scenarios explaining workload<--size=9.5-->
+sensitivity.<--size=9.4-->
+
+First, if we observe that the coverage of option-speciﬁc code<--size=9.3-->
+is conditioned by the presence of some workload characteristic,<--size=9.3-->
+we expect that such an option is inﬂuential only under the<--size=9.5-->
+corresponding workloads. This scenario enables us (to some<--size=9.4-->
+extent) to use code coverage as a cheap-to-compute proxy<--size=9.5-->
+for estimating the representativeness of a workload and, by<--size=9.5-->
+extension, resulting performance models: For options that are<--size=9.4-->
+known to condition code sections, we can maximize option-<--size=9.5-->
+code coverage to elicit all option-speciﬁc behavior and, thus,<--size=9.4-->
+performance inﬂuence. For instance, a database system could<--size=9.4-->
+cache a speciﬁc view only if a minimum number of queries<--size=9.5-->
+are executed. Here, the effect of any caching option would be<--size=9.3-->
+conditioned by the workload-speciﬁc number of transactions.<--size=9.4-->
+
+Second, if we observe performance variation across work-<--size=9.5-->
+loads in spite of similar or identical option-speciﬁc code<--size=9.5-->
+coverage, we draw a different picture. In this case, we cannot<--size=9.3-->
+attribute performance variation to code coverage, yet have<--size=9.5-->
+to consider differences in the workloads’ characteristics as<--size=9.5-->
+potential cause: The presence of a workload characteristic may<--size=9.3-->
+inﬂuence not what code sections are executed, but how code<--size=9.4-->
+sections are executed. In a simple case, a software system’s<--size=9.5-->
+performance may scale linearly with the workload size. In<--size=9.5-->
+a more complex case, the presence of a characteristic may<--size=9.5-->
+determine how frequently an operation is repeated, as is the<--size=9.5-->
+case for a table merge operation in a database system. Here,<--size=9.5-->
+we would not elicit the worst-case performance if a previous<--size=9.4-->
+transaction has sorted the data (e.g., by building an index).<--size=9.4-->
+
+1) Locating Conﬁguration-Dependent Code: To reason<--size=9.5-->
+about option-speciﬁc code, we require a mapping of conﬁgura-<--size=9.3-->
+tion options to code. The problem of determining which code<--size=9.3-->
+section implements which functionality in a software system<--size=9.4-->
+is known as feature location [58]. While there is a number<--size=9.5-->
+of approaches based on static [35], [59], [60] and dynamic<--size=9.5-->
+analysis [36], [61], [62], we employ a more light-weight, but<--size=9.4-->
+also less precise approach, that uses code coverage information.<--size=9.3-->
+The rationale is that, by exercising feature code, for instance,<--size=9.4-->
+by enabling conﬁguration options or running corresponding<--size=9.5-->
+tests, its location can be inferred from differences in code<--size=9.5-->
+coverage. Applications of such an approach have been studied<--size=9.3-->
+not only for feature location [63]–[66], but root in work on<--size=9.5-->
+program comprehension [67]–[71] and fault localization [72],<--size=9.4-->
+[73].<--size=9.4-->
+
+Speciﬁcally, we follow a strategy akin to spectrum-based<--size=9.5-->
+feature location [65]: We commence with obtaining a baseline<--size=9.3-->
+of all code that can be associated with a conﬁguration option<--size=9.4-->
+in the scope of our workload selection. Since we are looking<--size=9.4-->
+for workload-speciﬁc differences in option-code coverage, the<--size=9.3-->
+expressiveness of such a baseline depends on the diversity of<--size=9.4-->
+the workloads in question. To infer option-speciﬁc code, we<--size=9.5-->
+split our conﬁguration sample (cf. Section III-B3) into two<--size=9.5-->
+disjoint sets co and c¬o such that option o is selected only in co<--size=9.3-->
+and not in c¬o. Next, we select from our code coverage logs the<--size=9.3-->
+corresponding covered lines of code, So and S¬o. The rationale<--size=9.3-->
+is that all shared lines between both sets are not affected by<--size=9.5-->
+the selection of option o. Thus, we compute the symmetric set<--size=9.3-->
+difference So = So Δ S¬o to approximate option-speciﬁc or,<--size=9.4-->
+
+2092<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:8-->
+
+<--page_start:9-->
+at least, option-related code sections. To ﬁnally obtain code<--size=9.5-->
+sections that are option-speciﬁc under a speciﬁc workload w,<--size=9.4-->
+we repeat the steps above. Here, we consider only execution<--size=9.4-->
+logs under workload w (So,w and S¬o,w) and compute the<--size=9.5-->
+symmetric set difference So,w = So,w Δ S¬o,w.<--size=9.4-->
+
+2) Comparing Execution Traces: From (a) the information<--size=9.3-->
+about which code sections are speciﬁc to a conﬁguration option<--size=9.3-->
+and (b) how much of these sections is actually covered under<--size=9.3-->
+different workloads, we can compare the workload-speciﬁc<--size=9.5-->
+execution traces for each option. By comparing the sets So,v<--size=9.4-->
+and So,w for any two workloads v and w, we can estimate the<--size=9.3-->
+similarity between the option-code coverage with the Jaccard<--size=9.4-->
+set similarity index. A Jaccard similarity of zero implies that<--size=9.4-->
+there is no overlap in the code lines covered under each<--size=9.5-->
+workload, whereas a Jaccard similarity of 1 implies that the<--size=9.5-->
+exact same code was covered. Based on this pairwise similarity<--size=9.3-->
+metric simo(v, w), we can compute a corresponding distance<--size=9.4-->
+metric do(v, w) = 1 −sim(v, w) and cluster all workload-<--size=9.4-->
+speciﬁc execution proﬁles. We use agglomerative hierarchical<--size=9.3-->
+clustering with full linkage to construct dendrograms. In this<--size=9.4-->
+bottom-up approach, we iteratively add execution footprints to<--size=9.3-->
+clusters and merge subclusters into larger ones depending on<--size=9.4-->
+their Jaccard similarity to each other.<--size=9.4-->
+
+B. Results<--size=9.4-->
+
+We report our ﬁndings for the relationship between exe-<--size=9.5-->
+cution footprints and performance inﬂuences for the same<--size=9.5-->
+conﬁguration options presented for RQ2, since these illustrate<--size=9.3-->
+likely causes of workload sensitivity and the limitations<--size=9.5-->
+of solely relying on code coverage. The dashboard on the<--size=9.5-->
+supplementary Web site provides diagrams and inferred feature<--size=9.3-->
+code for all conﬁguration options. The dendrograms next to<--size=9.5-->
+the visualizations of performance inﬂuences in Figures 3a,<--size=9.5-->
+3c, and 3b, respectively, illustrate how similar the covered<--size=9.5-->
+lines of option-speciﬁc code are under each workload. The<--size=9.5-->
+dendrograms depict the Jaccard similarity clustering, where<--size=9.5-->
+the split points indicate what Jaccard distance individual sets<--size=9.4-->
+of lines or subclusters exhibit. The farther to the left the point<--size=9.3-->
+is, the more similar are the components.<--size=9.4-->
+
+We observe that, in many cases, where a conﬁguration option<--size=9.3-->
+is “conditionally inﬂuential” (cf. Section IV-B2a), the respective<--size=9.3-->
+option-speciﬁc code under the interacting workloads fall into a<--size=9.3-->
+cluster, as with the option-speciﬁc code for Mono in Figure 3a.<--size=9.3-->
+In this particular example, the dendrogram can be somewhat<--size=9.4-->
+misleading as the number of common lines of code between<--size=9.4-->
+workloads helix and dual-channel is far greater than between<--size=9.4-->
+the other four workloads. Hence, differences in the coverage of<--size=9.3-->
+option-speciﬁc code can account for, at least, some workload<--size=9.4-->
+sensitivity.<--size=9.4-->
+
+The other two examples, the conﬁguration options proof<--size=9.5-->
+(Z3) and MVSTORE (H2), provide a different picture. Akin to<--size=9.3-->
+the variation of performance inﬂuence of proof, the clustering<--size=9.3-->
+for this conﬁguration option (cf. Figure 3c) shows that some<--size=9.4-->
+clusters are disjoint, and thus the option-speciﬁc code is highly<--size=9.3-->
+fragmented depending on the workload.<--size=9.4-->
+
+2<--size=5.9-->
+0<--size=5.9-->
+Performance Influence<--size=5.9-->
+
+dual-channel.wav<--size=5.9-->
+
+helix.wav<--size=5.9-->
+single-channel.wav<--size=5.9-->
+
+beethoven.wav<--size=5.9-->
+
+speech.wav<--size=5.9-->
+
+sweep.wav<--size=5.9-->
+
+0.0<--size=5.9-->
+0.5<--size=5.9-->
+1.0<--size=5.9-->
+Jaccard Distance<--size=5.9-->
+
+(a) Workload-dependent performance inﬂuences of conﬁguration<--size=8.5-->
+option Mono of JUMP3R.<--size=8.4-->
+
+2.5<--size=5.9-->
+0.0<--size=5.9-->
+2.5<--size=5.9-->
+Performance Influence<--size=5.9-->
+
+QF_AUFBV_891_sqlite3.smt2<--size=5.9-->
+
+AUFNIRA_z3.637557.smt2<--size=5.9-->
+
+LRA_formula_277.smt2<--size=5.9-->
+QF_LRA_clocksynchro_7clock...<--size=5.9-->
+
+QF_RDL_orb08_888.smt2<--size=5.9-->
+QF_UFLIA_xs_23_43.smt2<--size=5.9-->
+QF_AUFLIA_swap_t1_pp_nf...<--size=5.9-->
+
+QF_UF_PEQ018_size6.smt2<--size=5.9-->
+
+QF_NRA_hong_9.smt2<--size=5.9-->
+
+QF_LIA_tightrhombus<--size=5.9-->
+QF_BV_bench_3176.smt2<--size=5.9-->
+
+QF_BV_bench_935.smt2<--size=5.9-->
+
+0.0<--size=5.9-->
+0.5<--size=5.9-->
+1.0<--size=5.9-->
+Jaccard Distance<--size=5.9-->
+
+(b) Workload-dependent performance inﬂuences of conﬁguration<--size=8.5-->
+option proof of Z3.<--size=8.4-->
+
+0<--size=5.9-->
+2<--size=5.9-->
+Performance Influence<--size=5.9-->
+
+ycsb-2400<--size=5.9-->
+
+ycsb-600<--size=5.9-->
+
+tpcc-2<--size=5.9-->
+tpcc-8<--size=5.9-->
+smallbank-1<--size=5.9-->
+smallbank-10<--size=5.9-->
+
+voter-16<--size=5.9-->
+
+voter-2<--size=5.9-->
+
+0.0<--size=5.9-->
+0.5<--size=5.9-->
+1.0<--size=5.9-->
+Jaccard Distance<--size=5.9-->
+
+(c) Workload-dependent performance inﬂuences of conﬁguration<--size=8.5-->
+option MVSTORE of H2.<--size=8.4-->
+
+Figure 3: Workload-dependent performance inﬂuences of<--size=9.5-->
+conﬁguration options (a) Mono (JUMP3R), (b) proof (Z3), and<--size=9.3-->
+(c) MVSTORE (H2) (left) and option-code coverage clusterings<--size=9.3-->
+for the the conﬁguration options (right).<--size=9.4-->
+
+In the same vein, for MVSTORE, we see that the option-<--size=9.5-->
+speciﬁc code is highly fragmented, yet all four benchmarks<--size=9.5-->
+constitute clusters of high internal similarity. In the context<--size=9.5-->
+of the observed variation of performance inﬂuences for the<--size=9.5-->
+Yahoo! Cloud Serving Benchmark (YCSB), we see that even<--size=9.4-->
+very high similarity in the covered code can virtually either<--size=9.5-->
+improve or deteriorate performance.<--size=9.4-->
+
+For cases where we did not detect any differences in<--size=9.5-->
+code coverage despite substantial differences in an option’s<--size=9.5-->
+performance inﬂuence across workloads, our results suggest<--size=9.5-->
+that the way how code was executed (i.e., how frequently<--size=9.5-->
+methods or loops are executed) is shaping performance.<--size=9.4-->
+
+2093<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:9-->
+
+<--page_start:10-->
+Summary (RQ3): Varying the workload can condition<--size=9.5-->
+the execution of option-speciﬁc code coverage and cause<--size=9.5-->
+performance differences. However, there is no single driving<--size=9.3-->
+cause of variation: Code utilization depending on workload<--size=9.3-->
+characteristics is a likely cause accounting for the majority<--size=9.4-->
+of variation in the performance inﬂuence of an option.<--size=9.4-->
+
+VI. DISCUSSION<--size=9.4-->
+
+Our results draw a clear picture of workload-induced perfor-<--size=9.3-->
+mance variations of individual options. This sheds light on the<--size=9.3-->
+extent of representativeness of single-workload performance<--size=9.5-->
+models. But, this is not the end of the story: We saw complex<--size=9.3-->
+variations that challenge transfer-learning approaches, which<--size=9.4-->
+aim to overcome the workload speciﬁcity of models.<--size=9.4-->
+
+A. Workload Sensitivity and Single-Workload Approaches<--size=9.4-->
+
+The observed workload sensitivity of conﬁguration options<--size=9.4-->
+exhibits a wide range of characteristics. While a large portion<--size=9.3-->
+of options scales proportionally with workload complexity or<--size=9.4-->
+remains unaffected by workload variation, the performance<--size=9.5-->
+inﬂuences of several conﬁguration options are sensitive to the<--size=9.3-->
+workload. So far, the existing body of work on modeling [1]–[9]<--size=9.3-->
+and optimizing [26]–[29] conﬁguration-speciﬁc performance<--size=9.4-->
+largely neglects the impact of workload variation at the cost<--size=9.4-->
+of generalizability. Our ﬁndings from RQ2 demonstrate that<--size=9.5-->
+unexpected interactions of conﬁguration options with the<--size=9.5-->
+workload are not uncommon, which can distort performance<--size=9.4-->
+estimations.<--size=9.4-->
+
+Beyond performance estimation, using performance models<--size=9.3-->
+as surrogates for ﬁnding conﬁgurations with optimal perfor-<--size=9.5-->
+mance properties is not without risk. For instance, there are<--size=9.5-->
+several approaches utilizing the rank or importance of op-<--size=9.5-->
+tions [27], [29]. Given the observed workload sensitivity, such<--size=9.3-->
+rankings remain susceptible to the choice of workload.<--size=9.3-->
+
+Insight: Workload sensitivity challenges the robustness and<--size=9.3-->
+generalizability of single-workload performance models, yet<--size=9.3-->
+it is neglected in state-of-the-art approaches. Worse, robust<--size=9.4-->
+techniques using only rankings or relative importance of<--size=9.5-->
+options are inapplicable for certain workload variations.<--size=9.4-->
+
+B. Adressing Workload Variations<--size=9.4-->
+
+In Section II-C0a, we have outlined the existing body of work<--size=9.3-->
+that aims at incorporating workload variations into performance<--size=9.3-->
+modeling [19]–[22]. Despite the effectiveness of individual<--size=9.5-->
+approaches, our results raise questions about assumptions used<--size=9.3-->
+for transfer learning [20], [21] in this setting.<--size=9.4-->
+
+1) Transfer Learning: In their exploratory analysis, Jamshidi<--size=9.3-->
+et al. reuse existing performance models by learning a linear<--size=9.4-->
+transfer function across workloads [21]. Our results from<--size=9.5-->
+RQ1 have shown non-monotonous performance relationships<--size=9.4-->
+across workloads, which is challenging to capture with such<--size=9.4-->
+transfer functions. The presence of non-monotonous interac-<--size=9.5-->
+tions between workloads and conﬁguration options motivates<--size=9.4-->
+employing more advanced machine learning techniques.<--size=9.4-->
+
+Table IV: Common top ﬁve inﬂuential conﬁguration options<--size=9.5-->
+among pairs of workloads.<--size=9.4-->
+
+System<--size=7.5-->
+Workload 1<--size=7.5-->
+Workload 2<--size=7.5-->
+# Common<--size=7.5-->
+
+JUMP3R<--size=6.0-->
+helix.wav<--size=7.5-->
+sweep.wav<--size=7.5-->
+2<--size=7.5-->
+KANZI<--size=6.0-->
+vmlinux<--size=7.5-->
+fannie mae 500k<--size=7.5-->
+1<--size=7.5-->
+DCONVERT<--size=5.9-->
+jpeg-small<--size=7.5-->
+svg-large<--size=7.5-->
+2<--size=7.5-->
+H2<--size=6.0-->
+tpcc-2<--size=7.5-->
+tpcc-8<--size=7.5-->
+3<--size=7.5-->
+BATIK<--size=6.0-->
+village<--size=7.5-->
+cubus<--size=7.5-->
+4<--size=7.5-->
+
+XZ<--size=6.0-->
+deepﬁeld<--size=7.5-->
+silesia<--size=7.5-->
+4<--size=7.5-->
+LRZIP<--size=6.0-->
+artiﬁcl<--size=7.5-->
+uiq-32-bin<--size=7.5-->
+3<--size=7.5-->
+X264<--size=6.0-->
+sd crew cif short<--size=7.5-->
+sd city 4cif short<--size=7.5-->
+4<--size=7.5-->
+Z3<--size=6.0-->
+QF NRA hong 9<--size=7.5-->
+QF BV bench 935<--size=7.5-->
+3<--size=7.5-->
+
+The more recent transfer-learning approach Learning to<--size=9.5-->
+Sample [20] improves over the prior exploratory work by<--size=9.5-->
+Jamshidi et al. [21]. It operates under the assumption that<--size=9.5-->
+sampling for a new context, such as workloads, should focus<--size=9.4-->
+on the inﬂuential options and interactions from a previously<--size=9.5-->
+trained performance model. While this approach has shown<--size=9.5-->
+to be effective, our results from RQ2 contradict the basic<--size=9.5-->
+assumption of stable inﬂuential options. To illustrate this in<--size=9.5-->
+the context of our study, we select a pair of workloads for<--size=9.5-->
+each of the nine subject systems studied and compare the<--size=9.5-->
+ranking of conﬁguration options with regard to their absolute<--size=9.4-->
+performance inﬂuence (cf. RQ2). In Table IV, we show for<--size=9.5-->
+each pair, how many conﬁguration options are ranked in the top<--size=9.3-->
+ﬁve (most inﬂuential) and shared across both workloads. For<--size=9.4-->
+these workload pairs, we see that the rankings are inconsistent<--size=9.3-->
+and thus not a reliable heuristic for transfer learning.<--size=9.4-->
+
+As the performance inﬂuence of conﬁguration options can<--size=9.4-->
+be conditioned by workload characteristics, a more appropriate<--size=9.3-->
+metric to guide sampling would be to assess which conﬁgura-<--size=9.3-->
+tion are workload sensitive rather than focusing on inﬂuential<--size=9.3-->
+ones. This reiterates the problems described for most kinds of<--size=9.3-->
+performance prediction approaches above.<--size=9.4-->
+
+2) Workload-aware and Conﬁguration-aware Performance<--size=9.4-->
+Modeling: While there is little work that explicitly considers<--size=9.4-->
+the impact of factors beside conﬁguration options on perfor-<--size=9.5-->
+mance [19], our results from RQ2 support idea of domain- or<--size=9.3-->
+application-speciﬁc performance modeling. For instance, for<--size=9.5-->
+several conﬁguration options of JUMP3R, we can conﬁdently<--size=9.4-->
+associate workload sensitivity with a workload characteristic.<--size=9.4-->
+To abstract more from application-speciﬁc approaches, a<--size=9.5-->
+notion of workload sensitivity as a form of uncertainty is a<--size=9.5-->
+promising avenue for further work. Work on using probabilisitc<--size=9.3-->
+programming to learn performance models [1] could be adapted<--size=9.3-->
+to encode workload sensitivity.<--size=9.4-->
+
+Insight: Applying transfer learning to adapt performance<--size=9.5-->
+models to new workloads must lift the assumption that the<--size=9.4-->
+set of inﬂuential conﬁguration options is stable. Domain-<--size=9.5-->
+speciﬁc and workload-aware approaches are promising and<--size=9.4-->
+should be extended on.<--size=9.4-->
+
+3) Identifying Workload Sensitivity via Code Analysis: Our<--size=9.3-->
+ﬁndings from RQ3 show that it is possible to identify workload<--size=9.3-->
+
+2094<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:10-->
+
+<--page_start:11-->
+sensitivity through code analysis. This can be done using<--size=9.5-->
+systematic coverage testing, which can be easily incorporated<--size=9.3-->
+into CI/CD pipelines along with other code analyses, such as<--size=9.4-->
+hit counts. While this low-cost metric can enhance existing<--size=9.5-->
+approaches and help to interpret and contextualize performance<--size=9.3-->
+estimations, it is important to note that more detailed analyses<--size=9.3-->
+may be required to fully explain all performance variation.<--size=9.5-->
+These ﬁndings can be applied in practice, for example, by using<--size=9.3-->
+code coverage data to estimate up-front whether an option is<--size=9.4-->
+input-sensitive and annotating existing performance models<--size=9.5-->
+with a usage score per option. These results are important<--size=9.5-->
+for understanding the performance of conﬁgurable software<--size=9.5-->
+systems and for designing effective benchmarks.<--size=9.4-->
+
+Insight: Code analysis can be used to identify workload<--size=9.5-->
+sensitivity and inform benchmark design in conﬁgurable<--size=9.5-->
+software systems, but it is important to consider the limita-<--size=9.4-->
+tions of this approach.<--size=9.4-->
+
+VII. THREATS TO VALIDITY<--size=9.4-->
+
+Threats to internal validity include the presence of measure-<--size=9.3-->
+ment noise, which may distort our classiﬁcation into categories<--size=9.3-->
+(Section IV-A) and model construction (Section IV-B). We<--size=9.5-->
+address these threats by repeating each experiment ﬁve times<--size=9.4-->
+(except for H2; cf. Section III-B5) and reporting the median<--size=9.5-->
+as a robust measure in a controlled environment. Our coverage<--size=9.3-->
+analysis (cf. Section III-B4) entails a noticeable instrumentation<--size=9.3-->
+overhead, which may distort performance observations. We<--size=9.5-->
+mitigate this threat by separating the experiment runs for<--size=9.5-->
+coverage assessment and performance measurement. In the case<--size=9.3-->
+of H2, the load generator of the OLTPBENCH framework [47]<--size=9.3-->
+ran on the same machine as the database since we were testing<--size=9.3-->
+an embedded scenario.<--size=9.4-->
+
+Threats to external validity include the selection of subject<--size=9.4-->
+systems and workloads. To increase generalizability, we select<--size=9.3-->
+software systems from various application domains as well as<--size=9.3-->
+two different programming language ecosystems (cf. Table I).<--size=9.4-->
+To increase the representativeness of our workloads, we vary<--size=9.4-->
+relevant characteristics and, where possible, reuse workloads<--size=9.4-->
+across subject systems of the same domain. Although there<--size=9.5-->
+might be additional workload characteristics, our results<--size=9.5-->
+demonstrate already for this selection severe consequences<--size=9.5-->
+for existing performance modeling approaches. So, further<--size=9.5-->
+variations could only strengthen our message.<--size=9.4-->
+
+VIII. CONCLUSION<--size=9.4-->
+
+Conﬁguration options are a key mechanism for optimizing<--size=9.4-->
+the performance of modern software systems. Yet, state-of-the-<--size=9.3-->
+art approaches of modeling conﬁguration-dependent software<--size=9.4-->
+performance largely ignore performance variation caused by<--size=9.5-->
+changes in the workload. So far, there is no systematic assess-<--size=9.3-->
+ment of whether, and if so, to what extent workload variations<--size=9.3-->
+can render single-workload approaches inaccurate. We have<--size=9.5-->
+conducted an empirical study of 25 258 conﬁgurations from<--size=9.5-->
+nine conﬁgurable software systems to characterize the effects<--size=9.4-->
+that varying workloads can have on conﬁguration-speciﬁc<--size=9.5-->
+
+performance. We compare performance measurements with<--size=9.5-->
+coverage data to identify possible similarities of executed code<--size=9.3-->
+of different workloads compared to performance variations.<--size=9.4-->
+
+We ﬁnd that workload variations affect software performance<--size=9.3-->
+not only at the system-level, but also affect the inﬂuence<--size=9.5-->
+of individual conﬁguration options on performance, often<--size=9.5-->
+in a non-monotonous way. While in some cases, we can<--size=9.5-->
+correlate performance variations with the workload-conditioned<--size=9.3-->
+execution of option-speciﬁc code, workload characteristics<--size=9.5-->
+inﬂuence the utilization of option-speciﬁc code in further non-<--size=9.3-->
+trivial ways (e.g., number of method calls).<--size=9.4-->
+
+We critically reﬂect on prevalent patterns, that we found in<--size=9.3-->
+our subject systems and aim at raising awareness to the missing<--size=9.3-->
+notion of workload sensitivity in existing approaches in this<--size=9.5-->
+area. Our study provides an empirical basis that questions the<--size=9.3-->
+practicality and generalizability of existing single-workload<--size=9.5-->
+approaches as well as the validity of assumptions under which<--size=9.3-->
+existing transfer-learning approaches in this area operate.<--size=9.4-->
+
+IX. ACKNOWLEDGEMENTS<--size=9.4-->
+
+We thank our reviewers for their thoughtful and constructive<--size=9.3-->
+comments. Apel’s work has been funded by the German<--size=9.5-->
+Research Foundation (DFG) under contract AP 206/11-2 and<--size=9.4-->
+grant 389792660 as part of TRR 248 – CPEC. Siegmund’s work<--size=9.3-->
+has been supported by the German Research Foundation (DFG)<--size=9.3-->
+under the contract SI 2171/2-2 and by the German Ministry of<--size=9.3-->
+Education and Research (BMBF) and State Ministry for Science<--size=9.3-->
+and Cultural Affairs of Saxony (SMWK) in the program<--size=9.5-->
+Center of Excellence in AI research “Center for Scalable Data<--size=9.3-->
+Analytics and Artiﬁcial Intelligence Dresden/Leipzig”, project<--size=9.3-->
+identiﬁcation ScaDS.AI.<--size=9.4-->
+
+REFERENCES<--size=9.4-->
+
+[1] J. Dorn, S. Apel, and N. Siegmund, “Mastering Uncertainty in Perfor-<--size=7.5-->
+
+mance Estimations of Conﬁgurable Software Systems,” in Proceedings of<--size=7.4-->
+the International Conference on Automated Software Engineering (ASE).<--size=7.4-->
+ACM, 2020, pp. 684–696.<--size=7.5-->
+[2] N. Siegmund, A. Grebhahn, S. Apel, and C. K¨astner, “Performance-<--size=7.5-->
+
+Inﬂuence Models for Highly Conﬁgurable Systems,” in Proceedings of<--size=7.5-->
+the Joint Meeting of the European Software Engineering Conference<--size=7.6-->
+and the ACM SIGSOFT Symposium on the Foundations of Software<--size=7.6-->
+Engineering (ESEC/FSE).<--size=7.5-->
+ACM, 2015, pp. 284–294.<--size=7.5-->
+[3] H. Ha and H. Zhang, “DeepPerf: Performance Prediction for Conﬁgurable<--size=7.5-->
+
+Software with Deep Sparse Neural Network,” in Proceedings of the<--size=7.6-->
+International Conference on Software Engineering (ICSE).<--size=7.4-->
+IEEE, 2019,<--size=7.4-->
+pp. 1095–1106.<--size=7.5-->
+[4] Y. Shu, Y. Sui, H. Zhang, and G. Xu, “Perf-AL: Performance Prediction<--size=7.5-->
+
+for Conﬁgurable Software through Adversarial Learning,” in Proceedings<--size=7.4-->
+of the International Symposium on Empirical Software Engineering and<--size=7.4-->
+Measurement (ESEM).<--size=7.5-->
+ACM, 2020.<--size=7.5-->
+[5] J. Guo, K. Czarnecki, S. Apel, N. Siegmund, and A. Wasowski,<--size=7.5-->
+
+“Variability-aware Performance Prediction: A Statistical Learning Ap-<--size=7.6-->
+
+proach,” in Proceedings of the International Conference on Automated<--size=7.5-->
+Software Engineering (ASE).<--size=7.5-->
+IEEE, 2013, pp. 301–311.<--size=7.5-->
+[6] A. Sarkar, J. Guo, N. Siegmund, S. Apel, and K. Czarnecki, “Cost-<--size=7.5-->
+
+Efﬁcient Sampling for Performance Prediction of Conﬁgurable Systems,”<--size=7.4-->
+in Proceedings of the International Conference on Automated Software<--size=7.5-->
+Engineering (ASE).<--size=7.5-->
+IEEE, 2015, pp. 342–352.<--size=7.5-->
+[7] J. Guo, D. Yang, N. Siegmund, S. Apel, A. Sarkar, P. Valov, K. Czarnecki,<--size=7.5-->
+
+A. Wasowski, and H. Yu, “Data-efﬁcient Performance Learning for<--size=7.6-->
+Conﬁgurable Systems,” Empirical Software Engineering, vol. 23, no. 3,<--size=7.5-->
+pp. 1826–1867, 2018.<--size=7.5-->
+
+2095<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:11-->
+
+<--page_start:12-->
+[8] Y. Zhang, J. Guo, E. Blais, and K. Czarnecki, “Performance Prediction of<--size=7.5-->
+
+Conﬁgurable Software Systems by Fourier Learning,” in Proceedings of<--size=7.4-->
+the International Conference on Automated Software Engineering (ASE).<--size=7.4-->
+IEEE, 2015, pp. 365–373.<--size=7.5-->
+[9] H. Ha and H. Zhang, “Performance-inﬂuence Model for Highly Con-<--size=7.5-->
+
+ﬁgurable Software with Fourier Learning and Lasso Regression,” in<--size=7.6-->
+Proceedings of the International Conference on Software Maintenance<--size=7.5-->
+and Evolution (ICSME).<--size=7.5-->
+IEEE, 2019, pp. 470–480.<--size=7.5-->
+[10] J. Cheng, C. Gao, and Z. Zheng, “HINNPerf: Hierarchical Interaction<--size=7.5-->
+
+Neural Network for Performance Prediction of Conﬁgurable Systems,”<--size=7.5-->
+ACM Transactions on Software Engineering and Methodology (TOSEM),<--size=7.4-->
+2022.<--size=7.5-->
+[11] S. Kounev, K.-D. Lange, and J. von Kistowski, Systems Benchmarking,<--size=7.5-->
+
+1st ed.<--size=7.5-->
+Springer International Publishing, 2020.<--size=7.5-->
+[12] S. Falkner, M. Lindauer, and F. Hutter, “SpySMAC: Automated Con-<--size=7.5-->
+
+ﬁguration and Performance Analysis of SAT Solvers,” in Theory and<--size=7.6-->
+Applications of Satisﬁability Testing (SAT), M. Heule and S. Weaver, Eds.<--size=7.4-->
+Springer International Publishing, 2015, pp. 215–222.<--size=7.5-->
+[13] L. Xu, F. Hutter, H. H. Hoos, and K. Leyton-Brown, “SATzilla: Portfolio-<--size=7.5-->
+
+Based Algorithm Selection for SAT,” Journal of Artiﬁcial Intelligence<--size=7.5-->
+Research, vol. 32, no. 1, pp. 565–606, 2008.<--size=7.5-->
+[14] Y. Ding, J. Ansel, K. Veeramachaneni, X. Shen, U.-M. O’Reilly, and<--size=7.5-->
+
+S. Amarasinghe, “Autotuning Algorithmic Choice for Input Sensitivity,”<--size=7.4-->
+SIGPLAN Not., vol. 50, no. 6, pp. 379–390, 2015.<--size=7.5-->
+[15] D. Plotnikov, D. Melnik, M. Vardanyan, R. Buchatskiy, R. Zhuykov, and<--size=7.5-->
+
+J.-H. Lee, “Automatic Tuning of Compiler Optimizations and Analysis<--size=7.5-->
+of their Impact,” Procedia Computer Science, vol. 18, pp. 1312–1321,<--size=7.6-->
+2013.<--size=7.5-->
+[16] A. Maxiaguine, Y. Liu, S. Chakraborty, and W. T. Ooi, “Identifying<--size=7.5-->
+
+“Representative” Workloads in Designing MpSoC Platforms for Media<--size=7.5-->
+
+Processing,” in Proceedings of the Workshop on Embedded Systems for<--size=7.5-->
+Real-Time Multimedia (ESTImedia).<--size=7.5-->
+IEEE, 2004, pp. 41–46.<--size=7.5-->
+[17] J. A. Pereira, M. Acher, H. Martin, and J.-M. J´ez´equel, “Sampling Effect<--size=7.5-->
+
+on Performance Prediction of Conﬁgurable Systems: A Case Study,” in<--size=7.5-->
+Proceedings of the International Conference on Performance Engineering<--size=7.4-->
+(ICPE).<--size=7.5-->
+ACM, 2020, pp. 277–288.<--size=7.5-->
+[18] M. Khavari Tavana, Y. Sun, N. Bohm Agostini, and D. Kaeli, “Ex-<--size=7.5-->
+
+ploiting Adaptive Data Compression to Improve Performance and<--size=7.6-->
+Energy-Efﬁciency of Compute Workloads in Multi-GPU Systems,” in<--size=7.6-->
+International Parallel and Distributed Processing Symposium (IPDPS).<--size=7.5-->
+IEEE, 2019, pp. 664–674.<--size=7.5-->
+[19] U. Koc, A. Mordahl, S. Wei, J. S. Foster, and A. A. Porter, “SATune:<--size=7.5-->
+
+A Study-Driven Auto-Tuning Approach for Conﬁgurable Software<--size=7.6-->
+Veriﬁcation Tools,” in Proceedings of the International Conference on<--size=7.5-->
+Automated Software Engineering (ASE).<--size=7.5-->
+IEEE, 2021, pp. 330–342.<--size=7.5-->
+[20] P. Jamshidi, M. Velez, C. K¨astner, and N. Siegmund, “Learning to Sample:<--size=7.5-->
+
+Exploiting Similarities across Environments to Learn Performance Models<--size=7.4-->
+for Conﬁgurable Systems,” in Proceedings of the Joint Meeting of the<--size=7.5-->
+European Software Engineering Conference and the ACM SIGSOFT<--size=7.6-->
+Symposium on the Foundations of Software Engineering (ESEC/FSE).<--size=7.6-->
+ACM, 2018, pp. 71–82.<--size=7.5-->
+[21] P. Jamshidi, N. Siegmund, M. Velez, C. K¨astner, A. Patel, and Y. Agarwal,<--size=7.5-->
+
+“Transfer Learning for Performance Modeling of Conﬁgurable Systems:<--size=7.5-->
+
+An Exploratory Analysis,” in Proceedings of the International Conference<--size=7.4-->
+on Automated Software Engineering (ASE).<--size=7.5-->
+IEEE, 2017, pp. 497–508.<--size=7.5-->
+[22] P. Jamshidi, M. Velez, C. K¨astner, N. Siegmund, and P. Kawthekar,<--size=7.5-->
+
+“Transfer Learning for Improving Model Predictions in Highly Conﬁg-<--size=7.5-->
+
+urable Software,” in Proceedings of the International Symposium on<--size=7.6-->
+Software Engineering for Adaptive and Self-Managing Systems (SEAMS).<--size=7.4-->
+IEEE, 2017, pp. 31–41.<--size=7.5-->
+[23] H. Martin, M. Acher, J. A. Pereira, L. Lesoil, J.-M. J´ez´equel, and D. E.<--size=7.5-->
+
+Khelladi, “Transfer Learning Across Variants and Versions: The Case<--size=7.6-->
+of Linux Kernel Size,” Transactions on Software Engineering (TSE),<--size=7.6-->
+vol. 48, no. 11, p. 42744290, 2022.<--size=7.5-->
+[24] Y. Ding, A. Pervaiz, S. Krishnan, and H. Hoffmann, “Bayesian Learning<--size=7.5-->
+
+for Hardware and Software Conﬁguration Co-Optimization,” University<--size=7.5-->
+of Chicago, Tech. Rep. 13, 2020.<--size=7.5-->
+[25] C. Lengauer, S. Apel, M. Bolten, A. Gr¨oßlinger, F. Hannig, H. K¨ostler,<--size=7.5-->
+
+U. R¨ude, J. Teich, A. Grebhahn, S. Kronawitter, S. Kuckuk, H. Rittich,<--size=7.5-->
+and C. Schmitt, “ExaStencils: Advanced Stencil-Code Engineering,” in<--size=7.5-->
+Parallel Processing Workshops – Euro-Par 2014 International Workshops,<--size=7.4-->
+Revised Selected Papers, Part II, ser. Lecture Notes in Computer Science,<--size=7.4-->
+vol. 8806.<--size=7.5-->
+Springer, 2014, pp. 553–564.<--size=7.5-->
+
+[26] Chen, Tao and Li, Miqing, “Multi-Objectivizing Software Conﬁguration<--size=7.5-->
+
+Tuning,” in Proceedings of the Joint Meeting of the European Software<--size=7.5-->
+Engineering Conference and the ACM SIGSOFT Symposium on the<--size=7.6-->
+Foundations of Software Engineering (ESEC/FSE).<--size=7.6-->
+ACM, 2021, pp.<--size=7.6-->
+453–465.<--size=7.5-->
+[27] V. Nair, T. Menzies, N. Siegmund, and S. Apel, “Using Bad Learners<--size=7.5-->
+
+to Find Good Conﬁgurations,” in Proceedings of the Joint Meeting of<--size=7.6-->
+the European Software Engineering Conference and the ACM SIGSOFT<--size=7.4-->
+Symposium on the Foundations of Software Engineering (ESEC/FSE).<--size=7.6-->
+ACM, 2017, pp. 257–267.<--size=7.5-->
+[28] V. Nair, Z. Yu, T. Menzies, N. Siegmund, and S. Apel, “Finding Faster<--size=7.5-->
+
+Conﬁgurations Using FLASH,” Transactions on Software Engineering<--size=7.5-->
+(TSE), vol. 46, no. 7, pp. 794–811, 2020.<--size=7.5-->
+[29] J. Oh, D. Batory, M. Myers, and N. Siegmund, “Finding Near-Optimal<--size=7.5-->
+
+Conﬁgurations in Product Lines by Random Sampling,” in Proceedings<--size=7.5-->
+of the Joint Meeting of the European Software Engineering Conference<--size=7.5-->
+and the ACM SIGSOFT Symposium on the Foundations of Software<--size=7.6-->
+Engineering (ESEC/FSE).<--size=7.5-->
+ACM, 2017, pp. 61–71.<--size=7.5-->
+[30] S. Apel, D. Batory, C. K¨astner, and G. Saake, Feature-Oriented Software<--size=7.4-->
+
+Product Lines.<--size=7.5-->
+Springer, 2016.<--size=7.5-->
+[31] C. Kaltenecker, A. Grebhahn, N. Siegmund, and S. Apel, “The Interplay<--size=7.5-->
+
+of Sampling and Machine Learning for Software Performance Prediction,”<--size=7.4-->
+IEEE Software, vol. 37, no. 4, pp. 58–66, 2020.<--size=7.5-->
+[32] F. Medeiros, C. K¨astner, M. Ribeiro, R. Gheyi, and S. Apel, “A<--size=7.5-->
+
+Comparison of 10 Sampling Algorithms for Conﬁgurable Systems,” in<--size=7.5-->
+Proceedings of the International Conference on Software Engineering<--size=7.6-->
+(ICSE).<--size=7.5-->
+ACM, 2016, pp. 643–654.<--size=7.5-->
+[33] N. Siegmund, S. Kolesnikov, C. K¨astner, S. Apel, D. Batory,<--size=7.5-->
+
+M. Rosenm¨uller, and G. Saake, “Predicting Performance via Automated<--size=7.4-->
+Feature-Interaction Detection,” in Proceedings of the International<--size=7.6-->
+Conference on Software Engineering (ICSE).<--size=7.4-->
+IEEE, 2012, pp. 167–177.<--size=7.4-->
+[34] C. Kaltenecker, A. Grebhahn, N. Siegmund, J. Guo, and S. Apel,<--size=7.5-->
+
+“Distance-Based Sampling of Software Conﬁguration Spaces,” in Proceed-<--size=7.4-->
+
+ings of the International Conference on Software Engineering (ICSE).<--size=7.6-->
+IEEE, 2019, pp. 1084–1094.<--size=7.5-->
+[35] M. Velez, P. Jamshidi, F. Sattler, N. Siegmund, S. Apel, and C. K¨astner,<--size=7.5-->
+
+“ConﬁgCrusher: Towards White-Box Performance Analysis for Con-<--size=7.6-->
+
+ﬁgurable Systems,” Automated Software Engineering (ASE), pp. 1–36,<--size=7.6-->
+2020.<--size=7.5-->
+[36] M. Velez, P. Jamshidi, N. Siegmund, S. Apel, and C. K¨astner, “White-Box<--size=7.5-->
+
+Analysis over Machine Learning: Modeling Performance of Conﬁgurable<--size=7.4-->
+Systems,” in Proceedings of the International Conference on Software<--size=7.5-->
+Engineering (ICSE).<--size=7.5-->
+IEEE, 2021, pp. 1072–1084.<--size=7.5-->
+[37] M. Weber, S. Apel, and N. Siegmund, “White-Box Performance-Inﬂuence<--size=7.5-->
+
+Models: A Proﬁling and Learning Approach,” in Proceedings of the<--size=7.6-->
+International Conference on Software Engineering (ICSE).<--size=7.4-->
+IEEE, 2021,<--size=7.4-->
+pp. 1059–1071.<--size=7.5-->
+[38] X. Han, T. Yu, and M. Pradel, “ConfProf: White-Box Performance<--size=7.5-->
+
+Proﬁling of Conﬁguration Options,” in Proceedings of the International<--size=7.5-->
+Conference on Performance Engineering (ICPE).<--size=7.4-->
+ACM, 2021, pp. 1–8.<--size=7.4-->
+[39] S. Ceesay, Y. Lin, and A. Barker, “A Survey: Benchmarking and<--size=7.5-->
+
+Performance Modelling of Data Intensive Applications,” in International<--size=7.4-->
+Conference on Big Data Computing, Applications and Technologies<--size=7.6-->
+(BDCAT).<--size=7.5-->
+IEEE, 2020, pp. 67–76.<--size=7.5-->
+[40] A. V. Papadopoulos, L. Versluis, A. Bauer, N. Herbst, J. v. Kistowski,<--size=7.5-->
+
+A. Ali-Eldin, C. L. Abad, J. N. Amaral, P. T˚uma, and A. Iosup,<--size=7.6-->
+“Methodological Principles for Reproducible Performance Evaluation<--size=7.6-->
+
+in Cloud Computing,” Transactions on Software Engineering (TSE),<--size=7.6-->
+vol. 47, no. 8, pp. 1528–1543, 2021.<--size=7.5-->
+[41] M. C. Calzarossa, L. Massari, and D. Tessera, “Workload Characterization:<--size=7.5-->
+
+A Survey Revisited,” ACM Computer Survey, vol. 48, no. 3, Feb. 2016.<--size=7.5-->
+[42] Z. M. Jiang and A. E. Hassan, “A Survey on Load Testing of Large-Scale<--size=7.5-->
+
+Software Systems,” Transactions on Software Engineering (TSE), vol. 41,<--size=7.4-->
+no. 11, pp. 1091–1118, 2015.<--size=7.5-->
+[43] L. Kotthoff, “Algorithm Selection for Combinatorial Search Problems: A<--size=7.5-->
+
+Survey,” in Data Mining and Constraint Programming: Foundations of<--size=7.5-->
+a Cross-Disciplinary Approach, C. Bessiere, L. De Raedt, L. Kotthoff,<--size=7.5-->
+S. Nijssen, B. O’Sullivan, and D. Pedreschi, Eds.<--size=7.5-->
+Springer, 2016, pp.<--size=7.5-->
+149–190.<--size=7.5-->
+[44] H. Samoaa and P. Leitner, “An Exploratory Study of the Impact<--size=7.5-->
+
+of Parameterization on JMH Measurement Results in Open-Source<--size=7.6-->
+Projects,” in Proceedings of the International Conference on Performance<--size=7.4-->
+Engineering (ICPE).<--size=7.5-->
+ACM, 2021, p. 213–224.<--size=7.5-->
+
+2096<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:12-->
+
+<--page_start:13-->
+[45] L. Lesoil, M. Acher, A. Blouin, and J.-M. J´ez´equel, “The Interaction<--size=7.5-->
+
+Between Inputs and Conﬁgurations Fed to Software Systems: An<--size=7.6-->
+Empirical Study,” Computing Research Repository (CoRR), 2021.<--size=7.5-->
+[46] P. Valov, J.-C. Petkovich, J. Guo, S. Fischmeister, and K. Czarnecki,<--size=7.5-->
+
+“Transferring Performance Prediction Models Across Different Hardware<--size=7.4-->
+
+Platforms,” in ICPE.<--size=7.5-->
+ACM, 2017, pp. 39–50.<--size=7.5-->
+[47] D. E. Difallah, A. Pavlo, C. Curino, and P. Cudre-Mauroux, “OLTP-<--size=7.5-->
+
+Bench: An Extensible Testbed for Benchmarking Relational Databases,”<--size=7.5-->
+in Proceedings of the Intervational Conference on Very Large Databases<--size=7.4-->
+(VLDB), vol. 7, no. 4.<--size=7.5-->
+VLDB Endowment, 2013, pp. 277–288.<--size=7.5-->
+[48] C. Henard, M. Papadakis, M. Harman, and Y. Le Traon, “Combining<--size=7.5-->
+
+Multi-Objective Search and Constraint Solving for Conﬁguring Large<--size=7.6-->
+Software Product Lines,” in Proceedings of the International Conference<--size=7.4-->
+on Software Engineering (ICSE).<--size=7.5-->
+IEEE, 2015, pp. 517–528.<--size=7.5-->
+[49] I. Molyneaux, The Art of Application Performance Testing, 2nd ed., ser.<--size=7.5-->
+
+Theory in Practice.<--size=7.5-->
+Beijing: O’Reilly, 2015.<--size=7.5-->
+[50] C. Curtsinger and E. D. Berger, “STABILIZER: Statistically Sound<--size=7.5-->
+
+Performance Evaluation,” in Proceedings of the International Conference<--size=7.4-->
+on Architectural Support for Programming Languages and Operating<--size=7.6-->
+Systems (ASPLOS).<--size=7.5-->
+ACM, 2013, pp. 219–228.<--size=7.5-->
+[51] A. Maricq, D. Duplyakin, I. Jimenez, C. Maltzahn, R. Stutsman, and<--size=7.5-->
+
+R. Ricci, “Taming Performance Variability,” in USENIX Symposium<--size=7.6-->
+on Operating Systems Design and Implementation (OSDI), 2018, pp.<--size=7.6-->
+409–425.<--size=7.5-->
+[52] M. Lovric, International Encyclopedia of Statistical Science, 1st ed.<--size=7.6-->
+
+Springer, 2010.<--size=7.5-->
+[53] J. Romano, J. D. Kromrey, J. Coraggio, J. Skowronek, and L. Devine,<--size=7.5-->
+
+“Exploring Methods for Evaluating Group Differences on the NSSE<--size=7.6-->
+
+and Other Surveys: Are the T-Test and Cohen’s d Indices the Most<--size=7.6-->
+Appropriate Choices?” in Annual Meeting of the Southern Association<--size=7.5-->
+for Institutional Research, 2006, pp. 1–51.<--size=7.5-->
+[54] N. Cliff, “Dominance statistics: Ordinal Analyses to Answer Ordinal<--size=7.5-->
+
+Questions.” Psychological Bulletin, vol. 114, pp. 494–509, 1993.<--size=7.5-->
+[55] M. G. Kendall, “A New Measure of Rank Correlation,” Biometrika,<--size=7.6-->
+
+vol. 30, no. 1/2, pp. 81–93, 1938.<--size=7.5-->
+[56] J. I. Daoud, “Multicollinearity and Regression Analysis,” Journal of<--size=7.6-->
+
+Physics: Conference Series, vol. 949, 2017.<--size=7.5-->
+[57] R. M. O’Brien, “A Caution Regarding Rules of Thumb for Variance<--size=7.5-->
+
+Inﬂation Factors,” Quality & Quantity, vol. 41, no. 5, pp. 673–690, 2007.<--size=7.4-->
+[58] J. Rubin and M. Chechik, “A Survey of Feature Location Techniques,”<--size=7.5-->
+
+in Domain Engineering: Product Lines, Languages, and Conceptual<--size=7.6-->
+Models, I. Reinhartz-Berger, A. Sturm, T. Clark, S. Cohen, and J. Bettin,<--size=7.4-->
+Eds.<--size=7.5-->
+Springer, 2013, pp. 29–58.<--size=7.5-->
+[59] M. Lillack, C. K¨astner, and E. Bodden, “Tracking Load-Time Conﬁgu-<--size=7.5-->
+
+ration Options,” Transactions on Software Engineering (TSE), vol. 44,<--size=7.6-->
+no. 12, pp. 1269–1291, 2018.<--size=7.5-->
+[60] L. Luo, E. Bodden, and J. Sp¨ath, “A Qualitative Analysis of Android<--size=7.5-->
+
+Taint-Analysis Results,” in Proceedings of the International Conference<--size=7.5-->
+on Automated Software Engineering (ASE).<--size=7.5-->
+IEEE, 2019, pp. 102–114.<--size=7.5-->
+[61] G. Bell, Jonatand Kaiser, “Phosphor: Illuminating Dynamic Data Flow in<--size=7.5-->
+
+Commodity JVMs,” ACM SIGPLAN Notices, vol. 49, no. 10, pp. 83–101,<--size=7.4-->
+2014.<--size=7.5-->
+[62] C. H. P. Kim, D. Marinov, S. Khurshid, D. Batory, S. Souto, P. Barros,<--size=7.5-->
+
+and M. D’Amorim, “SPLat: Lightweight Dynamic Analysis for Reducing<--size=7.4-->
+Combinatorics in Testing Conﬁgurable Systems,” in Proceedings of the<--size=7.5-->
+Joint Meeting of the European Software Engineering Conference and the<--size=7.4-->
+ACM SIGSOFT Symposium on the Foundations of Software Engineering<--size=7.4-->
+(ESEC/FSE).<--size=7.5-->
+ACM, 2013, pp. 257–267.<--size=7.5-->
+[63] W. E. Wong and J. Li, “An Integrated Solution for Ttesting and Analyzing<--size=7.5-->
+
+Java Applications in an Industrial Setting,” in Proceedings of the Asia-<--size=7.5-->
+Paciﬁc Conference on Software Engineering (ASPEC).<--size=7.4-->
+IEEE, 2005, pp.<--size=7.4-->
+576–583.<--size=7.5-->
+[64] M. Sul´ır and J. Porub¨an, “Semi-Automatic Concern Annotation using<--size=7.5-->
+
+Differential Code Coverage,” in Proceedings of the IEEE International<--size=7.5-->
+Scientiﬁc Conference on Informatics (ISCI).<--size=7.4-->
+IEEE, 2015, pp. 258–262.<--size=7.4-->
+[65] G. K. Michelon, B. Sotto-Mayor, J. Martinez, A. Arrieta, R. Abreu, and<--size=7.5-->
+
+W. K. Assunc¸˜ao, “Spectrum-Based Feature Localization: A Case Study<--size=7.5-->
+using ArgoUML,” in Proceedings of the International Conference on<--size=7.6-->
+Software Product Lines (SPLC).<--size=7.5-->
+ACM, 2021, pp. 126–130.<--size=7.5-->
+[66] A. Perez and R. Abreu, “Framing Program Comprehension as Fault<--size=7.5-->
+
+Localization,” Journal of Software: Evolution and Process, vol. 28, pp.<--size=7.5-->
+840–862, 2016.<--size=7.5-->
+[67] N. Wilde and C. Casey, “Early Field Experience with the Software<--size=7.5-->
+
+Reconnaissance Technique for Program Comprehension,” in Proceedings<--size=7.4-->
+
+of the International Conference on Software Maintenance (ICSM), 1996,<--size=7.4-->
+pp. 312–318.<--size=7.5-->
+[68] N. Wilde and M. C. Scully, “Software Reconnaissance: Mapping Program<--size=7.5-->
+
+Features to Code,” Journal of Software Maintenance: Research and<--size=7.6-->
+Practice, vol. 7, no. 1, pp. 49–62, 1995.<--size=7.5-->
+[69] K. D. Sherwood and G. C. Murphy, “Reducing Code Navigation Effort<--size=7.5-->
+
+with Differential Code Coverage,” Department of Computer Science,<--size=7.6-->
+University of British Columbia, Tech. Rep. 14, 2008.<--size=7.5-->
+[70] A. Perez and R. Abreu, “A Diagnosis-Based Approach to Software<--size=7.5-->
+
+Comprehension,” in Proceedings of the International Conference on<--size=7.6-->
+Program Comprehension (ICPC).<--size=7.5-->
+ACM, 2014, pp. 37–47.<--size=7.5-->
+[71] B. Castro, A. Perez, and R. Abreu, “Pangolin: An SFL-Based Toolset for<--size=7.5-->
+
+Feature Localization,” in Proceedings of the International Conference on<--size=7.4-->
+Automated Software Engineering (ASE).<--size=7.5-->
+IEEE, 2019, pp. 1130–1133.<--size=7.5-->
+[72] H. Agrawal, J. R. Horgan, S. London, and W. E. Wong, “Fault<--size=7.5-->
+
+Localization using Execution Slices and Dataﬂow Tests,” in Proceedings<--size=7.4-->
+of the International Symposium on Software Reliability Engineering<--size=7.6-->
+(ISSRE).<--size=7.5-->
+IEEE, 1995, pp. 143–151.<--size=7.5-->
+[73] W. E. Wong, R. Gao, Y. Li, R. Abreu, and F. Wotawa, “A Survey on<--size=7.5-->
+
+Software Fault Localization,” Transactions on Software Engineering<--size=7.6-->
+(TSE), vol. 42, no. 8, pp. 707–740, 2016.<--size=7.5-->
+
+2097<--size=8.0-->
+
+Authorized licensed use limited to: INRIA. Downloaded on January 07,2025 at 13:53:56 UTC from IEEE Xplore.  Restrictions apply. <--size=7.0-->
+
+<--page_end:13-->
+
+
