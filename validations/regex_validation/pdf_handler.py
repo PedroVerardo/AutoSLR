@@ -62,20 +62,20 @@ class PDFHandler:
         "non_ascii": r"[\x00-\x08\x0B-\x1F\x7F-\x9F\xA0]",
         "unicode_spaces": r"[\u00A0\u2000-\u200F\u2028\u2029\u202F\u3000]",
         "ponctuation": r"[\\u200B-\\u200F\\u2028\\u2029\\u3000]",
-        "ponctuation_ASCII": r"[.!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]",
-        "references": r"^\s*[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss](?:\s*|\s+[^\n<]+)\n",
-        "abstract": r"^\s*[Aa][Bb][Ss][Tt][Rr][Aa][Cc][Tt](?:\s*|\s+[^\n<]+)\n",
-        "introduction": r"^\s*[Ii][Nn][Tt][Rr][Oo][Dd][Uu][Cc][Tt][Ii][Oo][Nn](?:\s*|\s+[^\n<]+)\n",
-        "background": r"^\s*[Bb][Aa][Cc][Kk][Gg][Rr][Oo][Uu][Nn][Dd](?:\s*|\s+[^\n<]+)\n",
-        "related_work": r"^\s*[Rr][Ee][Ll][Aa][Tt][Ee][Dd]\s*[Ww][Oo][Rr][Kk](?:\s*|\s+[^\n<]+)\n",
-        "conclusion": r"^\s*[Cc][Oo][Nn][Cc][Ll][Uu][Ss][Ii][Oo][Nn](?:\s*|\s+[^\n<]+)\n",
+        "ponctuation_ASCII": r"[.!\"#$%&'()*+,-./   ;<=>?@[\\]^_`{|}~]",
+        "references": r"[Rr][Ee][Ff][Ee][Rr][Ee][Nn][Cc][Ee][Ss]\n",
+        "abstract": r"[Aa][Bb][Ss][Tt][Rr][Aa][Cc][Tt](?:\s*\n",
+        "introduction": r"[I][Nn][Tt][Rr][Oo][Dd][Uu][Cc][Tt][Ii][Oo][Nn]\n",
+        "background": r"^\s*[Bb][Aa][Cc][Kk][Gg][Rr][Oo][Uu][Nn][Dd]\n",
+        "related_work": r"^\s*[Rr][Ee][Ll][Aa][Tt][Ee][Dd]\s*[Ww][Oo][Rr][Kk]\n",
+        "conclusion": r"^\s*[Cc][Oo][Nn][Cc][Ll][Uu][Ss][Ii][Oo][Nn]\n",
         "figure": r"(?i)\b(?:figure|fig)\.?\s*\d+(?:[-.:]?\d+)?\b",
         "table": r"(?i)\b(?:table|tab)\.?\s*\d+(?:[-.:]?\d+)?\b",
-        "numeric_point_section": r"^\s*(\d)\.\s+([A-Z][A-Za-z]+(?:\s+[A-Za-z]+)(<--*.-->)*\n",
-        "rome_point_section": r"^\s*([IVX]+)\.\s+([A-Z][A-Za-z]+)(<--*.-->)*\n",
-        "numeric_section": r"^\s*(\d)\s+([A-Z][A-Za-z]+(?:\s+[A-Za-z]+)*)(<--*.-->)*\n",
+        "numeric_point_section": r"^\s*(\d+)\.\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "rome_point_section": r"^\s*([IVX]+)\.\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "numeric_section": r"^(\d+)\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
         "table_description": r"(TABLE|Table|table)\s*\d+\.[\s\S]+?\n",
-        "generic_section": r"^\s*([A-Z][a-zA-Z\s]+)(?:\s*|\s+[^\n<]+)$",
+        "generic_section": r"^\s*([A-Z][a-zA-Z\s]+)$",
         "citation1": r"^\[(\d)\]\s*([^\[]+)\n",
         "bold_tag": r"<--bold-->",
         "italic_tag": r"<--italic-->",
@@ -86,10 +86,10 @@ class PDFHandler:
     }
     
     common_section_titles = [
-        "abstract", "introduction", "background", "related work", 
-        "methodology", "method", "methods", "experiments", "experimental setup",
+        "introduction", "background", "related work", 
+        "methodology", "method", "methods", "experiments",
         "results", "discussion", "evaluation", "conclusion", "references",
-        "future work", "acknowledgments", "appendix"
+        "future work", "research questions", "threats to validity"
     ]
 
     section_position_map = {
@@ -400,7 +400,8 @@ class PDFHandler:
         #TODO : rethinking the structure of this rule executioning
         for section in sorted_sections:
             if best_sections and section.section_number == best_sections[-1].section_number:
-                best_section = PDFHandler.tiebreaker_policy(best_sections, last_find_position)
+                tied_sections = [section, best_sections[-1]]
+                best_section = PDFHandler.tiebreaker_policy(tied_sections, last_find_position)
                 best_sections[-1] = best_section
             else:
                 best_section = section
@@ -414,17 +415,13 @@ class PDFHandler:
     
     @staticmethod
     def extract_section_from_text(text: str, section_pattern: str) -> List[SectionInfo]:
-        """Extract sections from text using regex patterns.
-        
-        Args:
-            text (str): The text to search in
-            section_pattern (str): The regex pattern to match sections
-            
-        Returns:
-            List[SectionInfo]: List of extracted sections
-        """
         sections = []
         matches = re.finditer(section_pattern, text, re.MULTILINE)
+        introduction_matches = re.finditer(PDFHandler.regex_patterns["introduction"], text)
+
+        # if introduction_matches:
+        #     introduction_posiition = introduction_matches[0].start()
+
         if not matches:
             logging.info("No matches found for the given pattern.")
             return sections
@@ -460,7 +457,7 @@ class PDFHandler:
                 section.content = text[section.position:sections[indx + 1].position]
 
     @staticmethod
-    def extract_all_pdf_sections(text: str, pattern: str, total_pages: int) -> List[SectionInfo]:
+    def extract_all_pdf_sections(doc: fitz.Document, pattern: str) -> List[SectionInfo]:
         """Extract all sections from a PDF document using regex patterns.
 
         Args:
@@ -469,9 +466,16 @@ class PDFHandler:
         Returns:
             List[SectionInfo]: A list of SectionInfo objects containing section details.
         """
+        PDFHandler.try_open(doc)
+        text, page_count = PDFHandler.simple_extraction(doc)
+        section_titles = PDFHandler.find_pdf_topics_outline(doc)
+        print(section_titles)
+
         text = PDFHandler.default_pdf_cleaning(text)
 
         sections = PDFHandler.extract_section_from_text(text, PDFHandler.regex_patterns[pattern])
+        # for section in sections: 
+        #     print(section.section_title + " " + str(section.section_number))
 
         final_sections = PDFHandler.voting_policy(sections)
 
@@ -481,24 +485,25 @@ class PDFHandler:
         
 
 if __name__ == "__main__":
-    path = "/home/PUC/Documentos/AutoSLR/papers_pdf/ACM/cheng2023_tse.pdf"
+    path = "/home/PUC/Documentos/AutoSLR/papers_pdf/Scopus/Krishna2021.pdf"
     
     doc = PDFHandler.try_open(path)
     if doc is None:
         print("Error opening the PDF")
         exit(1)
-
-    text, page_count = PDFHandler.simple_extraction(doc)
-    tagged_text, tagged_page_count = PDFHandler.tagged_text_extraction(doc)
-    # print(f"Tagged text length: {tagged_text}")
-    # Extract all sections
-    sections = PDFHandler.extract_all_pdf_sections(text, "numeric_section", page_count)
+    PDFHandler.extract_all_pdf_sections(doc, "numeric_section")
+    # text, page_count = PDFHandler.simple_extraction(doc)
+    # tagged_text, tagged_page_count = PDFHandler.tagged_text_extraction(doc)
+    # with open("test.txt", "w") as f:
+    #     f.write(text)
+    # sections = PDFHandler.extract_all_pdf_sections(doc, "numeric_section")
     
     
     # Print results
-    print(f"Found {len(sections)} sections:")
-    for section in sections:
-        print(f"\n{section.section_number}: {section.section_title}")
-        print(f"Confidence score: {section.confidence_score}")
+    # print(f"Found {len(sections)} sections:")
+    # for section in sections:
+    #     print(f"\n{section.section_number}: {section.section_title}")
+    #     print(f"Confidence score: {section.confidence_score}")
+        # print(section.content)
         # print(f"Metrics: {section.metrics}")
         # print(f"Content preview: {section.content[:100]}...")
