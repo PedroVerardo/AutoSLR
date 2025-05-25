@@ -1,12 +1,13 @@
 import re
 import fitz
 from statistics import mode
-from typing import List, Dict, Tuple, Optional, Union, Any
+from typing import List, Dict, Tuple, Optional, Union
 import numpy as np
 import logging
 from roman import fromRoman, InvalidRomanNumeralError
 from Section import SectionInfo
-from collections import defaultdict
+# from collections import defaultdict
+import requests
 
 '''
 Considerations:
@@ -110,6 +111,37 @@ class PDFHandler:
         "acknowledgments": {"page": 10, "percentage": 0.90},
         "appendix": {"page": 12, "percentage": 0.98}
     }
+
+    llm_prompt_for_section = """
+    You are a text parser. Your ONLY job is to find section identifiers and titles in the provided text.
+
+    STEP 1: Scan the text line by line looking for these patterns:
+    - Lines starting with numbers: "1.", "2.", "3." etc.
+    - Lines starting with Roman numerals: "I.", "II.", "III." etc.
+
+    STEP 2: For each pattern found, extract:
+    - The identifier (number/numeral)
+    - The text that follows as the title
+
+    STEP 3: Return ONLY what you find, nothing else.
+
+    Rules:
+    - Do NOT create or invent sections
+    - Do NOT explain or summarize
+    - Do NOT add content that isn't there
+    - If no sections found, return empty array
+
+    Return JSON format:
+    ```json
+    {
+    "sections": [
+        {
+        "identifier": "1",
+        "title": "exact title text found after the identifier"
+        }
+    ]
+    }
+    """
 
     @staticmethod
     def try_open(pdf_path: str):
@@ -223,7 +255,7 @@ class PDFHandler:
         return information_by_depth[argmax_depth]
     
     @staticmethod
-    def simple_extraction(doc: fitz.Document) -> dict[int, str] | None:
+    def simple_extraction(doc: fitz.Document) -> Optional[Tuple[str, int]]:
         """This function extracts text from a PDF file and returns the text along with the number of pages.
 
         Args:
@@ -268,7 +300,7 @@ class PDFHandler:
                 text += f"<--page_start:{page_num+1}-->\n"
                 
                 blocks = page.get_text("dict")["blocks"]
-                for block_num, block in enumerate(blocks):
+                for block in blocks:
 
                     if block.get("type") == 1:  # Type 1 is image
                         img_width = block.get("width", 0)
@@ -281,7 +313,7 @@ class PDFHandler:
                     
                     for line in block["lines"]:
                         line_text = ""
-                        prev_span = None
+                        # prev_span = None
                         
                         tags = []
                         line_font_sizes = []
@@ -417,7 +449,7 @@ class PDFHandler:
     def extract_section_from_text(text: str, section_pattern: str) -> List[SectionInfo]:
         sections = []
         matches = re.finditer(section_pattern, text, re.MULTILINE)
-        introduction_matches = re.finditer(PDFHandler.regex_patterns["introduction"], text)
+        # introduction_matches = re.finditer(PDFHandler.regex_patterns["introduction"], text)
 
         # if introduction_matches:
         #     introduction_posiition = introduction_matches[0].start()
@@ -467,7 +499,7 @@ class PDFHandler:
             List[SectionInfo]: A list of SectionInfo objects containing section details.
         """
         PDFHandler.try_open(doc)
-        text, page_count = PDFHandler.simple_extraction(doc)
+        text, _ = PDFHandler.simple_extraction(doc)
         section_titles = PDFHandler.find_pdf_topics_outline(doc)
         print(section_titles)
 
@@ -483,15 +515,22 @@ class PDFHandler:
         
         return final_sections
         
+    
 
 if __name__ == "__main__":
-    path = "/home/PUC/Documentos/AutoSLR/papers_pdf/Scopus/Krishna2021.pdf"
+    path = "/home/pramos/Documents/AutoSLR/papers_pdf/Scopus/Krishna2021.pdf"
     
     doc = PDFHandler.try_open(path)
     if doc is None:
         print("Error opening the PDF")
         exit(1)
-    PDFHandler.extract_all_pdf_sections(doc, "numeric_section")
+
+    text, _ = PDFHandler.simple_extraction(doc)
+    text = PDFHandler.default_pdf_cleaning(text)
+
+
+    
+    # PDFHandler.extract_all_pdf_sections(doc, "numeric_section")
     # text, page_count = PDFHandler.simple_extraction(doc)
     # tagged_text, tagged_page_count = PDFHandler.tagged_text_extraction(doc)
     # with open("test.txt", "w") as f:
