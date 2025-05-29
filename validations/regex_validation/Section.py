@@ -1,13 +1,15 @@
 
 class SectionInfo:
     """Class to store section information with metrics for voting."""
-    def __init__(self, section_number, section_title, page_number, position, metrics=None):
+    def __init__(self, section_number, section_title, page_number, position, bold, size, metrics=None):
         self.section_number = section_number
         self.section_title = section_title
         self.page_number = page_number
         self.position = position
         self.content = ""
         self.metrics = metrics or {}
+        self.bold = bold
+        self.size = size
         self.confidence_score = 0
     
     def update_metrics(self, metric_name, value):

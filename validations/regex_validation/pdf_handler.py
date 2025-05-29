@@ -7,6 +7,8 @@ import logging
 from roman import fromRoman, InvalidRomanNumeralError
 from Section import SectionInfo
 from collections import defaultdict
+import sqlite3
+import time
 
 '''
 Considerations:
@@ -73,9 +75,10 @@ class PDFHandler:
         "table": r"(?i)\b(?:table|tab)\.?\s*\d+(?:[-.:]?\d+)?\b",
         "numeric_point_section": r"^\s*(\d+)\.\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
         "rome_point_section": r"^\s*([IVX]+)\.\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
-        "numeric_section": r"^(\d+)\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "numeric_section": r"^s*(\d+)\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "generic_section_title": r"^(\d+|[IVX]+)[\.]?\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
         "table_description": r"(TABLE|Table|table)\s*\d+\.[\s\S]+?\n",
-        "generic_section": r"^\s*([A-Z][a-zA-Z\s]+)$",
+        #"generic_section": r"^\s*([A-Z][a-zA-Z\s]+)$",
         "citation1": r"^\[(\d)\]\s*([^\[]+)\n",
         "bold_tag": r"<--bold-->",
         "italic_tag": r"<--italic-->",
@@ -236,8 +239,9 @@ class PDFHandler:
             text = ""
             total_pages = 0
             for idx, page in enumerate(doc):
-                text += f"<--page_{idx+1}-->"
+                text += f"<--page_start:{idx+1}-->"
                 text +=  page.get_text()
+                text += f"<--page_end:{idx+1}-->"
                 total_pages += 1
             return text, total_pages
 
@@ -264,6 +268,8 @@ class PDFHandler:
         try:
             text = ""
             
+            all_line_sizes = []
+
             for page_num, page in enumerate(doc):
                 text += f"<--page_start:{page_num+1}-->\n"
                 
@@ -300,6 +306,8 @@ class PDFHandler:
                             most_common_size = mode(line_font_sizes)
                             size_tag = f"<--size={most_common_size:.1f}-->"
                             tags.append(size_tag)
+                            all_line_sizes.append(most_common_size)
+                            
 
                         if line_is_bold:
                             tags.append("<--bold-->")
@@ -308,7 +316,11 @@ class PDFHandler:
 
                     text += "\n"
                 text += f"<--page_end:{page_num+1}-->\n\n"
-            return text, page_num+1
+            
+            # Calculate the mode of all line sizes in the document
+            doc_most_common_size = mode(all_line_sizes) if all_line_sizes else None
+
+            return text, page_num+1, doc_most_common_size
 
         except Exception as e:
             logging.error(f"Error in tagged_text_extraction: {e}")
@@ -412,7 +424,6 @@ class PDFHandler:
         
         return best_sections
         
-    
     @staticmethod
     def extract_section_from_text(text: str, section_pattern: str) -> List[SectionInfo]:
         sections = []
@@ -482,28 +493,121 @@ class PDFHandler:
         PDFHandler.get_sections_text(text, final_sections)
         
         return final_sections
+    
+    @staticmethod
+    def find_pattern_in_text(text: str, pattern: str, debug: bool = False) -> SectionInfo:
+        """Find all occurrences of a pattern in the text.
+
+        Args:
+            text (str): The text to search.
+            pattern (str): The regex pattern to match.
+
+        Returns:
+            List[Tuple[int, str]]: A list of tuples containing the position and matched text.
+        """
+        matches = list(re.finditer(pattern, text, re.MULTILINE))
+        if debug:
+            print(f"Found {len(matches)} matches:")
         
+        generate_page_start_end_list = PDFHandler.generate_page_start_end_list(text)
+        section_array = []
+        for match in matches:
+            page_number = -1
+            for idx, ((start_pos, _), (end_pos, _)) in enumerate(generate_page_start_end_list):
+                if start_pos <= match.start() < end_pos:
+                    page_number = idx + 1  
+                    break
+            matched_text = match.group(0)
+            section_number = match.group(1)
+            section_title = match.group(2)
+            bold = True if re.search(PDFHandler.regex_patterns["bold_tag"], matched_text) else False
+            size_match = re.search(PDFHandler.regex_patterns["size_tag"], matched_text)
+            section_info = SectionInfo(
+                section_number=section_number,
+                section_title=section_title,
+                page_number=page_number,
+                position=match.start(),
+                bold=bold,
+                size=float(size_match.group(1)) if size_match else 0.0,
+            )
+            section_array.append(section_info)
+
+        return section_array
+    
+    @staticmethod
+    def generate_page_start_end_list(text: str) -> List[Tuple[int, int]]:
+        """Generate a list of tuples containing the start and end positions of each page in the text.
+
+        Args:
+            text (str): The text to search.
+
+        Returns:
+            List[Tuple[int, int]]: A list of tuples containing the start and end positions of each page.
+        """
+        page_start_list = [(match.start(), match.group(0)) for match in re.finditer(PDFHandler.regex_patterns["page_start_tag"], text)]
+        page_end_list = [(match.start(), match.group(0)) for match in re.finditer(PDFHandler.regex_patterns["page_end_tag"], text)]
+        return list(zip(page_start_list, page_end_list))
+    
+    @staticmethod
+    def insert_section_into_sqlite(db_connection, sections: SectionInfo, id_pdf: int):
+        """Insert a section into the SQLite database.
+
+        Args:
+            db_connection: The SQLite database connection.
+            section (SectionInfo): The section to insert.
+        """
+        cursor = db_connection.cursor()
+        for section in sections:
+            cursor.execute(
+                "INSERT INTO extracted_text (section_number, pdf_id, section_title, page_number, position, content) VALUES (?, ?, ?, ?, ?, ?)",
+                (section.section_number, id_pdf, section.section_title, section.page_number, section.position, section.content)
+            )
+        db_connection.commit()
+
+    @staticmethod
+    def create_tables(db_connection):
+        """Create the sections table in the SQLite database if it does not exist."""
+        cursor = db_connection.cursor()
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS pdfs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                pdf_name TEXT NOT NULL UNIQUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS extracted_text (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                pdf_id INTEGER NOT NULL,
+                section_number TEXT NOT NULL,
+                section_title TEXT NOT NULL,
+                page_number INTEGER NOT NULL,
+                position INTEGER NOT NULL,
+                content TEXT,
+                FOREIGN KEY (pdf_id) REFERENCES pdfs(id)
+            )
+        """)
+        db_connection.commit()
 
 if __name__ == "__main__":
     path = "/home/PUC/Documentos/AutoSLR/papers_pdf/Scopus/Krishna2021.pdf"
+    db_connection = sqlite3.connect("simple_regex.db")
     
     doc = PDFHandler.try_open(path)
     if doc is None:
         print("Error opening the PDF")
         exit(1)
-    PDFHandler.extract_all_pdf_sections(doc, "numeric_section")
+    
+    text, page_count, doc_most_common_size = PDFHandler.tagged_text_extraction(doc)
+    with open("./output.txt", "w") as f:
+        f.write(text)
+
+    # PDFHandler.create_tables(db_connection)
     # text, page_count = PDFHandler.simple_extraction(doc)
-    # tagged_text, tagged_page_count = PDFHandler.tagged_text_extraction(doc)
-    # with open("test.txt", "w") as f:
-    #     f.write(text)
-    # sections = PDFHandler.extract_all_pdf_sections(doc, "numeric_section")
-    
-    
-    # Print results
-    # print(f"Found {len(sections)} sections:")
+    # text = PDFHandler.default_pdf_cleaning(text)
+    # sections = PDFHandler.find_pattern_in_text(text, PDFHandler.regex_patterns["generic_section_title"])
     # for section in sections:
-    #     print(f"\n{section.section_number}: {section.section_title}")
-    #     print(f"Confidence score: {section.confidence_score}")
-        # print(section.content)
-        # print(f"Metrics: {section.metrics}")
-        # print(f"Content preview: {section.content[:100]}...")
+    #     print(f"Section: {section.section_title}, Page: {section.page_number}, Position: {section.position}")
+    # PDFHandler.insert_section_into_sqlite(db_connection, sections)
