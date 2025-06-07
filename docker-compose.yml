@@ -94,8 +94,6 @@ services:
             - app-network
             - kafka-net
 
- 
-
 
   # prometheus:
   #   image: prom/prometheus:latest

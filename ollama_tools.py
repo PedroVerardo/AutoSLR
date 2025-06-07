@@ -15,7 +15,7 @@ def ask_llm(prompt, context: list[str] = [], model="deepseek-r1:1.5b"):
 
         data = {
             "model": model,
-            "prompt": f"Context:\n{context}\nEnd of context\nAnswer the question with only Context information, anything besides that write MYTHINKING:\n{prompt}"
+            "prompt": prompt
         }
 
         response = requests.post(

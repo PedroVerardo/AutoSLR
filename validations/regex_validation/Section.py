@@ -10,6 +10,7 @@ class SectionInfo:
         self.metrics = metrics or {}
         self.bold = bold
         self.size = size
+        self.all_caps = section_title.isupper()
         self.confidence_score = 0
     
     def update_metrics(self, metric_name, value):
@@ -21,7 +22,7 @@ class SectionInfo:
         score = 0
         weights = {
             "is_bold": 2,
-            "is_capital": 1,
+            "is_capital": 2,
             "has_section_number": 3,
             "font_size_larger": 2,
             "has_common_title": 4,
@@ -35,6 +36,9 @@ class SectionInfo:
         self.confidence_score = score
         return score
 
-
+    def get_title(self):
+        """Return the section title."""
+        return self.section_number + self.section_title
+    
     def __str__(self):
         return f"Section {self.section_number}: {self.section_title} (Page {self.page_number}, Score: {self.confidence_score})"

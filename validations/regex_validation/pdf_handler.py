@@ -9,6 +9,10 @@ from Section import SectionInfo
 from collections import defaultdict
 import sqlite3
 import time
+import requests
+import json
+from docling.document_converter import DocumentConverter
+OLLAMA_URL = "http://localhost:11434"
 
 '''
 Considerations:
@@ -29,7 +33,6 @@ Considerations:
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.FileHandler("pdf_extraction.log"),
         logging.StreamHandler()
     ]
 )
@@ -37,7 +40,6 @@ logging.basicConfig(
 logging.basicConfig(
     level=logging.WARNING,
     handlers=[
-        logging.FileHandler("pdf_extraction.log"),
         logging.StreamHandler()
     ]
 )
@@ -73,19 +75,20 @@ class PDFHandler:
         "conclusion": r"^\s*[Cc][Oo][Nn][Cc][Ll][Uu][Ss][Ii][Oo][Nn]\n",
         "figure": r"(?i)\b(?:figure|fig)\.?\s*\d+(?:[-.:]?\d+)?\b",
         "table": r"(?i)\b(?:table|tab)\.?\s*\d+(?:[-.:]?\d+)?\b",
-        "numeric_point_section": r"^\s*(\d+)\.\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
-        "rome_point_section": r"^\s*([IVX]+)\.\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
-        "numeric_section": r"^s*(\d+)\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
-        "generic_section_title": r"^(\d+|[IVX]+)[\.]?\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "numeric_point_section": r"^\s*(\d+)\.(?:<--.*-->)*\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "rome_point_section": r"^\s*([IVX]+)\.(?:<--.*-->)*\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "numeric_section": r"^s*(\d+)(?:<--.*-->)*\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "generic_section_title": r"^(\d+|[IVX]+)\.?\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
         "table_description": r"(TABLE|Table|table)\s*\d+\.[\s\S]+?\n",
-        #"generic_section": r"^\s*([A-Z][a-zA-Z\s]+)$",
         "citation1": r"^\[(\d)\]\s*([^\[]+)\n",
         "bold_tag": r"<--bold-->",
         "italic_tag": r"<--italic-->",
-        "size_tag": r"<--size=(\d+(\.\d+)?)-->",
+        "size_tag": r"<--size=(\d+\.\d*)-->",
         "page_start_tag": r"<--page_start:(\d+)-->",
         "page_end_tag": r"<--page_end:(\d+)-->",
         "image_tag": r"<--image width=(\d+(\.\d+)?) height=(\d+(\.\d+)?)-->",
+        "html_title_tag": r"<h\d>(?:<.+>)*([A-Z][\w+:]+[ \w+]+)(?:<.+>)*</h\d>",
+        "html_ensure_title_number": r"<h\d>(?:<.+>)*(\d+|[IVX]+)\.*\s([A-Z][\w:]+[ \w+]+)(?:<.+>)*<\/h\d>",
     }
     
     common_section_titles = [
@@ -95,25 +98,34 @@ class PDFHandler:
         "future work", "research questions", "threats to validity"
     ]
 
-    section_position_map = {
-        "introduction": {"page": [1,2], "percentage": 0.08},
-        "background": {"page": [2,3], "percentage": 0.15},
-        "related work": {"page": 4, "percentage": 0.20},
-        "methodology": {"page": 5, "percentage": 0.35},
-        "method": {"page": 5, "percentage": 0.35},
-        "methods": {"page": 5, "percentage": 0.35},
-        "experiments": {"page": 7, "percentage": 0.55},
-        "experimental setup": {"page": 7, "percentage": 0.55},
-        "results": {"page": 8, "percentage": 0.70},
-        "discussion": {"page": 9, "percentage": 0.75},
-        "evaluation": {"page": 8, "percentage": 0.70},
-        "conclusion": {"page": 10, "percentage": 0.85},
-        "references": {"page": 11, "percentage": 0.95},
-        "future work": {"page": 10, "percentage": 0.85},
-        "acknowledgments": {"page": 10, "percentage": 0.90},
-        "appendix": {"page": 12, "percentage": 0.98}
-    }
+    llm_prompt = """Please analyze this scientific article and identify all the sections present in the document. Extract and return the information in JSON format with the following structure:
 
+                {
+                    sections: [
+                        {
+                        "section_number": "string",
+                        "section_name": "string",
+                        "page_number": "number or range"
+                        },...
+                    ]
+                }
+
+                For each section found, include:
+                - The exact section name/title as it appears in the document
+                - The page number(s) where the section appears
+                - The section number if applicable (e.g., 1, 2, 3, etc. or I, II, III for Roman numerals), is possible to not have any, in that case use 0
+
+                Common academic sections such as:
+                - Abstract
+                - Introduction
+                - Related Work
+                - Methodology/Methods
+                - Results
+                - Discussion
+                - Conclusion
+
+                Return only the JSON response without additional commentary.
+            """
     @staticmethod
     def try_open(pdf_path: str):
         try:
@@ -226,7 +238,7 @@ class PDFHandler:
         return information_by_depth[argmax_depth]
     
     @staticmethod
-    def simple_extraction(doc: fitz.Document) -> dict[int, str] | None:
+    def simple_extraction(doc: fitz.Document) -> dict[int, str]:
         """This function extracts text from a PDF file and returns the text along with the number of pages.
 
         Args:
@@ -247,7 +259,7 @@ class PDFHandler:
 
         except Exception as e:
             print(f"An error occurred: {e} in {__file__} ")
-            return None
+            return "", 0
 
     @staticmethod
     def tagged_text_extraction(doc: fitz.Document) -> str:
@@ -292,6 +304,7 @@ class PDFHandler:
                         tags = []
                         line_font_sizes = []
                         line_is_bold = True
+                        previous_line_text = ""
 
                         for span in line["spans"]:
                             mod = extract_span_formatting(span)
@@ -339,7 +352,6 @@ class PDFHandler:
         try:
             return fromRoman(rome.upper())
         except InvalidRomanNumeralError as irne:
-            logging.error(f"Error converting Roman numeral: {irne}")
             return int(rome)
 
     @staticmethod
@@ -390,17 +402,19 @@ class PDFHandler:
         return best_section
 
     @staticmethod
-    def voting_policy(sections: List[SectionInfo]) -> List[SectionInfo]:
+    def voting_policy(sections: List[SectionInfo], size_mode: int) -> List[SectionInfo]:
         
         sorted_sections = sorted(sections, key=lambda x: (getattr(x, 'section_number', 0), getattr(x, 'position', 0)))
         
-        for section in sorted_sections:
-
+        for idx, section in enumerate(sorted_sections):
+            if int(section.section_number) > 12:
+                break
             section.update_metrics("is_bold", True if re.search(PDFHandler.regex_patterns["bold_tag"], section.section_title) else False)
-            # size_match = re.search(PDFHandler.regex_patterns["size_tag"], section.section_title)
-            # if size_match:
-            #     font_size = float(size_match.group(1))
-            #     section.update_metrics("font_size_larger", font_size > 1.0)
+            size_match = re.search(PDFHandler.regex_patterns["size_tag"], section.section_title)
+            if size_match:
+                font_size = float(size_match.group(1))
+                section.update_metrics("font_size_larger", font_size > size_mode)
+            section.update_metrics("is_capital", section.section_title.isupper())
             section.update_metrics("has_common_title", True if any(title.lower() in section.section_title.lower() for title in PDFHandler.common_section_titles) else False)
             section.update_metrics("has_no_ponctuation", False if re.search(PDFHandler.regex_patterns["ponctuation_ASCII"], section.section_title) else True)
 
@@ -496,15 +510,6 @@ class PDFHandler:
     
     @staticmethod
     def find_pattern_in_text(text: str, pattern: str, debug: bool = False) -> SectionInfo:
-        """Find all occurrences of a pattern in the text.
-
-        Args:
-            text (str): The text to search.
-            pattern (str): The regex pattern to match.
-
-        Returns:
-            List[Tuple[int, str]]: A list of tuples containing the position and matched text.
-        """
         matches = list(re.finditer(pattern, text, re.MULTILINE))
         if debug:
             print(f"Found {len(matches)} matches:")
@@ -520,6 +525,8 @@ class PDFHandler:
             matched_text = match.group(0)
             section_number = match.group(1)
             section_title = match.group(2)
+            if debug:
+                print(f"section_title {section_title}" )
             bold = True if re.search(PDFHandler.regex_patterns["bold_tag"], matched_text) else False
             size_match = re.search(PDFHandler.regex_patterns["size_tag"], matched_text)
             section_info = SectionInfo(
@@ -591,18 +598,118 @@ class PDFHandler:
         """)
         db_connection.commit()
 
+    @staticmethod
+    def ask_llm(prompt, context: list[str] = [], model="deepseek-r1:1.5b"):
+        try:
+
+            if isinstance(prompt, list):
+                prompt = "\n".join(str(item) for item in prompt)
+
+            if isinstance(context, list):
+                context = "\n".join(str(item) for item in context)
+
+            data = {
+                "model": model,
+                "prompt": f"Context:\n{context}\nEnd of context\nAnswer the question with only Context information, anything besides that write MYTHINKING:\n{prompt}"
+            }
+
+            response = requests.post(
+                f'{OLLAMA_URL}/api/generate',
+                json=data,
+                timeout=10,
+                stream=False
+            )
+            response.raise_for_status()
+            
+            full_response = ""
+            for line in response.text.splitlines():
+                if line.strip():
+                    try:
+                        json_response = json.loads(line)
+                        if 'response' in json_response:
+                            full_response += json_response['response']
+                    except json.JSONDecodeError:
+                        continue
+            
+            return full_response
+
+        except requests.exceptions.ConnectionError:
+            return "Error: Cannot connect to Ollama server"
+        except requests.exceptions.RequestException as e:
+            return f"Error: Request failed: {str(e)}"
+
+    @staticmethod
+    def orc_extraction_html(path: str) -> List[SectionInfo]:
+        converter = DocumentConverter()
+        result = converter.convert(path)
+
+        matches = re.finditer(PDFHandler.regex_patterns["html_ensure_title_number"], result.document.export_to_html(), re.MULTILINE)
+
+        result_sections = []
+
+        found_any = False
+        for match in matches:
+            found_any = True
+            print(f"DEBUG: match found wiht section number {match.group(1)} and title {match.group(2)}")
+            section_title = match.group(2)
+            section_number = match.group(1)
+            section_start = match.start(0)
+            section_number = PDFHandler.convert_rome_to_numeric(section_number)
+            secinfo = SectionInfo(
+                section_number=section_number,
+                section_title=section_title,
+                page_number=0,  
+                position=section_start,
+                bold=False,
+                size=0,
+            )
+
+            result_sections.append(secinfo)
+        if not found_any:
+            print("No sections found in the HTML with numerator, trying without it.")
+            matches = re.finditer(PDFHandler.regex_patterns["html_title_tag"], result.document.export_to_html())
+            found_any_title = False
+            for match in matches:
+                found_any_title = True
+                print(f"DEBUG: match found wihtout section title {match.group(1)}")
+                section_title = match.group(1)
+                section_number = 0
+                section_start = match.start(0)
+                secinfo = SectionInfo(
+                    section_number=int(section_number),
+                    section_title=section_title,
+                    page_number=0,  
+                    position=section_start,
+                    bold=False,
+                    size=0,
+                )
+                result_sections.append(secinfo)
+            if not found_any_title:
+                print("INFO: No sections found in the HTML, trying with generic section title.")
+                return []
+        
+        return result_sections
+        
+
+
+        
+        
+
+
 if __name__ == "__main__":
-    path = "/home/PUC/Documentos/AutoSLR/papers_pdf/Scopus/Krishna2021.pdf"
+    path = "/home/pramos/Documents/AutoSLR/papers_pdf/Scopus/Gao2021-ICSE.pdf"
     db_connection = sqlite3.connect("simple_regex.db")
+
+    # PDFHandler.orc_extraction_html(path)
     
-    doc = PDFHandler.try_open(path)
-    if doc is None:
-        print("Error opening the PDF")
-        exit(1)
+    # doc = PDFHandler.try_open(path)
+    # if doc is None:
+    #     print("Error opening the PDF")
+    #     exit(1)
     
-    text, page_count, doc_most_common_size = PDFHandler.tagged_text_extraction(doc)
-    with open("./output.txt", "w") as f:
-        f.write(text)
+    # text, page_count, doc_most_common_size = PDFHandler.tagged_text_extraction(doc)
+    # with open("./output.txt", "w") as f:
+    #     f.write(text)
 
     # PDFHandler.create_tables(db_connection)
     # text, page_count = PDFHandler.simple_extraction(doc)
