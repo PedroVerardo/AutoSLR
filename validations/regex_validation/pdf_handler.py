@@ -75,10 +75,10 @@ class PDFHandler:
         "conclusion": r"^\s*[Cc][Oo][Nn][Cc][Ll][Uu][Ss][Ii][Oo][Nn]\n",
         "figure": r"(?i)\b(?:figure|fig)\.?\s*\d+(?:[-.:]?\d+)?\b",
         "table": r"(?i)\b(?:table|tab)\.?\s*\d+(?:[-.:]?\d+)?\b",
-        "numeric_point_section": r"^\s*(\d+)\.(?:<--.*-->)*\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
-        "rome_point_section": r"^\s*([IVX]+)\.(?:<--.*-->)*\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
-        "numeric_section": r"^s*(\d+)(?:<--.*-->)*\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
-        "generic_section_title": r"^(\d+|[IVX]+)\.?\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "numeric_point_section": r"^\s*(\d+)\.(?:<--.*-->)*\s*([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "rome_point_section": r"^\s*([IVX]+)\.(?:<--.*-->)*\s*([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "numeric_section": r"^s*(\d+)(?:<--.*-->)*\s*([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
+        "generic_section_title": r"^(\d+|[IVX]+)\.?(?:<--.*-->)*\s([A-Z][\w:]+[ \w+]+)(<--.*-->)*\n",
         "table_description": r"(TABLE|Table|table)\s*\d+\.[\s\S]+?\n",
         "citation1": r"^\[(\d)\]\s*([^\[]+)\n",
         "bold_tag": r"<--bold-->",
@@ -103,17 +103,18 @@ class PDFHandler:
                 {
                     sections: [
                         {
+                        "all_section": "string",
                         "section_number": "string",
                         "section_name": "string",
-                        "page_number": "number or range"
                         },...
                     ]
                 }
 
                 For each section found, include:
+                - All section is the combined string with the section number (if exists) and the section name/title
                 - The exact section name/title as it appears in the document
-                - The page number(s) where the section appears
-                - The section number if applicable (e.g., 1, 2, 3, etc. or I, II, III for Roman numerals), is possible to not have any, in that case use 0
+                - The section number if applicable (e.g., 1, 2, 3, etc. or I, II, III for Roman numerals), is possible to not have any, in that case use "" an empty string
+                - Pick only the most general section level. For example, if you find '2 Related Work' and '2.1 Graph Usage', you should only extract '2 Related Work'. Do not extract subsections like '2.1', '3.3', etc. 
 
                 Common academic sections such as:
                 - Abstract
@@ -566,8 +567,8 @@ class PDFHandler:
         cursor = db_connection.cursor()
         for section in sections:
             cursor.execute(
-                "INSERT INTO extracted_text (section_number, pdf_id, section_title, page_number, position, content) VALUES (?, ?, ?, ?, ?, ?)",
-                (section.section_number, id_pdf, section.section_title, section.page_number, section.position, section.content)
+                "INSERT INTO extracted_text (section_number, pdf_id, section_title, page_number, position, content, all_section) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (section.section_number, id_pdf, section.section_title, section.page_number, section.position, section.content, section.all_section)
             )
         db_connection.commit()
 
@@ -588,6 +589,7 @@ class PDFHandler:
             CREATE TABLE IF NOT EXISTS extracted_text (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 pdf_id INTEGER NOT NULL,
+                all_section TEXT,
                 section_number TEXT NOT NULL,
                 section_title TEXT NOT NULL,
                 page_number INTEGER NOT NULL,
