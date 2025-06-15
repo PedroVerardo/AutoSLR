@@ -3,8 +3,45 @@
         "question": "What sampling method is used in the paper?",
         "answer": "The sampling method used in the paper is:",
         "context": "sampling methods are used to select a representative subset from a dataset. They are often used to reduce the size of the dataset while maintaining its diversity and characteristics.",
-        "some_answer_example": "Randon sampling, Stratified sampling, Systematic sampling, Cluster sampling, Convenience sampling, Purposive sampling, Snowball sampling, Oversampling, Undersampling and etc... .",
+        "some_possible_answers": "Randon sampling, Stratified sampling, Systematic sampling, Cluster sampling, Convenience sampling, Purposive sampling, Snowball sampling, Oversampling, Undersampling and etc... .",
         "text_example": "The preliminary analysis entails choosing an acceptable sample strategy because the dataset is severely imbalanced. Using some technique, such as changing the amount of the original data, sampling methods will convert an imbalanced dataset into a balanced distribution. The difficulty with imbalanced datasets is that most machine learning approaches will disregard the minority class, which is fraud, and hence perform poorly on it. Undersampling, Oversampling, and ROSE sampling approaches were tested for this objective. The performance of each sampling technique on the dataset is measured using ROC-AUC performance measure. The ROC-AUC gives you a number between 0 and 1, with one being the best and 0 being the worst. We chose the sampling approach with the maximum area under the curve (AUC) based on the study of the three sample methods since it will deliver the best performance. For our dataset, oversampling produced the greatest AUC.",
-        "text_example_answare": "Undersampling, Oversampling, and ROSE"
+        "text_example_answare": "Undersampling, Oversampling, and ROSE",
+        "output_format": "" 
+    },
+    "dataset":{
+        "question": "What dataset is used in the paper?",
+        "answer": "The dataset used in the paper is:",
+        "context": "Datasets are collections of data that are used for analysis, training machine learning models, or other purposes. They can vary widely in size, structure, and content.",
+        "some_possible_answers": "Image datasets, Text datasets, Audio datasets, Video datasets, Tabular datasets and etc..., they could have different formats such as CSV, JSON, XML, or SQL databases.",
+        "text_example": "This paper introduces the EMNIST dataset and then ap- plies two ELM-based neural networks to the classification tasks made possible with the complete NIST dataset. The classification systems demonstrate the structure and nature of the classification tasks involving both digits and letters, and additionally provides benchmark results for this new dataset. The purpose of the EMNIST dataset is to function as a drop- in replacement for the MNIST dataset in existing classification systems. As a result, the focus of the methodology is on reproducing the steps used to convert the NIST dataset into the MNIST dataset and apply them to the entire NIST SpecialDatabase 19. This conversion process and the modifications implemented to better convert the letters is described in Section II-B. The classifier used in this work are introduced and described in Section II-C and were applied to three different classifi- cation tasks based on combinations of letters, digits and the full classification task using the NIST dataset. In addition, a subset of the EMNIST digits were extracted and used to train a classifier. The results were then compared to an identical network applied to the MNIST digits in order to explore and validate the conversion process used in this work. The code used to extract the data from the original NIST dataset, the conversion code from 128 × 128 pixel binary images to the converted gray-scale and the code to perform the training and testing splits are provided as supplementary material to this paper.",
+        "text_example_answare": "EMNIST, NIST, MNIST",
+        "output_format": ""
+    },
+    "technique":{
+        "question": "What technique is used in the paper?",
+        "answer": "The technique used in the paper is:",
+        "context": "techniques refer to the methods or approaches used in the Machine Learning field to solve specific problems or tasks. They are normally categorized in supervised learning (classification, regression), unsupervised learning (clustering, dimensionality reduction)",
+        "some_possible_answers": "Decision Trees, Support Vector Machines, Neural Networks, k-Nearest Neighbors, Random Forests, Gradient Boosting Machines",
+        "text_example": "",
+        "text_example_answare": "",
+        "output_format": ""
+    },
+    "partition method":{
+        "question": "What partition method is used in the paper?",
+        "answer": "The partition method used in the paper is:",
+        "context": "partition methods are used to divide a dataset into subsets for training, validation, and testing. They help in evaluating the performance of machine learning models by ensuring that the model is tested on unseen data.",
+        "some_possible_answers": "Holdout method, k-Fold Cross-Validation, Stratified k-Fold Cross-Validation, Leave-One-Out Cross-Validation (LOOCV), Time Series Split and etc... .",
+        "text_example": "",
+        "text_example_answare": "",
+        "output_format": ""
+    },
+    "evaluation metric":{
+        "question": "What evaluation metric is used in the paper?",
+        "answer": "The evaluation metric used in the paper is:",
+        "context": "evaluation metrics are used to assess the performance of machine learning models. They provide a quantitative measure of how well a model performs on a given task.",
+        "some_possible_answers": "accuracy, precision, recall, F1-score, ROC-AUC, mean absolute error(MAE), and mean squared error(MSE). and etc... .",
+        "text_example": "",
+        "text_example_answare": "",
+        "output_format": ""
     }
 }
