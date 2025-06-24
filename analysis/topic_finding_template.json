@@ -1,0 +1,62 @@
+{
+    "alves2020-icpe":{
+        "introduction": "1",
+        "methodology": "3"
+    },
+    "Ha2019-icse": {
+        "introduction": "1",
+        "methodology": "2"
+    },
+    "Krishna2021": {
+        "introduction": "1",
+        "methodology": ["3","4"]
+    },
+    "martin2021": {
+        "introduction": "1",
+        "methodology": "4"
+    },
+    "Muhlbauer2020": {
+        "introduction": "1",
+        "methodology": "1"
+    },
+    "OH2023": {
+        "introduction": "1",
+        "methodology": ["2", "3", "4", "5", "6"]
+    },
+    "shu2020":{
+        "introduction": "1",
+        "methodology": "2"
+    },
+    "Temple2021": {
+        "introduction": "1",
+        "methodology": "2"
+    },
+    "magrin2022_twc": {
+        "introduction": "I.",
+        "methodology": "IV."
+    },
+    "marcén2022ssm": {
+        "introduction": "1",
+        "methodology": ["3", "4", "5", "6"]
+    },
+    "metzger2024computing": {
+        "introduction": "1",
+        "methodology": [ "3", "4"]
+    },
+    "muhlbauer2023_icse": {
+        "introduction": "I.",
+        "methodology": "III."
+    },
+    "peeters2021_ida":{
+        "introduction": "1",
+        "methodology": ["2", "3", "4"]
+    },
+    "peng2023ese": {
+        "introduction": "1",
+        "methodology": ["2", "4"]
+    },
+    "ros2020_emse": {
+        "introduction": "1",
+        "methodology": ["3", "4", "5"]
+    }
+}

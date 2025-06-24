@@ -1,0 +1,758 @@
+3
+DESIGN STUDY
+In this section, we introduce our research questions, the considered
+subject system, and the experiment setup.
+3.1
+Research Questions
+We conducted a series of experiments to evaluate six sampling
+strategies and to compare our results to the original results in [25].
+We aim at answering the following two research questions:
+• (RQ1) What is the influence of using different sampling
+strategies on the accuracy of performance predictions over
+different inputs and non-functional properties?
+0.70
+0.75
+0.80
+0.85
+0.90
+0.95
+1.00
+1.05
+Video size (bytes)
+1e7
+0
+5
+10
+15
+20
+25
+30
+35
+40
+Frequency
+(a) flower_sif.y4m x2642
+0.8
+1.0
+1.2
+1.4
+1.6
+1.8
+Video size (bytes)
+1e7
+0
+20
+40
+60
+80
+100
+Frequency
+(b) 720p50_parkrun_ter.y4m x26415
+Figure 2: The size distribution of 1,152 configurations of
+x264 over two input videos
+• (RQ2) What is the influence of randomness of using dif-
+ferent sampling strategies on the robustness of prediction
+accuracy?
+It is not new the claim that the prediction accuracy of machine
+learning extensively depends on the sampling strategy. The origi-
+nality of the research question is to what extent are performance
+prediction models of the same configurable system (here: x264) sen-
+sitive to other factors, such as different inputs and non-functional
+properties. To address RQ1, we analyze the sensitivity of the pre-
+diction accuracy of sampling strategies to these factors. Since most
+of the considered sampling strategies use randomness, which may
+considerably affect the prediction accuracy, RQ2 quantitatively com-
+pares whether the variances (over 100 runs) on prediction accuracy
+between different sampling strategies and sample sizes differ sig-
+nificantly. We show that the sampling prediction accuracy and
+robustness hardly depends on the definition of performance (i.e.,
+encoding time or encoding size). As in Kaltenecker et al. [25], we
+have excluded t-wise sampling from RQ2, as it is also deterministic
+in our setting and does not lead to variations.
+3.2
+Subject System
+We conduct an in-depth study of x264, a popular and highly config-
+urable video encoder implemented in C. We choose x264 instead
+of the other case studies documented in Kaltenecker et al. [25] be-
+cause x264 demonstrated more promising accuracy results to the
+newest proposed sampling approach (i.e., diversified distance-based
+sampling). With this study, we aim at investigating, for instance,
+whether diversified distance-based sampling also dominates across
+different variations of x264 (i.e., inputs, performance properties).
+As benchmark, we encoded 17 different input videos from raw
+SESSION 7: Performance Techniques
+ICPE '20, April 20–24, 2020, Edmonton, AB, Canada
+280
+<--page_end:4--><--page_start:5-->Sampling Effect on Performance Prediction of
+Configurable Systems: A Case Study
+ICPE ’20, April 20–24, 2020, Edmonton, AB, Canada
+YUV to the H.264 codec and measured two quantitative properties
+(encoding time and encoding size).
+• Encoding time (in short time): how many seconds x264 takes
+to encode a video.
+• Encoding size of the output video (in short size): compres-
+sion size (in bytes) of an output video in the H.264 format.
+All measurements have been performed over the same version
+of x264 and on a grid computing infrastructure called IGRIDA1.
+Importantly, we used the same hardware characteristics for all
+performance measurements. In Table 1, we provide an overview
+of the encoded input videos. This number of inputs allows us to
+draw conclusions about the practicality of sampling strategies for
+diversified conditions of x264.
+To control measurement bias while measuring execution time,
+we have repeated the measurements several times. We report in
+Table 1 how many times we have repeated the time measurements
+of all 1,152 configurations for each video input. the number of
+repetitions has been increased to reach a standard deviation of
+less than 10%. Since measurements are costly, we set the repetition
+to up 30 times given 1-hour restriction from where we got the
+#times in Table 1. We repeated the measurements at least three
+times and at most 23 times and retained the average execution
+time for each configuration. The stability column reports whether
+the configuration measurements for a given input video are stable
+(Relative Standard Deviation - RSD). For example, measurements
+have been repeated 5 times for video 0 (bridge_far_cif.y4m) and the
+measurements present low RSD of ≈1%. Although the RSD measure
+for Video 3 (claire_qcif.y4m) is higher compared to the others, the
+deviation still remains lower than 10% (i.e., RSD ≈8.7%). We provide
+the variability model and the measurements of each video input for
+encoding time and encoding size on our supplementary website.
+3.3
+Experiment Setup
+In our experiments, the independent variables are the choice of the
+input videos, the predicted non-functional-property, the sample
+strategies and the sample sizes.
+For comparison, we used the same experiment design than in
+Kaltenecker et al. [25]. To evaluate the accuracy of different sam-
+pling strategies over different inputs and non-functional-properties,
+we conducted experiments using three different sample sizes. To
+be able to use the same sample sizes for all sampling strategies, we
+consider the sizes from t-wise sampling with t=1, t=2, and t=3. As
+described in Section 2.2, t-wise sampling covers all combinations
+of t configuration options being selected. We learn a performance
+model based on the sample sets along with the corresponding per-
+formance measurements defined by the different sampling strate-
+gies. Although several machine-learning techniques have been pro-
+posed in the literature with this purpose [46], such as linear regres-
+sion [10, 20, 21, 25–27, 33, 39, 50, 52, 54, 67], classification and regres-
+sion trees (CART) [2, 16, 21, 28, 39–42, 48, 51, 56, 58, 60, 63, 64, 68–
+71], and random forest [3, 6, 49, 61, 63]. In this paper, we use step-
+wise multiple linear regression [52] as in Kaltenecker et al. [25].
+According to Kaltenecker et al. [25], multiple linear regression is
+often as accurate as CART and random forests.
+1http://igrida.gforge.inria.fr/
+video
+#times
+stability
+x2640
+bridge_far_cif.y4m
+5
+0.010127
+x2641
+ice_cif.y4m
+5
+0.044476
+x2642
+flower_sif.y4m
+5
+0.036826
+x2643
+claire_qcif.y4m
+5
+0.086958
+x2644
+sintel_trailer_2k_480p24.y4m
+9
+0.009481
+x2645
+football_cif.y4m
+5
+0.029640
+x2646
+crowd_run_1080p50.y4m
+3
+0.005503
+x2647
+blue_sky_1080p25.y4m
+8
+0.010468
+x2648
+FourPeople_1280x720_60.y4m
+11
+0.011258
+x2649
+sunflower_1080p25.y4m
+4
+0.006066
+x26410
+deadline_cif.y4m
+23
+0.014536
+x26411
+bridge_close_cif.y4m
+5
+0.009892
+x26412
+husky_cif.y4m
+5
+0.028564
+x26413
+tennis_sif.y4m
+5
+0.044731
+x26414
+riverbed_1080p25.y4m
+3
+0.007625
+x26415
+720p50_parkrun_ter.y4m
+8
+0.010531
+x26416
+soccer_4cif.y4m
+16
+0.011847
+Table 1: Overview of encoded input videos including the
+number of times we measured the encoding time in order
+to ensure we have a stable set of measurements (according
+to RSD results), independent of the machine.
+To calculate the prediction error rate, we use the resulting per-
+formance models to predict the performance of the entire dataset
+of valid configurations C. We calculate the error rate of a prediction
+model in terms of the mean relative error (MRE - Equation 1). MRE
+is used to estimate the accuracy between the exact measurements
+and the predicted one.
+MRE = 1
+|C|
+Õ
+c ∈C
+|measuredc −predictedc |
+measuredc
+(1)
+Where C is the set of all valid configurations used as the valida-
+tion set, and measuredc and predictedc indicate the measured and
+predicted values of performance for configuration c with c ∈C,
+respectively. The exact value of measuredc is measured at run-
+time while running the configuration c, and the predicted values of
+predictedc is computed based on the model built with a sample of
+configurations t (see Section 2.2). To address RQ1, we computed the
+mean error rate for each input video and sample size. A lower error
+rate indicates a higher accuracy. Then, we use a Kruskal-Wallis
+test [29] and pair-wise one-sided Mann-Whitney U tests [34] to
+identify whether the error rate of two sampling strategies differs
+significantly (p < 0.05) [4]. In addition, we compute the effect size
+ˆA12 [65] (small(>0.56), medium(>0.64), and large(>0.71)) to easily
+compare the error rates of two sampling strategies.
+To address RQ2, we compute the variance across the error rates
+over 100 runs. A lower variance indicates higher robustness. First,
+we use Levene’s test [32] to identify whether the variances of two
+sampling strategies differ significantly from each other. Then, for
+these sampling strategies, we perform a one-sided F-tests [55] to
+compare pair-wisely the variance between sampling strategies.
+All sampling and learning experiments have been performed on
+the same machine with Intel Core i7 CPU 2,2 GHz and 4GB RAM.
+To reduce fluctuations in the values of dependent variables caused
+SESSION 7: Performance Techniques
+ICPE '20, April 20–24, 2020, Edmonton, AB, Canada
+281
+<--page_end:5--><--page_start:6-->ICPE ’20, April 20–24, 2020, Edmonton, AB, Canada
+Juliana Alves Pereira, Mathieu Acher, Hugo Martin, and Jean-Marc Jézéquel
+Video
+Coverage-based
+Solver-based
+Randomized solver-based
+Distance-based
+Diversified distance-based
+Random
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+x2640
+18.2 %
+13.9 %
+13.4 %
+24.0 %
+27.0 %
+27.5 %
+22.3 %
+19.9 %
+24.3 %
+16.5 %
+12.7 %
+10.6 %
+16.3 %
+8.8 %
+8.2 %
+16.7 %
+9.2 %
+8.2 %
+x2641
+15.4 %
+13.2 %
+12.1 %
+26.9 %
+23.7 %
+24.9 %
+21.4 %
+21.5 %
+23.2 %
+17.3 %
+14.2 %
+9.5 %
+17.4 %
+9.8 %
+8.7 %
+16.1 %
+9.2 %
+8.7 %
+x2642
+29.3 %
+10.3 %
+9.7 %
+21.4 %
+19.4 %
+16.4 %
+19.1 %
+19.6 %
+19.4 %
+17.4 %
+11.4 %
+9.8 %
+17.6 %
+9.6 %
+9.3 %
+15.3 %
+9.5 %
+9.3 %
+x2643
+21.4 %
+13.7 %
+10.1 %
+25.2 %
+25.3 %
+26.4 %
+16.4 %
+22.3 %
+24.8 %
+13.6 %
+10.7 %
+10.2 %
+12.8 %
+9.8 %
+9.7 %
+14.5 %
+9.8 %
+9.2 %
+x2644
+21.8 %
+12.3 %
+14.4 %
+23.9 %
+21.2 %
+22.0 %
+18.3 %
+21.1 %
+22.5 %
+14.2 %
+11.7 %
+9.7 %
+13.9 %
+10.1 %
+8.9 %
+13.9 %
+9.4 %
+8.8 %
+x2645
+26.1 %
+14.1 %
+13.2 %
+28.8 %
+23.2 %
+24.1 %
+21.8 %
+22.5 %
+23.3 %
+16.4 %
+13.4 %
+11.4 %
+16.8 %
+10.7 %
+9.5 %
+15.7 %
+10.0 %
+9.3 %
+x2646
+25.9 %
+18.1 %
+8.6 %
+23.6 %
+28.5 %
+29.1 %
+18.2 %
+21.6 %
+24.9 %
+13.7 %
+9.9 %
+9.0 %
+13.2 %
+8.8 %
+7.8 %
+12.6 %
+8.0 %
+7.3 %
+x2647
+23.3 %
+14.2 %
+12.0 %
+20.2 %
+25.3 %
+26.1 %
+15.3 %
+23.0 %
+23.8 %
+12.2 %
+9.2 %
+7.2 %
+10.8 %
+8.5 %
+7.2 %
+11.4 %
+8.2 %
+7.3 %
+x2648
+20.8 %
+13.1 %
+11.5 %
+20.3 %
+22.7 %
+23.6 %
+16.7 %
+23.4 %
+23.4 %
+12.6 %
+10.4 %
+9.6 %
+11.1 %
+9.3 %
+8.3 %
+12.0 %
+8.7 %
+7.6 %
+x2649
+23.4 %
+13.2 %
+5.6 %
+22.1 %
+28.6 %
+29.7 %
+16.8 %
+24.2 %
+25.3 %
+11.4 %
+6.5 %
+6.5 %
+9.2 %
+5.8 %
+5.4 %
+10.9 %
+6.6 %
+5.4 %
+x26410
+21.9 %
+12.3 %
+9.3 %
+22.6 %
+23.2 %
+24.0 %
+17.9 %
+22.4 %
+24.3 %
+14.0 %
+10.2 %
+9.7 %
+13.5 %
+9.4 %
+8.9 %
+14.0 %
+9.0 %
+8.8 %
+x26411
+21.1 %
+12.6 %
+10.3 %
+25.7 %
+23.5 %
+23.8 %
+20.0 %
+21.1 %
+24.7 %
+13.3 %
+10.8 %
+10.4 %
+13.0 %
+10.1 %
+9.7 %
+13.9 %
+9.4 %
+9.1 %
+x26412
+25.4 %
+13.4 %
+10.4 %
+26.2 %
+21.2 %
+21.6 %
+19.8 %
+20.6 %
+20.9 %
+16.2 %
+13.7 %
+10.9 %
+16.3 %
+11.4 %
+9.1 %
+15.0 %
+9.7 %
+8.5 %
+x26413
+16.4 %
+10.5 %
+10.0 %
+20.6 %
+18.8 %
+19.1 %
+18.3 %
+19.4 %
+19.8 %
+16.0 %
+13.9 %
+10.0 %
+16.2 %
+10.5 %
+9.6 %
+15.5 %
+9.7 %
+9.0 %
+x26414
+20.7 %
+16.9 %
+15.8 %
+34.3 %
+39.5 %
+40.6 %
+28.5 %
+29.7 %
+32.4 %
+18.1 %
+11.1 %
+9.6 %
+18.4 %
+7.8 %
+7.3 %
+17.4 %
+7.5 %
+7.2 %
+x26415
+26.2 %
+12.7 %
+11.1 %
+23.2 %
+26.5 %
+27.2 %
+20.3 %
+22.7 %
+25.1 %
+15.1 %
+11.9 %
+10.7 %
+14.8 %
+10.6 %
+9.5 %
+13.9 %
+9.1 %
+8.9 %
+x26416
+22.9 %
+12.3 %
+8.4 %
+22.1 %
+24.5 %
+25.2 %
+18.0 %
+22.2 %
+23.6 %
+13.4 %
+9.4 %
+8.9 %
+12.6 %
+8.5 %
+7.8 %
+12.5 %
+8.1 %
+7.4 %
+Mean
+22.4 %
+13.3 %
+10.9 %
+24.2 %
+24.8 %
+25.4 %
+19.4 %
+22.2 %
+23.9 %
+14.8 %
+11.3 %
+9.6 %
+14.3 %
+9.4 %
+8.5 %
+14.2 %
+8.9 %
+8.2 %
+Table 2: Error rates of t-wise, (randomized) solver-based, (diversified) distance-based, and random sampling for the prediction
+of encoding time for 17 input videos of x264. The bottom row contains the MRE mean across all input videos. The best results
+per input video and sample size are highlighted in bold if the Mann-Whitney U test reported a significant difference (p < 0.05).
+Mann-Whitney U test [p value ( ˆA12)]
+Coverage-based
+Solver-based
+Randomized solver-based
+Distance-based
+Diversified distance-based
+Random
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+t = 1
+t = 2
+t = 3
+0
+0
+0
+0
+Coverage-based
+(0.99)
+(1.00)
+(0.98)
+(1.00)
+10−08
+10−49
+Solver-based
+(0.55)
+(0.65)
+10−120
+10−99
+Randomized solver-based
+(0.73)
+(0.71)
+0
+10−119
+10−115
+0
+0
+0
+10−248
+0
+0
+Distance-based
+(0.92)
+(0.73)
+(0.73)
+(0.92)
+(0.99)
+(1.00)
+(0.83)
+(0.98)
+(1.00)
+0
+0
+0
+0
+0
+0
+10−283
+0
+0
+10−05
+10−166
+10−109
+Diversified distance-based
+(0.93)
+(0.95)
+(0.94)
+(0.93)
+(1.00)
+(1.00)
+(0.86)
+(1.00)
+(1.00)
+(0.54)
+(0.77)
+(0.72)
+0
+0
+0
+0
+0
+0
+10−285
+0
+0
+10−11
+10−262
+10−161
+10−03
+10−42
+10−24
+Random
+(0.93)
+(0.97)
+(0.96)
+(0.93)
+(1.00)
+(1.00)
+(0.86)
+(1.00)
+(1.00)
+(0.57)
+(0.84)
+(0.77)
+(0.53)
+(0.63)
+(0.60)
+Table 3: p values from a one-sided pair-wise Mann-WhitneyU test for the property encoding time, where we tested pair-wisely
+whether the error rate of the sampling strategy from the row is significantly lower than the error rate of the sampling strategy
+from the column, for different sample sizes. The effect size is included for every significant result (p < 0.05), where we consider
+the effect as small, medium, and large when ˆA12 is over 0.56, 0.64, and 0.71, respectively.
+by randomness (e.g., the random generation of input samples), we
+evaluated each combination of the independent variables 100 times.
+That is, for each input video, non-functional property, sampling
+strategy and sampling size, we instantiated our experimental set-
+tings and measured the values of all dependent variables 100 times
+with random seeds from 1 to 100.
+

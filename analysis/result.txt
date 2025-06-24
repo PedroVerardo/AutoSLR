@@ -1,0 +1,216 @@
+(venv) [pramos@localhost AutoSLR]$ /home/pramos/Documents/AutoSLR/venv/bin/python /home/pramos/Documents/AutoSLR/analysis/main.py
+/home/pramos/Documents/AutoSLR/venv/lib64/python3.9/site-packages/networkx/utils/backends.py:135: RuntimeWarning: networkx backend defined more than once: nx-loopback
+  backends.update(_get_backends("networkx.backends"))
+Processing reference: alves2020-icpe
+Input text: Introduction
+Candidates: ['ABSTRACT', 'KEYWORDS', 'INTRODUCTION', 'BACKGROUND AND RELATED WORK', 'DESIGN STUDY', 'RESULTS', 'DISCUSSION', 'THREATS TO VALIDITY', 'CONCLUSION', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Introduction Result: INTRODUCTION
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['ABSTRACT', 'KEYWORDS', 'INTRODUCTION', 'BACKGROUND AND RELATED WORK', 'DESIGN STUDY', 'RESULTS', 'DISCUSSION', 'THREATS TO VALIDITY', 'CONCLUSION', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Methodology Result: DESIGN STUDY
+BERT Methodology Result: DISCUSSION
+SBERT Methodology Result: DESIGN STUDY
+SciBERT Methodology Result: DESIGN STUDY
+Gemini Methodology Result: DESIGN STUDY
+Processing reference: Ha2019-icse
+Input text: Introduction
+Candidates: ['Abstract', 'INTRODUCTION', 'BACKGROUND', 'EVALUATION', 'RELATED WORK', 'CONCLUSION', 'Acknowledgment.', 'REFERENCES']
+/home/pramos/Documents/AutoSLR/analysis/main.py:18: RuntimeWarning: invalid value encountered in scalar divide
+  return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+Word2Vec Introduction Result: Acknowledgment.
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['Abstract', 'INTRODUCTION', 'BACKGROUND', 'EVALUATION', 'RELATED WORK', 'CONCLUSION', 'Acknowledgment.', 'REFERENCES']
+Word2Vec Methodology Result: Acknowledgment.
+BERT Methodology Result: EVALUATION
+SBERT Methodology Result: INTRODUCTION
+SciBERT Methodology Result: BACKGROUND
+Gemini Methodology Result: Abstract
+Processing reference: Krishna2021
+Input text: Introduction
+Candidates: ['Abstract', 'INTRODUCTION', 'MOTIVATION', 'DEFINITIONS AND PROBLEM STATEMENT', 'BEETLE: BELLWETHER TRANSFER LEARNER', 'OTHER TRANSFER LEARNING METHODS', 'EXPERIMENTAL SETUP', 'RESULTS', 'DISCUSSION', 'THREATS TO VALIDITY', 'RELATED WORK', 'CONCLUSION', 'REFERENCES']
+Word2Vec Introduction Result: INTRODUCTION
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['Abstract', 'INTRODUCTION', 'MOTIVATION', 'DEFINITIONS AND PROBLEM STATEMENT', 'BEETLE: BELLWETHER TRANSFER LEARNER', 'OTHER TRANSFER LEARNING METHODS', 'EXPERIMENTAL SETUP', 'RESULTS', 'DISCUSSION', 'THREATS TO VALIDITY', 'RELATED WORK', 'CONCLUSION', 'REFERENCES']
+Word2Vec Methodology Result: DEFINITIONS AND PROBLEM STATEMENT
+BERT Methodology Result: RELATED WORK
+SBERT Methodology Result: INTRODUCTION
+SciBERT Methodology Result: MOTIVATION
+Gemini Methodology Result: RELATED WORK
+Processing reference: martin2021
+Input text: Introduction
+Candidates: ['ABSTRACT', 'INTRODUCTION', 'PERFORMANCE SPECIALIZATION', 'STUDY DESIGN', 'RESULTS', 'DISCUSSION', 'THREATS TO VALIDITY', 'CONCLUSION', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Introduction Result: INTRODUCTION
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['ABSTRACT', 'INTRODUCTION', 'PERFORMANCE SPECIALIZATION', 'STUDY DESIGN', 'RESULTS', 'DISCUSSION', 'THREATS TO VALIDITY', 'CONCLUSION', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Methodology Result: STUDY DESIGN
+BERT Methodology Result: PERFORMANCE SPECIALIZATION
+SBERT Methodology Result: STUDY DESIGN
+SciBERT Methodology Result: STUDY DESIGN
+Gemini Methodology Result: STUDY DESIGN
+Processing reference: Muhlbauer2020
+Input text: Introduction
+Candidates: ['ABSTRACT', 'CCS CONCEPTS', 'KEYWORDS', 'ACM Reference Format', 'INTRODUCTION', 'EVALUATION', 'DISCUSSION', 'RELATED WORK', 'CONCLUSION', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Introduction Result: INTRODUCTION
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['ABSTRACT', 'CCS CONCEPTS', 'KEYWORDS', 'ACM Reference Format', 'INTRODUCTION', 'EVALUATION', 'DISCUSSION', 'RELATED WORK', 'CONCLUSION', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Methodology Result: CCS CONCEPTS
+BERT Methodology Result: EVALUATION
+SBERT Methodology Result: INTRODUCTION
+SciBERT Methodology Result: EVALUATION
+Gemini Methodology Result: RELATED WORK
+Processing reference: OH2023
+Input text: Introduction
+Candidates: ['INTRODUCTION', 'RESULTS ON PERFORMANCE MODELING', 'RESULTS ON SIMPLE RANDOM SEARCHING', 'RECURSIVE RANDOM SEARCH', 'EVALUATION USING ENUMERABLE SPLS', 'EVALUATION OF SRS AND RRS ON KCONFIG SPLS', 'FIXED BUDGET SPLO: THE ESSENTIAL PROBLEM', 'RELATED AND FUTURE WORK', 'CONCLUSIONS', 'APPENDICES', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Introduction Result: INTRODUCTION
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['INTRODUCTION', 'RESULTS ON PERFORMANCE MODELING', 'RESULTS ON SIMPLE RANDOM SEARCHING', 'RECURSIVE RANDOM SEARCH', 'EVALUATION USING ENUMERABLE SPLS', 'EVALUATION OF SRS AND RRS ON KCONFIG SPLS', 'FIXED BUDGET SPLO: THE ESSENTIAL PROBLEM', 'RELATED AND FUTURE WORK', 'CONCLUSIONS', 'APPENDICES', 'ACKNOWLEDGMENTS', 'REFERENCES']
+Word2Vec Methodology Result: EVALUATION USING ENUMERABLE SPLS
+BERT Methodology Result: CONCLUSIONS
+SBERT Methodology Result: INTRODUCTION
+SciBERT Methodology Result: INTRODUCTION
+Gemini Methodology Result: RELATED AND FUTURE WORK
+Processing reference: shu2020
+Input text: Introduction
+Candidates: ['ABSTRACT', 'CCS CONCEPTS', 'INTRODUCTION', 'PRELIMINARIES', 'EXPERIMENTS AND ANALYSIS', 'RELATED WORK', 'CONCLUSION', 'REFERENCES']
+Word2Vec Introduction Result: INTRODUCTION
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['ABSTRACT', 'CCS CONCEPTS', 'INTRODUCTION', 'PRELIMINARIES', 'EXPERIMENTS AND ANALYSIS', 'RELATED WORK', 'CONCLUSION', 'REFERENCES']
+Word2Vec Methodology Result: EXPERIMENTS AND ANALYSIS
+BERT Methodology Result: RELATED WORK
+SBERT Methodology Result: INTRODUCTION
+SciBERT Methodology Result: EXPERIMENTS AND ANALYSIS
+Gemini Methodology Result: PRELIMINARIES
+Processing reference: magrin2022_twc
+Input text: Introduction
+Candidates: ['Abstract', 'INTRODUCTION', 'TECHNOLOGY OVERVIEW', 'STATE OF THE ART IN LORAWAN MODELING', 'MODEL', 'NETWORK SIMULATIONS', 'RESULTS', 'CONCLUSION', 'REFERENCES']
+Word2Vec Introduction Result: INTRODUCTION
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['Abstract', 'INTRODUCTION', 'TECHNOLOGY OVERVIEW', 'STATE OF THE ART IN LORAWAN MODELING', 'MODEL', 'NETWORK SIMULATIONS', 'RESULTS', 'CONCLUSION', 'REFERENCES']
+Word2Vec Methodology Result: MODEL
+BERT Methodology Result: NETWORK SIMULATIONS
+SBERT Methodology Result: INTRODUCTION
+SciBERT Methodology Result: MODEL
+Gemini Methodology Result: Abstract
+Processing reference: marcén2022ssm
+Input text: Introduction
+Candidates: ['Abstract', 'Introduction', 'Background and motivation', 'Encodings', 'Evaluation', 'Statistical analysis', 'Discussion', 'Threats to validity', 'Related work', 'Conclusion and future work', 'References']
+Word2Vec Introduction Result: Introduction
+BERT Introduction Result: Introduction
+SBERT Introduction Result: Introduction
+SciBERT Introduction Result: Introduction
+Gemini Introduction Result: Introduction
+Input text: Methodology
+Candidates: ['Abstract', 'Introduction', 'Background and motivation', 'Encodings', 'Evaluation', 'Statistical analysis', 'Discussion', 'Threats to validity', 'Related work', 'Conclusion and future work', 'References']
+Word2Vec Methodology Result: Statistical analysis
+BERT Methodology Result: Evaluation
+SBERT Methodology Result: Introduction
+SciBERT Methodology Result: Background and motivation
+Gemini Methodology Result: Related work
+Processing reference: metzger2024computing
+Input text: Introduction
+Candidates: ['Abstract', 'Introduction', 'Fundamentals', 'Feature-model-guided exploration (FM-guided exploration)', 'Experiment setup', 'Results', 'Limitations and assumptions', 'Related work', 'Conclusion and outlook', 'Acknowledgements', 'Funding', 'Open Access', 'References']
+Word2Vec Introduction Result: Acknowledgements
+BERT Introduction Result: Introduction
+SBERT Introduction Result: Introduction
+SciBERT Introduction Result: Introduction
+Gemini Introduction Result: Introduction
+Input text: Methodology
+Candidates: ['Abstract', 'Introduction', 'Fundamentals', 'Feature-model-guided exploration (FM-guided exploration)', 'Experiment setup', 'Results', 'Limitations and assumptions', 'Related work', 'Conclusion and outlook', 'Acknowledgements', 'Funding', 'Open Access', 'References']
+Word2Vec Methodology Result: Acknowledgements
+BERT Methodology Result: Experiment setup
+SBERT Methodology Result: Introduction
+SciBERT Methodology Result: Experiment setup
+Gemini Methodology Result: Experiment setup
+Processing reference: muhlbauer2023_icse
+Input text: Introduction
+Candidates: ['Abstract', 'INTRODUCTION', 'PRELIMINARIES AND RELATED WORK', 'STUDY DESIGN', 'STUDY RESULTS', 'EXPLORING CAUSES OF WORKLOAD SENSITIVITY', 'DISCUSSION', 'THREATS TO VALIDITY', 'CONCLUSION', 'ACKNOWLEDGEMENTS', 'REFERENCES']
+Word2Vec Introduction Result: ACKNOWLEDGEMENTS
+BERT Introduction Result: INTRODUCTION
+SBERT Introduction Result: INTRODUCTION
+SciBERT Introduction Result: INTRODUCTION
+Gemini Introduction Result: INTRODUCTION
+Input text: Methodology
+Candidates: ['Abstract', 'INTRODUCTION', 'PRELIMINARIES AND RELATED WORK', 'STUDY DESIGN', 'STUDY RESULTS', 'EXPLORING CAUSES OF WORKLOAD SENSITIVITY', 'DISCUSSION', 'THREATS TO VALIDITY', 'CONCLUSION', 'ACKNOWLEDGEMENTS', 'REFERENCES']
+Word2Vec Methodology Result: ACKNOWLEDGEMENTS
+BERT Methodology Result: DISCUSSION
+SBERT Methodology Result: STUDY DESIGN
+SciBERT Methodology Result: STUDY DESIGN
+Gemini Methodology Result: STUDY DESIGN
+Processing reference: peeters2021_ida
+Input text: Introduction
+Candidates: ['Abstract', 'Introduction', 'Learning Problem', 'Learning Model', 'Case Study: Predicting FPS in Video Games', 'Related Work', 'Conclusion', 'References']
+Word2Vec Introduction Result: Introduction
+BERT Introduction Result: Introduction
+SBERT Introduction Result: Introduction
+SciBERT Introduction Result: Introduction
+Gemini Introduction Result: Introduction
+Input text: Methodology
+Candidates: ['Abstract', 'Introduction', 'Learning Problem', 'Learning Model', 'Case Study: Predicting FPS in Video Games', 'Related Work', 'Conclusion', 'References']
+Word2Vec Methodology Result: Learning Model
+BERT Methodology Result: Related Work
+SBERT Methodology Result: Introduction
+SciBERT Methodology Result: Introduction
+Gemini Methodology Result: Abstract
+Processing reference: peng2023ese
+Input text: Introduction
+Candidates: ['Abstract', 'Introduction', 'Background and Related Work', 'VEER: Disagreement-Free Multi-Objective Optimizer', 'Research Questions', 'Experimental Setup', 'Results', 'Discussion', 'Threats to Validity', 'Conclusion', 'Acknowledgements', 'Funding', 'Declarations', 'References']
+Word2Vec Introduction Result: Acknowledgements
+BERT Introduction Result: Introduction
+SBERT Introduction Result: Introduction
+SciBERT Introduction Result: Introduction
+Gemini Introduction Result: Introduction
+Input text: Methodology
+Candidates: ['Abstract', 'Introduction', 'Background and Related Work', 'VEER: Disagreement-Free Multi-Objective Optimizer', 'Research Questions', 'Experimental Setup', 'Results', 'Discussion', 'Threats to Validity', 'Conclusion', 'Acknowledgements', 'Funding', 'Declarations', 'References']
+Word2Vec Methodology Result: Acknowledgements
+BERT Methodology Result: Research Questions
+SBERT Methodology Result: Introduction
+SciBERT Methodology Result: Experimental Setup
+Gemini Methodology Result: Experimental Setup
+Processing reference: ros2020_emse
+Input text: Introduction
+Candidates: ['Abstract', 'Introduction', 'Background and Related Work on Continuous Experimentation', 'Theory on Bandit Optimization of Software', 'Research Context and Methods', 'Tooling Support for Bandit Optimization', 'Validation', 'Discussion', 'Conclusion', 'Acknowledgements', 'Funding Information', 'Open Access', 'Appendix: Replication of Simulations', 'References']
+Word2Vec Introduction Result: Acknowledgements
+BERT Introduction Result: Introduction
+SBERT Introduction Result: Introduction
+SciBERT Introduction Result: Introduction
+Gemini Introduction Result: Introduction
+Input text: Methodology
+Candidates: ['Abstract', 'Introduction', 'Background and Related Work on Continuous Experimentation', 'Theory on Bandit Optimization of Software', 'Research Context and Methods', 'Tooling Support for Bandit Optimization', 'Validation', 'Discussion', 'Conclusion', 'Acknowledgements', 'Funding Information', 'Open Access', 'Appendix: Replication of Simulations', 'References']
+Word2Vec Methodology Result: Acknowledgements
+BERT Methodology Result: Validation
+SBERT Methodology Result: Research Context and Methods
+SciBERT Methodology Result: Research Context and Methods
+Gemini Methodology Result: Research Context and Methods
+(venv) [pramos@localhost AutoSLR]$ ^C
