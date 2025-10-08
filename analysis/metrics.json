@@ -4,7 +4,7 @@
         "answer_prefix": "The sampling method used in the paper is:",
         "context": "sampling methods are used to select a representative subset from a dataset. They are often used to reduce the size of the dataset while maintaining its diversity and characteristics.",
         "some_possible_answers": "Randon sampling, Stratified sampling, Systematic sampling, Cluster sampling, Convenience sampling, Purposive sampling, Snowball sampling, Oversampling, Undersampling and etc... .",
-        "text_example": "The preliminary analysis entails choosing an acceptable sample strategy because the dataset is severely imbalanced. . Undersampling, Oversampling, and ROSE sampling approaches were tested for this objective. ",
+        "text_example": "The preliminary analysis entails choosing an acceptable sample strategy because the dataset is severely imbalanced. Undersampling, Oversampling, and ROSE sampling approaches were tested for this objective. ",
         "text_example_answare": "Undersampling, Oversampling, and ROSE",
         "output_format": "comma separated list" 
     },

@@ -1,0 +1,1020 @@
+pdf_name,prompt_technique,text_segmentation_stategy,metric,response,expert_answer,fuzzy_found,Specialist1_name,specialist1_answer,specialist1_comment,Specialist2_name,specialist2_answer,specialist2_comment,Specialist3_name,specialist3_answer,specialist3_comment
+alves2020-icpe,simple,all,sampling method,"The paper uses and compares **six** state-of-the-art sampling strategies:
+
+1.  **Random sampling** (also referred to as uniform random sampling)
+2.  **Solver-based sampling**
+3.  **Randomized solver-based sampling**
+4.  **Coverage-based sampling** (specifically t-wise sampling)
+5.  **Distance-based sampling**
+6.  **Diversified distance-based sampling**
+
+The study replicates a previous work that devised ""distance-based sampling"" and systematically analyzes the influence of these different strategies on performance prediction accuracy.","['Coverage-based    ', 'Solver-based', 'Randomized solver-based', 'Distance-based', 'Distance-based ', 'Diversified distance-based', 'Random']",FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,"more information, contextualized",Lucas,FALSE,"[""less information""]"
+alves2020-icpe,complex,all,sampling method,"The sampling method used in the paper includes six strategies: t-wise (coverage-based), solver-based, randomized solver-based, distance-based, diversified distance-based, and uniform random sampling (referred to as random).","['Coverage-based    ', 'Solver-based', 'Randomized solver-based', 'Distance-based', 'Distance-based ', 'Diversified distance-based', 'Random']",TRUE,Pedro,TRUE,more information,Diogo,TRUE,"more information, contextualized",Lucas,TRUE,"[""more information""]"
+alves2020-icpe,one shot,all,sampling method,"The sampling method used in the paper is: t-wise (a type of coverage-based sampling), solver-based, randomized solver-based, distance-based, diversified distance-based, and uniform random sampling.","['Coverage-based    ', 'Solver-based', 'Randomized solver-based', 'Distance-based', 'Distance-based ', 'Diversified distance-based', 'Random']",TRUE,Pedro,TRUE,more information,Diogo,TRUE,"more information, contextualized",Lucas,TRUE,"[""more information""]"
+alves2020-icpe,simple,all,dataset,"The dataset used in the paper is based on measurements from the **x264 video encoder**.
+
+Specifically, the authors:
+*   Systematically measured all 1,152 configurations of x264.
+*   Used 17 different input videos as workloads.
+*   Measured two quantitative properties: encoding time and encoding size.",https://github.com/jualvespereira/ICPE2020,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]"
+alves2020-icpe,complex,all,dataset,"The dataset used in the paper is: performance measurements of 1,152 configurations of the x264 video encoder, using 17 different input videos, and measuring two quantitative properties: encoding time and encoding size.",https://github.com/jualvespereira/ICPE2020,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]"
+alves2020-icpe,one shot,all,dataset,"The dataset used in the paper is: measurements of 1,152 configurations of the x264 video encoder, obtained by systematically measuring it with 17 different input videos and two quantitative properties (encoding time and encoding size).",https://github.com/jualvespereira/ICPE2020,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]"
+alves2020-icpe,simple,all,technique,"The paper states that for building performance models, they use **stepwise multiple linear regression**.
+
+It also mentions other machine learning techniques that have been proposed in the literature for this purpose, such as linear regression, classification and regression trees (CART), and random forest, but explicitly states that *in this paper*, stepwise multiple linear regression is used.",Multiple linear regression,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+alves2020-icpe,complex,all,technique,The learning algorithms used in the paper are: step-wise multiple linear regression.,Multiple linear regression,FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+alves2020-icpe,one shot,all,technique,The learning algorithms used in the paper are: step-wise multiple linear regression.,Multiple linear regression,FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+alves2020-icpe,simple,all,partition method,"The paper states that for calculating the prediction error rate (MRE), they use the entire dataset of valid configurations (C) as the validation set. They explicitly mention that they **""include the sample used as training to the testing set for comparing sampling strategies.""**
+
+This means they do not use a method that strictly partitions the data into disjoint training and testing sets (like hold-out or cross-validation) for the final error calculation. Instead, the model is trained on a sample, and its performance is then evaluated on the complete set of configurations, which includes the configurations used for training.",NI,FALSE,Pedro,FALSE,contextualized,Diogo,TRUE,"less matches, contextualized",Lucas,FALSE,"[""less information""]"
+alves2020-icpe,complex,all,partition method,"The partition method used in the paper is: The model is trained on a sample of configurations, and then the prediction error is calculated on the entire dataset of valid configurations (referred to as the validation set), which includes the training sample. This process is repeated 100 times with different random seeds.",NI,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+alves2020-icpe,one shot,all,partition method,"The partition method used in the paper is: a sample of configurations is used for training, and the entire dataset of valid configurations (C), which includes the training sample, is used as the validation/testing set to calculate the mean relative error.",NI,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+alves2020-icpe,simple,all,evaluation metric,"The evaluation metric used in the paper is **Mean Relative Error (MRE)**.
+
+It is defined by Equation 1:
+MRE = (1/|C|) * Σ (from c ∈ C) (|measuredc - predictedc| / measuredc)
+
+Where:
+*   C is the set of all valid configurations used as the validation set.
+*   measuredc is the actual measured performance value for configuration c.
+*   predictedc is the predicted performance value for configuration c.
+
+A lower MRE indicates a higher accuracy of the prediction model.",Mean Relative Error (MRE),TRUE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+alves2020-icpe,complex,all,evaluation metric,The evaluation metric used in the paper is: Mean Relative Error (MRE).,Mean Relative Error (MRE),TRUE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+alves2020-icpe,one shot,all,evaluation metric,The evaluation metric used in the paper is: Mean Relative Error (MRE).,Mean Relative Error (MRE),TRUE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Ha2019-icse,simple,all,sampling method,"The sampling method used for DeepPerf, the approach proposed in the paper, is **random sampling**.
+
+The text states this explicitly in two places:
+*   In Section IV.C.1 (""Setup"" for RQ1): ""Speciﬁcally, for each subject system, we **randomly select a certain number of conﬁgurations and their corresponding performance values to construct the training dataset (sample)**; all the remaining measurements are then used as the testing dataset.""
+*   In Section IV.D.1 (""Setup"" for RQ2): ""For DeepPerf, the sample is chosen using the **random sampling heuristic**.""",Random,TRUE,Pedro,TRUE,"contextualized, more information",Diogo,TRUE,"more information, contextualized",Lucas,TRUE,"[""more information""]"
+Ha2019-icse,complex,all,sampling method,"The sampling method used in the paper is: random sampling. The paper explicitly states, ""for each subject system, we randomly select a certain number of conﬁgurations and their corresponding performance values to construct the training dataset (sample)"" and ""For DeepPerf, the sample is chosen using the random sampling heuristic.""",Random,TRUE,Pedro,TRUE,contextualized,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Ha2019-icse,one shot,all,sampling method,The sampling method used in the paper is: random sampling.,Random,TRUE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Ha2019-icse,simple,all,dataset,"The paper uses **eleven public real-world configurable software systems** for its experiments.
+
+These systems are:
+*   **Six systems with binary configuration options:** Apache, x264, LLVM, BDB-C, BDB-J, and SQLite.
+*   **Five systems with both binary and numeric configuration options:** DUNE MGS, HIPAcc, HSMGP, JavaGC, and SaC.
+
+The paper states that these software systems were measured and published online, accessible via the SPLConqueror project page (http://www.fosd.de/SPLConqueror).",https://github.com/DeepPerf/DeepPerf,FALSE,Pedro,FALSE,"contextualized, more information",Diogo,FALSE,"more information, less matches, contextualized",Lucas,FALSE,"[""less matches""]"
+Ha2019-icse,complex,all,dataset,"The dataset used in the paper is: eleven public real-world configurable software systems, specifically: Apache, x264, LLVM, BDB-C, BDB-J, SQLite, DUNE MGS, HIPAcc, HSMGP, JavaGC, and SaC.",https://github.com/DeepPerf/DeepPerf,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+Ha2019-icse,one shot,all,dataset,"The dataset used in the paper is: eleven public real-world configurable software systems, specifically: Apache, x264, LLVM, BDB-C, BDB-J, SQLite, DUNE MGS, HIPAcc, HSMGP, JavaGC, and SaC. These systems are available online from the SPLConqueror project page.",https://github.com/DeepPerf/DeepPerf,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+Ha2019-icse,simple,all,technique,"The paper primarily uses and proposes a novel approach based on a **deep feedforward neural network (FNN)** combined with **L1 regularization** for performance prediction, which they name **DeepPerf**.
+
+For training this neural network, they utilize the **Adam optimizer**.
+
+The paper also mentions and compares DeepPerf against several other learning algorithms:
+*   **SPLConqueror**
+*   **DECART** (an extended version of Classification And Regression Trees - CART)
+*   **FourierLearning** (which uses Fourier transform of Boolean functions)
+*   **Support Vector Machine (SVM) regression**
+
+Additionally, for comparative analysis of their architectural choices, they evaluate other variations of deep FNNs:
+*   **L1 regularized FNN (with L1 regularization applied to all layers)**
+*   **Plain-FNN (non-regularized deep FNN)**
+*   **L2 regularized FNN**
+*   **Dropout FNN**",rede neural profunda feedforward (FNN) ,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,"more information, contextualized",Lucas,TRUE,"[""more information""]"
+Ha2019-icse,complex,all,technique,"The learning algorithms used in the paper are: a deep feedforward neural network (FNN) combined with a sparsity regularization technique, specifically L1 regularization, which they call Deep sparse FNN (DeepPerf).",rede neural profunda feedforward (FNN) ,FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Ha2019-icse,one shot,all,technique,The learning algorithms used in the paper are: Deep Feedforward Neural Network (FNN) combined with L1 regularization (also referred to as deep sparse FNN).,rede neural profunda feedforward (FNN) ,FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Ha2019-icse,simple,all,partition method,"The paper describes two main partition methods:
+
+1.  **For DeepPerf's internal hyperparameter tuning:** The sample is split into **67% for training and 33% for validation**.
+2.  **For evaluating DeepPerf's prediction accuracy against other methods (RQ1 and RQ2):** A certain number of configurations are **randomly selected to construct the training dataset (sample)**. **All the remaining measurements are then used as the testing dataset**. This random sampling, training, and testing process is **repeated 30 times** for each sample size to ensure consistency and stability.",NI,FALSE,Pedro,FALSE,,Diogo,TRUE,,Lucas,FALSE,"[""less information""]"
+Ha2019-icse,complex,all,partition method,"The partition method used in the paper is: random sampling of configurations to construct the training dataset (sample), with all remaining measurements used as the testing dataset. This random sampling, training, and testing process is repeated 30 times for each sample size and subject system to evaluate consistency and stability. Additionally, for hyperparameter tuning, the sample is split into 67% for training and 33% for validation.",NI,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"less matches, contextualized",Lucas,FALSE,"[""less information""]"
+Ha2019-icse,one shot,all,partition method,"The partition method used in the paper is: repeated random sub-sampling validation. For evaluation, a certain number of configurations are randomly selected for the training dataset (sample), and all remaining measurements are used as the testing dataset. This random sampling, training, and testing process is repeated 30 times. For hyperparameter tuning, the sample is further split into 67% for training and 33% for validation.",NI,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"less matches, contextualized",Lucas,FALSE,"[""less information""]"
+Ha2019-icse,simple,all,evaluation metric,"The evaluation metric used in the paper is the **mean relative error (MRE)**.
+
+It is computed as:
+MRE = (1/|C|) * Σ<sub>c∈V</sub> (|predicted<sub>c</sub> - actual<sub>c</sub>| / actual<sub>c</sub>) * 100
+
+where:
+*   V is the testing dataset
+*   predicted<sub>c</sub> is the predicted performance value of configuration c
+*   actual<sub>c</sub> is the actual performance value of configuration c
+
+The paper states this metric is chosen because it is widely used to measure the accuracy of prediction models.",Mean Relative Error (MRE),FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Ha2019-icse,complex,all,evaluation metric,The evaluation metric used in the paper is: Mean Relative Error (MRE).,Mean Relative Error (MRE),TRUE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Ha2019-icse,one shot,all,evaluation metric,The evaluation metric used in the paper is: mean relative error (MRE).,Mean Relative Error (MRE),FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Krishna2021,simple,all,sampling method,"The sampling method used in the paper for their proposed BEETLE framework and for collecting data for their subject systems is **random sampling**.
+
+Specifically:
+*   In the ""Discovery: Finding Bellwether Environments"" section (4.1), it states: ""Lines 3–5: **Randomly sample** a small subset of conﬁgurations from the source environments.""
+*   In the ""Subject Systems"" section (6.1), when describing the data collection for X264, it mentions: ""...we **randomly sample** 4,000 conﬁgurations in 21 environments.""
+*   For SQLite, it states: ""...we use 1,000 **randomly selected** conﬁgurations in 15 different environments.""
+*   For Storm, it says: ""...2,048 **randomly selected** conﬁgurations in 4 environments.""",Random,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,contextualized,Lucas,TRUE,"[""more information""]"
+Krishna2021,complex,all,sampling method,"The sampling method used in the paper, specifically for BEETLE's discovery phase, is an **incremental random sampling** strategy guided by a **racing algorithm**. This approach starts by randomly sampling a small fraction (e.g., 1%) of configurations from each environment and then incrementally increases the sample size (e.g., in steps of 1%) while eliminating poorly performing environments, until a bellwether environment is discovered.",Random,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Krishna2021,one shot,all,sampling method,"The sampling method used in the paper for BEETLE's discovery phase is an incremental random sampling approach driven by a racing algorithm. This involves randomly sampling a small subset of configurations, starting from 1% and incrementing in steps of 1%, from the source environments. For the initial data collection of some subject systems (X264, SQLite, Storm), random sampling was also employed. One of the comparison methods (Valov et al. [24]) used Sobol sampling.",Random,FALSE,Pedro,TRUE,contextualized,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Krishna2021,simple,all,dataset,"The paper uses performance measurements from **five real-world configurable software systems**:
+
+1.  **SPEAR** (an industrial strength bit-vector arithmetic decision procedure and Boolean satisfiability (SAT) solver)
+2.  **X264** (a video encoder)
+3.  **SQLITE** (a lightweight relational database management system)
+4.  **SAC** (a compiler for high-performance computing)
+5.  **STORM** (a distributed stream processing framework for data analytics)
+
+These systems were measured under a total of **57 different environments** (combinations of workload, hardware, and software versions). The data for these five software systems was collected by Jamshidi et al. [20] for their studies. A reproduction package with all scripts and data is available online at https://git.io/fjsky.",https://git.io/fjsky,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]"
+Krishna2021,complex,all,dataset,"The dataset used in the paper is: data collected from five software systems: SPEAR (an SAT solver), X264 (a video encoder), SQLITE (a SQL database), SAC (a high-performance C-compiler), and STORM (a streaming data analytics tool). This data comprises performance measurements under various configurations and environments for these systems.",https://git.io/fjsky,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+Krishna2021,one shot,all,dataset,"The dataset used in the paper is: Performance measurement data collected from five real-world configurable software systems: a video encoder (X264), an SAT solver (SPEAR), a SQL database (SQLITE), a high-performance C-compiler (SAC), and a streaming data analytics tool (STORM). This data includes performance measurements for various configurations of these systems across different environments (hardware, workloads, and software versions), and was originally collected by Jamshidi et al. [20].",https://git.io/fjsky,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+Krishna2021,simple,all,technique,"The paper uses **Regression Trees** (also referred to as Decision Tree Regressor) as the primary learning algorithm for building performance prediction models within its BEETLE framework.
+
+Additionally, while not a learning algorithm itself, a **racing algorithm** is used in the ""Discovery"" phase of BEETLE to efficiently identify bellwether environments.",Regression trees,FALSE,Pedro,TRUE,contextualized,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Krishna2021,complex,all,technique,The learning algorithms used in the paper are: Regression Trees.,Regression trees,FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Krishna2021,one shot,all,technique,The learning algorithms used in the paper are: Regression Trees.,Regression trees,FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Krishna2021,simple,all,partition method,"The paper uses a **pair-wise comparison** or **round-robin experimentation** method at the environment level to discover and evaluate bellwether environments.
+
+Specifically, for each software system:
+1. One environment is selected as a ""source"" to build a prediction model.
+2. All **remaining environments** are then used as ""targets"" to evaluate the performance of the model built from the chosen source.
+3. This process is repeated by choosing a different environment as the source in a round-robin fashion, allowing them to rank the performance of all environments in terms of their suitability as a source (bellwether).
+
+In the BEETLE framework's ""Discovery"" phase, a **racing algorithm** is used to refine this process by incrementally sampling configurations and eliminating poorly performing source candidates based on their performance in predicting for other environments.
+
+Therefore, the partition method is based on treating individual **environments** as distinct units, with one acting as a source and the rest as targets for evaluation.",bootstrap,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,"less matches, more information",Lucas,TRUE,"[""more information""]"
+Krishna2021,complex,all,partition method,"The partition method used in the paper is: a racing algorithm combined with incremental sampling, where a small fraction of data instances are sampled from source environments, performance is evaluated statistically, poorly performing environments are discarded, and the process is repeated with slightly larger sample sizes for the remaining datasets until a bellwether environment is discovered.",bootstrap,FALSE,Pedro,TRUE,,Diogo,FALSE,"less matches, more information",Lucas,TRUE,"[""more information""]"
+Krishna2021,one shot,all,partition method,"The partition method used in the paper is: a novel approach involving a ""racing algorithm"" for source selection in transfer learning. This racing algorithm operates by iteratively sampling a small fraction of configurations (starting from 1% and incrementing by 1%) from available environments. In each iteration, it performs a round-robin or pairwise comparison where one environment is used as a ""source"" (for training a prediction model) and all other environments are used as ""targets"" (for evaluation). Environments showing poor performance are progressively eliminated until the optimal ""bellwether"" environment(s) are identified. Once identified, data from these bellwether environments are used to train the final prediction model for target environments.",bootstrap,FALSE,Pedro,TRUE,,Diogo,FALSE,"less matches, more information",Lucas,TRUE,"[""more information""]"
+Krishna2021,simple,all,evaluation metric,"Based on the provided text, the primary evaluation metric used in the paper is **Normalized Absolute Residual (NAR)**.
+
+The paper defines NAR as:
+NAR = |min(f(c)) − f(c^)| / (max(f(c)) − min(f(c))) * 100
+
+Where:
+*   `min(f(c))` is the value of the true minima of configuration `c`.
+*   `f(c^)` is the predicted value of the minima.
+*   `max(f(c))` is the largest performance value of a configuration.
+
+A lower NAR value indicates better performance. The paper explains that this measure is preferred over Mean Magnitude of Relative Error (MMRE) and rank-difference (Rd) because it provides a more realistic estimate of the optimality of a configuration by normalizing the absolute residual between predicted and actual optimal performance.
+
+Additionally, the paper also evaluates methods based on the **number of measurements/samples required** as a proxy for cost and computational efficiency, noting that ""Reducing the number of measurements is an important consideration since collecting data in this domain can be computationally and monetarily expensive."" (page 2). This is evident in RQ2, RQ3, and RQ4 where they compare the ""cost"" (number of samples) alongside NAR.",Residual Absoluto Normalizado (NAR),FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,"more information, contextualized",Lucas,TRUE,"[""more information""]"
+Krishna2021,complex,all,evaluation metric,The evaluation metric used in the paper is: Normalized Absolute Residual (NAR).,Residual Absoluto Normalizado (NAR),FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Krishna2021,one shot,all,evaluation metric,"The evaluation metric used in the paper is: Normalized Absolute Residual (NAR), which is calculated as:
+NAR = |min(f(c)) - f(c*)| / (max(f(c)) - min(f(c))) * 100
+Where min(f(c)) is the value of the true minima of configuration c, f(c*) is the predicted value of the minima, and max(f(c)) is the largest performance value of a configuration. A lower NAR value indicates better performance.",Residual Absoluto Normalizado (NAR),FALSE,Pedro,TRUE,contextualized,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+martin2021,simple,all,sampling method,"The sampling method used in the paper is **random sampling**.
+
+The text states in section 4.2, ""Learning algorithms"": ""...the sampling being made at random among the datasets, as Pereira et al. [34] show that this sampling method is a strong baseline overall."" This is reinforced in section 7.1, ""Threats to Validity,"" which mentions: ""For this experiment, we focused only on random sampling to avoid spreading ourselves too much. Pereira et al. [34] shows that random sampling is a strong baseline, but also warns about the potentially strong influence of different sampling strategies, especially when comparing learning techniques.""",NI,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,"contextualized,  less matches",Lucas,FALSE,"[""less information""]"
+martin2021,complex,all,sampling method,The sampling method used in the paper is: random sampling.,NI,FALSE,Pedro,TRUE,,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+martin2021,one shot,all,sampling method,The sampling method used in the paper is random sampling.,NI,FALSE,Pedro,TRUE,,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+martin2021,simple,all,dataset,"The paper uses two main sets of datasets for its experiments:
+
+1.  **Eight configurable systems** commonly used in previous related works: Apache, Berkeley C, Berkeley J, Dune, HMSGP, HIPAcc, LLVM, and SQLite.
+2.  A **Linux kernel dataset**, specifically on Linux kernel size, which consists of 92,562 configurations.",https://github.com/HugoJPMartin/SPLC2021,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+martin2021,complex,all,dataset,"The dataset used in the paper is: a collection of nine real-world configurable systems, including Apache, Berkeley C, Berkeley J, Dune, HMSGP, HIPAcc, LLVM, SQLite, and the Linux kernel. The Linux kernel dataset specifically consists of binary size measurements of 92,562 configurations.",https://github.com/HugoJPMartin/SPLC2021,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+martin2021,one shot,all,dataset,"The dataset used in the paper is: Apache, Berkeley C, Berkeley J, Dune, HMSGP, HIPAcc, LLVM, SQLite, and Linux kernel.",https://github.com/HugoJPMartin/SPLC2021,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+martin2021,simple,all,technique,"The paper uses **Decision Trees** as the primary learning algorithm. They explore three variants of decision trees:
+
+1.  **Classification Trees**
+2.  **Regression Trees**
+3.  **Specialized Regression** (a novel, hybrid strategy based on regression trees)
+
+Additionally, they investigate the use of **model-based feature selection** prior to the learning process, specifically using **Random Forest** to learn the feature ranking list for this purpose. This leads to six distinct learning strategies (each of the three decision tree variants with and without feature selection).",Árvores de Decisão,FALSE,Pedro,TRUE,"contextualized, more matches",Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+martin2021,complex,all,technique,"The learning algorithms used in the paper are: three variants of Decision Trees (regression, classification, and specialized regression), which are also combined with model-based feature selection using Random Forests.",Árvores de Decisão,FALSE,Pedro,TRUE,more matches,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+martin2021,one shot,all,technique,"The learning algorithms used in the paper are: three variants of Decision Trees (regression, classification, and specialized regression), with and without the use of model-based feature selection based on Random Forests.",Árvores de Decisão,FALSE,Pedro,TRUE,more matches,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+martin2021,simple,all,partition method,"The paper uses a **random sampling** method to partition the dataset into a training set and a test set.
+
+Specifically, they varied the training set size from 10% to 70% of the total measured configurations, with the remaining data (at least 30%) used as the test set. This random sampling was repeated for each iteration (5 to 20 times) to reduce the impact of randomness and report average values.",NI,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+martin2021,complex,all,partition method,"The partition method used in the paper is: random splitting of the dataset into training and test sets, with training set sizes varying from 10% to 70% and the remaining (at least 30%) used as the test set.",NI,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+martin2021,one shot,all,partition method,"The partition method used in the paper is: The dataset is separated into a training set and a test set, with the training set size varying from 10% to 70% and the remaining (at least 30%) used as the test set. The sampling for this split is done randomly among the datasets.",NI,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+martin2021,simple,all,evaluation metric,"The evaluation metric used in the paper to measure the accuracy of the Decision Trees classification is **balanced accuracy**.
+
+The text states: ""To measure the accuracy of the Decision Trees classification, we use the balanced accuracy[8], which is a combination of sensitivity and specificity: 𝐵𝑎𝑙𝑎𝑛𝑐𝑒𝑑𝑎𝑐𝑐𝑢𝑟𝑎𝑐𝑦= 1/2 [𝑇𝑃/(𝑇𝑃+ 𝐹𝑁) + 𝑇𝑁/(𝑇𝑁+ 𝐹𝑃)]"" It further clarifies, ""In the remaining of the paper, we will refer to balanced accuracy as 'accuracy'.""",Acuraccy,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+martin2021,complex,all,evaluation metric,"The evaluation metric used in the paper is: balanced accuracy, which is referred to as ""accuracy"" in the paper.",Acuraccy,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+martin2021,one shot,all,evaluation metric,The evaluation metric used in the paper is: balanced accuracy.,Acuraccy,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,simple,all,sampling method,"The paper uses an **iterative and adaptive sampling approach**. This approach iteratively samples pairs of configurations and versions, guided by an **adaptive learning strategy** that involves two main components:
+
+1.  **Exploration**: Acquiring new measurements (commits and configurations) to improve coverage of the search space in previously unseen areas.
+2.  **Exploitation**: Acquiring new measurements to verify guesses, increase confidence in identified associations (commit and configuration option pairs), or rule out false positives.
+
+Specifically:
+*   For the **initial configuration sampling**, they use **distance-based sampling**.
+*   For **initial commit sampling** within each configuration, they **uniformly sample** a constant number of commits.",Iterative and adaptive sampling,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,complex,all,sampling method,"The sampling method used in the paper is: an iterative and adaptive sampling approach, which employs exploration and exploitation strategies, and for initial and exploration phases of configurations, it uses distance-based sampling.",Iterative and adaptive sampling,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,one shot,all,sampling method,"The sampling method used in the paper is: an iterative and adaptive sampling approach. It begins with an initial sample set using distance-based sampling for configurations to ensure uniform coverage, and uniformly sampling a fixed percentage of commits independently for each configuration. Subsequently, the sample set is augmented iteratively using an adaptive learning strategy that combines exploration (sampling new configurations via distance-based sampling and commits with maximum distance to already sampled) and exploitation (randomly sampling commits based on their change point likelihood and sampling configurations guided by candidate solutions to increase confidence or rule out false positives).",Iterative and adaptive sampling,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,simple,all,dataset,"The paper uses two types of datasets for its evaluation:
+
+1.  **Controlled synthetic data sets**: These were generated to simulate different scenarios by varying the number of change points and affected configurations.
+2.  **Real-world performance data**: This data was collected from three configurable software systems:
+    *   **xz** (a file compression tool)
+    *   **LRZIP** (a file compression tool)
+    *   **OGGENC** (an audio transcoder)
+
+    For the file compression tools (LRZIP and xz), the **Silesia corpus** was used as a workload. For the audio transcoder (OGGENC), a **raw WAVE audio file of over 60 MB from the Wikimedia Commons collection** was used.",https:github.comiole-tangeilrzipicommit!1203aI853e89 2300f79daI9f14acaII15 2b5b890,FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+Muhlbauer2020,complex,all,dataset,"The dataset used in the paper is: controlled synthetic data sets and real-world performance measurements from three configurable software systems: xz, LRZIP, and OGGENC.",https:github.comiole-tangeilrzipicommit!1203aI853e89 2300f79daI9f14acaII15 2b5b890,FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+Muhlbauer2020,one shot,all,dataset,"The dataset used in the paper is: controlled synthetic data sets and real-world performance data from three configurable software systems (xz, LRZIP, and OGGENC).",https:github.comiole-tangeilrzipicommit!1203aI853e89 2300f79daI9f14acaII15 2b5b890,FALSE,Pedro,FALSE,,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+Muhlbauer2020,simple,all,technique,"The paper utilizes the following learning algorithms and techniques:
+
+1.  **Active Learning**: The overall approach is described as an ""iterative and adaptive sampling approach"" or an ""adaptive learning strategy"" to acquire accurate estimations with acceptable measurement cost. This guides the selective and incremental measurement of configuration-version pairs.
+2.  **Linear Models**: The paper learns a ""prediction model"" for performance changes, specifically stating that a ""performance-influence model is a linear prediction model.""
+3.  **LASSO (L1 norm for regularization)**: For associating candidate commits with configuration options, the paper explicitly states using ""a linear model that implements the L1 norm for regularization (LASSO)."" This technique helps prevent overfitting and eliminate non-influential model parameters.
+4.  **Kernel Density Estimation (KDE)**: This technique is used to cluster commits and estimate the probability mass function of whether a commit is a change point, with local maxima representing candidate commits.",LASSO regression,FALSE,Pedro,TRUE,more matches,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,complex,all,technique,"The learning algorithms used in the paper are: active learning, linear models with L1 norm regularization (LASSO), and kernel density estimation (KDE).",LASSO regression,FALSE,Pedro,TRUE,,Diogo,TRUE,"more information, more matches",Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,one shot,all,technique,"The learning algorithms used in the paper are: Active learning (specifically an adaptive learning strategy), linear models implementing the L1 norm for regularization (LASSO regression), and Kernel Density Estimation (KDE).",LASSO regression,FALSE,Pedro,TRUE,,Diogo,TRUE,"more information, more matches",Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,simple,all,partition method,"The paper does not use a single, fixed ""partition method"" for the entire dataset. Instead, it employs an **iterative and adaptive sampling approach** to select performance measurements from the vast configuration and version spaces.
+
+Specifically:
+1.  **Initial Sampling:** A small, fixed number of configurations are selected. For these, a fixed percentage of commits are measured. For the initial configuration sampling, it uses **distance-based sampling** to achieve uniform coverage at low cost.
+2.  **Iterative Acquisition:** The algorithm then iteratively **augments the sample set** with new measurements. This process is guided by two strategies:
+    *   **Exploration:** To include previously unseen commits and configurations to improve coverage (e.g., sampling commits that exhibit maximum distance to already sampled ones, or using distance-based sampling for new configurations).
+    *   **Exploitation:** To include measurements that may increase confidence in identified associations or rule out false positives (e.g., sampling commits where change point likelihood is high but not yet confident, or selecting configurations based on current candidate solutions using a constraint solver).",NI,FALSE,Pedro,TRUE,contextualized,Diogo,TRUE,"more information, less matches",Lucas,FALSE,"[""less information""]"
+Muhlbauer2020,complex,all,partition method,"The partition method used in the paper is: an iterative and adaptive sampling approach, which includes initial distance-based sampling for configurations and subsequent exploration and exploitation strategies for acquiring new commits and configurations. Threefold cross-validation is also used for hyper-parameter tuning of the LASSO model.",NI,FALSE,Pedro,TRUE,,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+Muhlbauer2020,one shot,all,partition method,"The partition method used in the paper is: an iterative and adaptive sampling approach that starts with a small initial sample set and then iteratively augments this ""training set"" by exploring new configurations and commits (using distance-based sampling for initial configurations and maximum distance for new commits/configurations) and exploiting promising regions based on current candidate solutions (sampling where change point likelihood is high but uncertain, or selecting configurations to verify/refine associations).",NI,FALSE,Pedro,TRUE,,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+Muhlbauer2020,simple,all,evaluation metric,"The evaluation metric used in the paper to assess accuracy is the **F1 score**.
+
+The paper states: ""To assess the accuracy of a parameter combination's outcome (as well as of intermediate iterations), we use the **F1 score**, a combination of precision and recall."" (page 8)",F1-score,FALSE,Pedro,TRUE,contextualized,Diogo,TRUE,contextualized,Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,complex,all,evaluation metric,"The evaluation metric used in the paper is: F1 score, which is a combination of precision and recall.",F1-score,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+Muhlbauer2020,one shot,all,evaluation metric,"The evaluation metric used in the paper is: F1 score, which is a combination of precision and recall.",F1-score,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+OH2023,simple,all,sampling method,"The paper primarily uses and investigates **Uniform Random Sampling (URS)**.
+
+It also introduces and evaluates a variant called **Recursive Random Search (RRS)**, which inherently relies on **uniform sampling** within constricted subspaces.",Uniform Random Sampling,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+OH2023,complex,all,sampling method,"The sampling method used in the paper is Uniform Random Sampling (URS), which is employed in both Simple Random Search (SRS) and Recursive Random Search (RRS) algorithms.",Uniform Random Sampling,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+OH2023,one shot,all,sampling method,The sampling method used in the paper is Uniform Random Sampling (URS) and Recursive Random Search (RRS).,Uniform Random Sampling,FALSE,Pedro,TRUE,,Diogo,TRUE,"more information, more matches",Lucas,TRUE,"[""more information""]"
+OH2023,simple,all,dataset,"The paper uses the following datasets for its evaluations:
+
+1.  **For enumerable SPLs (Section 5), taken from Siegmund et al. [105, 106]:**
+    *   **BerkeleyDBC:** An embedded database system with 18 features and 2,560 configurations. Benchmark response times were measured.
+    *   **7z:** A file archiver with 44 features and 68,640 configurations. Compression times were measured.
+    *   **VP9:** A video encoder with 42 features and 216,000 configurations. Video encoding times were measured.
+
+2.  **For colossal Kconfig SPLs (Section 6):**
+    *   **axTLS 2.1.4:** A client-server library with 94 features and 2·10^12 configurations. Benchmarked for build size.
+    *   **ToyBox 0.7.5:** A Linux command line utilities package with 316 features and 1.4·10^81 configurations. Benchmarked for build size.
+
+The paper also states that their source code and experimental data are available at **https://doi.org/10.5281/zenodo.7485062**.",https://doi.org/10.5281/zenodo.7485062,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+OH2023,complex,all,dataset,"The dataset used in the paper is:
+The paper uses several Software Product Lines (SPLs) for evaluation and experiments:
+
+1.  **For general SPL space sizes (Table 1):** Contemporary SPLs from [48, 50, 69, 79, 89].
+2.  **For BDDSampler performance (Table 2):** JHipster 3.1.6, DellSPLOT, Fiasco 2014092821, axTLS 1.5.3, ToyBox 0.5.2, uClibc 20150420, BusyBox 1.23.2, EmbToolkit 1.7.0, LargeAutomotive.
+3.  **For complete PCS graphs (Figure 7):** Apache [8], LLVM [75], H264 [45], BerkeleyDBC [19] (data from Siegmund et al. [105, 106]).
+4.  **For uClibc-ng PCS graph (Figure 8):** uClibc-ng [90].
+5.  **For evaluation using enumerable SPLs (Section 5):** BerkeleyDBC [19], 7z [2], VP9 [116].
+6.  **For evaluation on Kconfig SPLs (Section 6):** axTLS 2.1.4 [11], ToyBox 0.7.5 [112].",https://doi.org/10.5281/zenodo.7485062,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+OH2023,one shot,all,dataset,"The dataset used in the paper is:
+1.  **Siegmund et al.'s dataset (Dataset for Siegmund2012)** [105, 106] (http://fosd.de/SPLConqueror) for enumerable Software Product Lines (SPLs) including BerkeleyDBC, 7z, and VP9, used in Section 5.
+2.  **BDDs of various SPLs** listed in Table 2 (JHipster, DellSPLOT, Fiasco, axTLS 1.5.3, ToyBox 0.5.2, uClibc 20150420, BusyBox 1.23.2, EmbToolkit 1.7.0, LargeAutomotive), available at https://doi.org/10.5281/zenodo.4514919, used for evaluating BDDSampler in Section 3.3.
+3.  **Experimental data for axTLS 2.1.4 and ToyBox 0.7.5**, including 46,250-point Performance Configuration Space (PCS) graphs, available in their Zenodo download (https://doi.org/10.5281/zenodo.7485062), used in Section 6.",https://doi.org/10.5281/zenodo.7485062,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+OH2023,simple,all,technique,"The paper primarily uses and proposes the following learning algorithms:
+
+1.  **Uniform Random Sampling (URS)**: This is a fundamental sampling technique used to select configurations from the colossal configuration spaces. Algorithm 1 in the paper details its implementation.
+2.  **Simple Random Search (SRS)**: This algorithm uses Uniform Random Sampling to select a set of configurations, benchmarks them, and returns the best-performing one. The paper provides statistical guarantees for SRS.
+3.  **Recursive Random Search (RRS)**: This algorithm is an enhancement of Simple Random Search. It recursively restricts the search scope to subspaces containing ""noteworthy"" features, aiming to find better near-optimal solutions with fewer samples. Algorithm 2 outlines RRS.
+
+The paper *compares* these random search algorithms against other machine learning approaches used in related work, such as:
+*   **Linear Regression (LR)** (as used in SPLConqueror)
+*   **Deep Sparse Neural Networks** (as used in DeepPerf)
+*   Other methods mentioned in the related work include Classification and Regression Trees (CART), Fourier learning, LASSO regression, and probabilistic programming.
+
+However, URS, SRS, and RRS are the ""learning algorithms used in the paper"" by the authors as their primary methods for finding near-optimal configurations.","['SPLConqueror (Regressão Linear)', 'DeepPerf']",FALSE,Pedro,TRUE,"contextualized, more information",Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less information""]"
+OH2023,complex,all,technique,"The learning algorithms used in the paper are:
+*   Uniform Random Sampling (URS)
+*   Simple Random Search (SRS)
+*   Recursive Random Search (RRS)
+*   Linear Regression (LR) (as part of Performance Models, specifically SPLConqueror)
+*   Deep Sparse Neural Network (DeepPerf)
+*   Classification and Regression Tree (CART) (mentioned as other PMs)
+*   Fourier Learning (mentioned as other PMs)
+*   LASSO regression (mentioned as other PMs)
+*   Probabilistic programming (mentioned as other PMs)","['SPLConqueror (Regressão Linear)', 'DeepPerf']",FALSE,Pedro,TRUE,"contextualized, more information",Diogo,TRUE,"more information, less matches",Lucas,TRUE,"[""more information""]"
+OH2023,one shot,all,technique,The learning algorithms used in the paper are: Linear Regression (employed by SPLConqueror) and Deep Sparse Neural Networks (DeepPerf).,"['SPLConqueror (Regressão Linear)', 'DeepPerf']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Lucas,TRUE,"[""more information""]"
+OH2023,simple,all,partition method,"The paper uses **Uniform Random Sampling (URS)** as its primary partition method for exploring configuration spaces.
+
+Specifically, Algorithm 1, which is implemented by the BDDSampler tool, samples a configuration by:
+*   **Incrementally assigning Boolean values (true or false) to each feature (f1, f2, ..., fω)** in the feature model.
+*   These assignments are made based on **feature conditional probabilities** (e.g., the probability of f1 being true, then the probability of f2 being true given f1's assignment, and so on), following the chain rule to ensure the resulting configuration is valid and uniformly random.
+
+This method effectively partitions the solution space by making feature-by-feature decisions based on their probabilities within the remaining valid subspace.",NI,FALSE,Pedro,TRUE,"contextualized, more information,  more matches",Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+OH2023,complex,all,partition method,"The partition method used in the paper is: Uniform Random Sampling (URS) and Recursive Random Search (RRS), which also uses uniform random sampling within its recursive steps. The paper also discusses a ""Fixed Budget SPLO"" approach where a specific number of configurations are sampled.",NI,FALSE,Pedro,TRUE," more information,  more matches",Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+OH2023,one shot,all,partition method,"The partition method used in the paper is: Uniform Random Sampling (URS), also referred to as Simple Random Search (SRS), for selecting configurations. Recursive Random Search (RRS) is also used, which involves uniformly sampling configurations from recursively constrained subspaces.",NI,FALSE,Pedro,TRUE," more information,  more matches",Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+OH2023,simple,all,evaluation metric,"The paper uses the following evaluation metrics:
+
+*   **Percentile rank (μx)**: Measures how near a returned near-optimal configuration (cno) is to the optimal configuration (cbest). For Simple Random Search (SRS), this is theoretically calculated as `100 / (n + 1)` percentiles from cbest (Equation 4).
+*   **Standard deviation (σx)**: Measures the reliability or variability of the returned cnos. For SRS, its theoretical value is `σ1,n` (Equation 6).
+*   **Mean Absolute Percentage Error (MAPE)**: Quantifies the overall accuracy of Performance Models (PMs) (Equation 12).
+*   **Correlation Measures (Spearman’s ρ, Kendall’s τ, Hoeffding’s D, and Distance Correlation (dCor))**: Used to assess the correlation between PM accuracy (MAPE) and PM solution accuracy (β, which is the rank of the cno).",MAPE,FALSE,Pedro,TRUE,"contextualized, more information,  more matches",Diogo,TRUE,"more information, more matches",Lucas,FALSE,"[""less information""]"
+OH2023,complex,all,evaluation metric,"The evaluation metric used in the paper is:
+*   **Mean Absolute Percentage Error (MAPE)** for overall accuracy.
+*   **Average rank (μx)** of returned near-optimal configurations (cnos) for solution accuracy.
+*   **Standard deviation (σx)** of the average rank of returned cnos for reliability.",MAPE,FALSE,Pedro,TRUE,"more information,  more matches",Diogo,TRUE,"more information, more matches",Lucas,FALSE,"[""less information""]"
+OH2023,one shot,all,evaluation metric,"The evaluation metric used in the paper is: overall accuracy (Mean Absolute Percentage Error or MAPE), solution accuracy (average rank of returned cnos, denoted as μx), and reliability (standard deviation of returned cnos, denoted as σx).",MAPE,FALSE,Pedro,TRUE,more information,Diogo,TRUE,"more information, more matches",Lucas,TRUE,"[""more information""]"
+shu2020,simple,all,sampling method,"The paper uses pre-existing, publicly available real-world datasets that were already measured and published online.
+
+Within their experimental setup, for the purpose of training and evaluating their model, they then perform **random sampling** from these datasets. Specifically, they:
+*   **Randomly select** five different sample sizes (n, 2n, 3n, 4n, and 5n) from the subject systems for their training datasets.
+*   Allocate **67% of these randomly selected samples for training and 33% for validation**.
+*   Use **all the remaining measurements from the original dataset as testing datasets**.
+*   **Repeat this random sampling, training, and testing process 30 times** for each sample size to evaluate consistency and stability.",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+shu2020,complex,all,sampling method,"The sampling method used in the paper is: random sampling. For evaluation, the authors initially randomly select five different sizes of training datasets (n, 2n, 3n, 4n, and 5n) from the subject systems, with 67% for training and 33% for validation, and repeat this random sampling, training, and testing process 30 times for each sample size.",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+shu2020,one shot,all,sampling method,"The sampling method used in the paper is: **random sampling**. Specifically, for their experiments, they randomly select different sizes of samples (e.g., n, 2n, 3n, 4n, 5n) from the full datasets for training and validation, repeating this process 30 times to ensure consistency and stability.",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+shu2020,simple,all,dataset,"The paper uses seven real-world configurable software systems as datasets for evaluation. These are categorized into:
+
+*   **Four datasets with binary configuration options:** Apache, LLVM, BDB-C, and BDB-J.
+*   **Three datasets with both binary and numeric configuration options:** DUNE MGS, HIPA, and HSMGP.
+
+More details about these systems, including their domain, number of binary/numeric options, and total configurations, are provided in Table 2 of the paper. These systems were measured and published online as part of the SPLConqueror project.",https://github.com/GANPerf/GANPerf,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches, contextualized",Lucas,FALSE,"[""less matches""]"
+shu2020,complex,all,dataset,"The dataset used in the paper is: seven public real-world datasets, specifically Apache, LLVM, BDB-C, BDB-J, DUNE MGS, HIPA, and HSMGP. These datasets consist of performance measurements from various configurable software systems.",https://github.com/GANPerf/GANPerf,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+shu2020,one shot,all,dataset,"The dataset used in the paper is: seven public real-world datasets, which include: Apache, LLVM, BDB-C, BDB-J (with binary configuration options), and DUNE MGS, HIPA, HSMGP (with both binary and numeric configuration options). These datasets represent different configurable software systems.",https://github.com/GANPerf/GANPerf,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Lucas,FALSE,"[""less matches""]"
+shu2020,simple,all,technique,"The paper uses the following learning algorithms and techniques:
+
+1.  **Adversarial Learning (Adversarial Network/GAN - Generative Adversarial Networks):** This is the core learning paradigm proposed in the paper (PERF-AL). It involves two competing networks:
+    *   **Generator Network:** A deep neural network that acts as a regression network to predict performance values.
+    *   **Discriminator Network:** A network that tries to distinguish between the predicted values from the generator and the actual ground truth values.
+
+2.  **Regularization Techniques:** Integrated into the generator network to prevent overfitting, especially with small sample sizes:
+    *   **L1 regularization**
+    *   **L2 regularization**
+    *   **Dropout technique** (L2 regularization was chosen as the best performing in their experiments).
+
+3.  **Adam Algorithm:** Used as the optimization algorithm for training both the generator and discriminator networks.",Redes Adversariais Generativas (GANs),FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,"more information, more matches",Lucas,FALSE,"[""less information""]"
+shu2020,complex,all,technique,"The learning algorithms used in the paper are: Adversarial Learning, specifically Generative Adversarial Networks (GANs), which consist of a generative deep neural network and a discriminator network. The problem is framed as a regression problem. The paper also incorporates regularization techniques (L1 regularization, L2 regularization, and dropout) as part of the training process for the networks.",Redes Adversariais Generativas (GANs),FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+shu2020,one shot,all,technique,The learning algorithms used in the paper are: Adversarial Learning (implemented using Generative Adversarial Networks - GANs) and Deep Neural Networks (for both the generator and discriminator components within the GAN). The generator network is specifically a regression network.,Redes Adversariais Generativas (GANs),FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Lucas,TRUE,"[""more information""]"
+shu2020,simple,all,partition method,"The paper uses a **repeated random sampling** method for partitioning the data.
+
+Specifically, for each experiment:
+1.  A ""sample size"" (e.g., n, 2n, 3n, 4n, or 5n configurations) is **randomly selected** from the full dataset.
+2.  This randomly selected sample is then partitioned: **67% of it is used for training**, and **33% is used for validation**.
+3.  **All remaining measurements (configurations not included in the initial randomly selected sample)** are used as the **testing dataset**.
+4.  This entire process of random sampling, training, validation, and testing is **repeated 30 times** to ensure consistency and stability of the results.",NI,FALSE,Pedro,FALSE,more information,Diogo,FALSE,less matches,Lucas,FALSE,"[""less information""]"
+shu2020,complex,all,partition method,"The partition method used in the paper is: random sampling with 67% of samples for training, 33% for validation, and the remaining measurements for testing, repeated 30 times.",NI,FALSE,Pedro,FALSE,,Diogo,FALSE,less matches,Breno,FALSE,"less information, less matches"
+shu2020,one shot,all,partition method,"The partition method used in the paper is: Random sampling with 67% of samples for training, 33% for validation (from the initially selected sample sizes), and all remaining measurements for testing. This process is repeated 30 times for each sample size to evaluate consistency and stability.",NI,FALSE,Pedro,FALSE,,Diogo,FALSE,less matches,Breno,TRUE,"more information, more matches, contextualized"
+shu2020,simple,all,evaluation metric,"The evaluation metrics used in the paper are:
+
+*   **Mean Relative Error (MRE)**
+*   **Mean Square Error (MSE)**
+*   **Spearman correlation**","['Mean Relative Error (MRE)', 'Mean Relative Error (MRE),', 'Spearman correlation']",TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, more information"
+shu2020,complex,all,evaluation metric,"The evaluation metric used in the paper is: Mean Relative Error (MRE), Mean Square Error (MSE), and Spearman correlation.","['Mean Relative Error (MRE)', 'Mean Relative Error (MRE),', 'Spearman correlation']",TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, more information"
+shu2020,one shot,all,evaluation metric,"The evaluation metric used in the paper is: Mean Relative Error (MRE), Mean Square Error (MSE), and Spearman correlation.","['Mean Relative Error (MRE)', 'Mean Relative Error (MRE),', 'Spearman correlation']",TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contexualized"
+magrin2022_twc,simple,all,sampling method,"Based on the provided text, the paper does **not use a traditional sampling method** in the sense of collecting data from a real-world population.
+
+Instead, the paper relies on:
+1.  A **mathematical model** to estimate LoRaWAN performance.
+2.  **Network simulations** using the ns-3 module for validation.
+
+Within their simulated environment, the ""End Devices (EDs)"" are described as being ""**randomly and uniformly distributed** around a single GW"" (Section IV-A). Furthermore, in the simulation setting, ""the positions of the nodes are **randomly picked** at each simulation run"" (Section V). This describes how the *simulated entities* are configured and positioned, rather than a method for sampling real-world data. The traffic generation is assumed to follow a ""Poisson Process.""","['Random', 'Constrained-driven sampling']",FALSE,Pedro,TRUE,less matches,Diogo,FALSE,"more information, less matches",Breno,TRUE,"more information, less matches, contextualized"
+magrin2022_twc,complex,all,sampling method,"The paper does not use a traditional sampling method to select a representative subset from an existing dataset. Instead, it employs:
+*   A **mathematical model** to estimate performance.
+*   **ns-3 simulations** where network events are generated based on probabilistic distributions, such as End Devices (EDs) being **randomly and uniformly distributed** around a single gateway, and application-layer packets being generated according to a **Poisson Process**. The positions of the nodes are also **randomly picked** at each simulation run.","['Random', 'Constrained-driven sampling']",FALSE,Pedro,TRUE,less matches,Diogo,FALSE,"more information, less matches",Breno,FALSE,"less information, less matches"
+magrin2022_twc,one shot,all,sampling method,"The sampling method used in the paper is: The End Devices (EDs) are **randomly and uniformly distributed** around a single Gateway (GW) in the mathematical model. For the ns-3 simulations, the positions of the nodes are **randomly picked** at each simulation run. Application-layer packets are also generated according to a **Poisson Process**, which describes a random arrival process.","['Random', 'Constrained-driven sampling']",FALSE,Pedro,TRUE,less matches,Diogo,FALSE,"more information, less matches",Breno,FALSE,"less information, less matches"
+magrin2022_twc,simple,all,dataset,"The paper does not use a pre-existing dataset. Instead, it validates its proposed mathematical model through **realistic ns-3 simulations**. The simulation setup and parameters (e.g., number of end devices, traffic load, channel allocation, duty cycle, channel model, SF distribution) are described in Section V, ""NETWORK SIMULATIONS.""",ns-3 simulation LoRaWAN network,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Breno,TRUE,"more information, more matches, contextualized"
+magrin2022_twc,complex,all,dataset,"The dataset used in the paper is: the data generated through realistic ns-3 simulations using the LoRaWAN ns-3 module, which includes specific configurations for traffic load, channel allocation (European region), duty cycle, channel model (log-distance propagation path loss), SF distribution (uniformly assigned or pEXPLoRa), and interference/capture effect modeling.",ns-3 simulation LoRaWAN network,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+magrin2022_twc,one shot,all,dataset,"The dataset used in the paper is: results generated through realistic ns-3 simulations, specifically using the LoRaWAN ns-3 module described in [26].",ns-3 simulation LoRaWAN network,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,contextualized,Breno,TRUE,"more matches, contextualized"
+magrin2022_twc,simple,all,technique,"Based on the provided text, the paper **does not use learning algorithms** in the context of machine learning or artificial intelligence.
+
+Instead, the paper proposes and uses a **mathematical model** to estimate the performance of a LoRaWAN network. This model is characterized by:
+*   **Analytical modeling:** It involves deriving mathematical formulas for various network performance metrics (e.g., packet success probability, delays, fairness).
+*   **Poisson process assumptions:** Traffic generation is assumed to follow a Poisson process.
+*   **Alternating renewal processes:** Used to model the availability of sub-bands and demodulators.
+*   **Fixed-point iteration:** The system of inter-dependent equations in the model is solved using a fixed-point iteration approach to find a stable solution.
+*   **Numerical optimization (Trust Region Method):** When optimizing network parameters (e.g., SF distributions, number of re-transmissions), the paper mentions using the ""trust region method as implemented by the scipy library,"" which is a numerical optimization algorithm.
+
+The results from this mathematical model are then **validated using ns-3 simulations**, which is a network simulator, not a learning algorithm itself.",Trust Region Method,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,"more information, more matches",Breno,TRUE,"more information, more matches, contextualized"
+magrin2022_twc,complex,all,technique,"The learning algorithms used in the paper are: None. The paper focuses on developing and validating a configurable mathematical model for LoRaWAN network performance analysis, which is solved using fixed-point iteration and optimized using the trust region method. These are mathematical and optimization techniques, not learning algorithms in the context of machine learning.",Trust Region Method,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,FALSE,"less matches, less information"
+magrin2022_twc,one shot,all,technique,"The learning algorithms used in the paper are: No learning algorithms in the sense of machine learning (e.g., supervised, unsupervised, reinforcement learning) are explicitly used or developed in this paper. The paper presents a ""configurable mathematical model"" for LoRaWAN performance analysis, which involves:
+
+*   **Analytical modeling**: Using mathematical formulations, including Poisson processes and Markov-chain theory, to derive performance metrics.
+*   **Fixed-point iteration**: A numerical method to find the solution for a system of inter-dependent equations.
+*   **Optimization problem**: Solving an optimization problem to identify optimal parameter configurations, which is performed using the ""trust region method"" from the scipy library. This is an optimization algorithm, not a learning algorithm in the context of AI/ML.
+
+The work primarily focuses on network modeling, simulation, and optimization based on derived mathematical relationships, rather than learning from data.",Trust Region Method,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,FALSE,"more information, less matches"
+magrin2022_twc,simple,all,partition method,"The paper uses a partition method that **splits the network traffic into different logical channels based on the assumption of perfect orthogonality between different Spreading Factors (SFs)**.
+
+Within these logical channels, the traffic load for each SF is further **split uniformly over the given C frequency channels**.
+
+Additionally, the model distinguishes between **confirmed and unconfirmed traffic**, analyzing them separately within this framework.",Não se aplica. ,FALSE,Pedro,FALSE,,Diogo,,,Breno,TRUE,"more information, more matches, contextualized"
+magrin2022_twc,complex,all,partition method,"The partition method used in the paper is: Not applicable. The paper describes an analytical mathematical model that is validated against results obtained from ns-3 simulations, rather than using a partition method for a machine learning dataset.",Não se aplica. ,FALSE,Pedro,TRUE,,Diogo,,,Breno,TRUE,"less matches, contextualized"
+magrin2022_twc,one shot,all,partition method,"The partition method used in the paper is: not applicable, as the paper focuses on validating a configurable mathematical model through ns-3 simulations rather than training and evaluating a machine learning model on a partitioned dataset.",Não se aplica. ,FALSE,Pedro,TRUE,,Diogo,,,Breno,TRUE,"less matches, contextualized"
+magrin2022_twc,simple,all,evaluation metric,"The paper uses the following evaluation metrics:
+
+*   **Reliability Metrics (Packet Delivery Rate - PDR):**
+    *   **Unconfirmed Uplink PDR (UU):** Fraction of application-layer unconfirmed packets successfully received by the Gateway (GW).
+    *   **Confirmed Uplink PDR (CU):** Fraction of application-layer confirmed packets successfully received by the GW (regardless of ACK success).
+    *   **Confirmed Downlink PDR (CD):** Fraction of application-layer confirmed packets successfully acknowledged by the Network Server (NS).
+
+*   **Delay Metrics (for confirmed traffic):**
+    *   **ΔUL:** Time from the first transmission attempt to the successful delivery of an Uplink (UL) confirmed packet to the GW.
+    *   **ΔDL:** Time from the first transmission of a confirmed packet to the successful reception of the corresponding reply.
+
+*   **Fairness Metric:**
+    *   **Jain's fairness index:** Used to assess fairness among devices employing different Spreading Factors (SFs), considering UU for unconfirmed traffic and CU for confirmed messages as inputs.
+
+Additionally, the paper mentions that these metrics allow for the derivation of ""other measures of interest, such as energy consumption, system’s reliability and the achievable Quality of Service (QoS).""","['Packet Success Probability', 'Delay', 'Fairness']",FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+magrin2022_twc,complex,all,evaluation metric,"The evaluation metric used in the paper is: packet success probability (including Unconfirmed Uplink PDR (UU), Confirmed Uplink PDR (CU), and Confirmed Downlink PDR (CD)), average delays (ΔUL and ΔDL), and fairness (Jain's fairness index).","['Packet Success Probability', 'Delay', 'Fairness']",FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Breno,TRUE,"more matches, contexualized"
+magrin2022_twc,one shot,all,evaluation metric,"The evaluation metric used in the paper is: packet success probability (detailed as Unconfirmed Uplink PDR (UU), Confirmed Uplink PDR (CU), and Confirmed Downlink PDR (CD)), average delays (specifically ΔUL and ΔDL), and fairness (using Jain's fairness index).","['Packet Success Probability', 'Delay', 'Fairness']",FALSE,Pedro,TRUE,more information,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,simple,all,sampling method,"The paper states that the model fragments used for evaluation were **randomly selected** from the large product models provided by their industrial partners (CAF and BSH).
+
+These randomly selected model fragments were then **grouped into representative sets** to evaluate different ""location challenges,"" which are associated with three measurements:
+*   **Density:** measuring the percentage of model elements contained by the fragment (small, large, or all kinds of density values).
+*   **Multiplicity:** measuring the number of times the model fragment appears in the product model (appears once, several times, or all kinds of multiplicity values).
+*   **Dispersion:** measuring the ratio of connected elements in the model fragment (small, large, or all kinds of dispersion values).
+
+This indicates a form of **stratified random sampling**, where random selection is performed within strata defined by these location challenge characteristics.",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Breno,TRUE,"more information, more matches, contextualized"
+marcén2022ssm,complex,all,sampling method,"The sampling method used in the paper is: Model fragments for evaluation were randomly selected and then grouped into representative sets based on different location challenges (density, multiplicity, and dispersion) to ensure diversity.",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,one shot,all,sampling method,"The sampling method used in the paper is: Model fragments for the evaluation were randomly selected and grouped into representative sets based on different location challenges (density, multiplicity, and dispersion).",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Breno,TRUE,"more information, more matches, contextualized"
+marcén2022ssm,simple,all,dataset,"The paper uses two real-world case studies as its dataset for evaluation:
+
+1.  **CAF case study:** This dataset is from the railway domain and includes:
+    *   1800 test cases.
+    *   10 different feature descriptions (approx. 25 words each).
+    *   180 sets of model fragments from 20 product models.
+    *   A knowledge base with 1339 samples (each containing a feature description, a model fragment, and a score between 0 and 4).
+    *   A domain ontology with 103 elements (concepts, properties, and relations).
+    *   An oracle with 10 correct model fragments for the feature descriptions.
+
+2.  **BSH case study:** This dataset is from the induction hob domain and includes:
+    *   108 test cases.
+    *   6 different feature descriptions (approx. 10 words each).
+    *   18 sets of model fragments from 2 product models.
+    *   A knowledge base with 758 samples (each containing a feature description, a model fragment, and a score between 0 and 4).
+    *   A domain ontology with 13 elements (concepts, properties, and relations).
+    *   An oracle with 6 correct model fragments for the feature descriptions.
+
+Both case studies consist of ""test cases"" (comprising a feature description, a set of model fragments, a knowledge base, and an ontology) and an ""oracle"" (approved solutions for comparison).",https://bitbucket.org/svitusj/flame/src/master/FLiM_ML/,FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,TRUE,"more information, more matches, contextualized"
+marcén2022ssm,complex,all,dataset,"The dataset used in the paper is: two real-world case studies provided by industrial partners: CAF (a worldwide provider of railway solutions) and BSH (one of the largest manufacturers of home appliances in Europe).
+
+The **CAF case study** includes:
+*   1800 test cases.
+*   10 different feature descriptions (about 25 words each).
+*   180 different sets of model fragments from 20 product models.
+*   A knowledge base with 1339 samples (each sample containing a feature description, a model fragment, and a score between 0 and 4).
+*   A domain ontology with 103 elements (concepts, properties, and relations).
+*   An oracle with 10 model fragments as correct solutions.
+
+The **BSH case study** includes:
+*   108 test cases.
+*   6 different feature descriptions (about 10 words each).
+*   18 different sets of model fragments from 2 product models.
+*   A knowledge base with 758 samples (each sample containing a feature description, a model fragment, and a score between 0 and 4).
+*   A domain ontology with 13 elements (concepts, properties, and relations).
+*   An oracle with 6 model fragments as correct solutions.",https://bitbucket.org/svitusj/flame/src/master/FLiM_ML/,FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,FALSE,"less information, less matches"
+marcén2022ssm,one shot,all,dataset,"The dataset used in the paper is: two real-world case studies: one from the railway domain provided by CAF (1800 test cases) and another from the induction hob domain provided by BSH (108 test cases). Each test case consists of a feature description, a set of model fragments, a knowledge base, and an ontology, along with an oracle of approved solutions. The CAF knowledge base has 1339 samples, and the BSH knowledge base has 758 samples.",https://bitbucket.org/svitusj/flame/src/master/FLiM_ML/,FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,TRUE,"more information, more matches, contextualized"
+marcén2022ssm,simple,all,technique,"The paper uses the following learning algorithms:
+
+*   RankBoost (a Learning to Rank algorithm)
+*   Feedforward Neural Network (FNN)
+*   Recurrent Neural Network (RNN)","['RankBoost', 'Rede Neural Feedforward', 'a Rede Neural Recorrente']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,complex,all,technique,"The learning algorithms used in the paper are: RankBoost, Feedforward Neural Network (FNN), and Recurrent Neural Network (RNN).","['RankBoost', 'Rede Neural Feedforward', 'a Rede Neural Recorrente']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,one shot,all,technique,"The learning algorithms used in the paper are: RankBoost, Feedforward Neural Network (FNN), and Recurrent Neural Network (RNN).","['RankBoost', 'Rede Neural Feedforward', 'a Rede Neural Recorrente']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,simple,all,partition method,"The paper uses the **k-fold cross-validation method** for validating the classifiers. Specifically, they used a **k value equal to 4**, and the folds were selected in a **stratified manner** to ensure each partition contains roughly the same proportions of each score value.",cross-validation,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Breno,FALSE,"less information, more matches"
+marcén2022ssm,complex,all,partition method,"The partition method used in the paper is: k-fold validation method with a k value equal to 4, where the folds are selected in a stratified manner. The overall process also involves distinct training and testing phases for the machine learning models.",cross-validation,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Breno,FALSE,"less matches, more information"
+marcén2022ssm,one shot,all,partition method,"The partition method used in the paper is: k-fold validation, specifically 4-fold stratified cross-validation.",cross-validation,FALSE,Pedro,TRUE,,Diogo,TRUE,more information,Breno,FALSE,"less matches, more information"
+marcén2022ssm,simple,all,evaluation metric,"The evaluation metrics used in the paper are:
+
+*   **Precision**
+*   **Recall**
+*   **F-measure**
+*   **Matthews Correlation Coefficient (MCC)**
+
+Additionally, for analyzing the effect size in statistical comparisons, **Vargha and Delaney’s ˆA12** is used.","['Precision', 'Recall', 'F-measure', 'MCC']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,complex,all,evaluation metric,"The evaluation metric used in the paper is: precision, recall, F-measure, and Matthews Correlation Coefﬁcient (MCC).","['Precision', 'Recall', 'F-measure', 'MCC']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,one shot,all,evaluation metric,"The evaluation metric used in the paper is: precision, recall, F-measure, and Matthews Correlation Coefficient (MCC).","['Precision', 'Recall', 'F-measure', 'MCC']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+metzger2024computing,simple,all,sampling method,"The paper uses and proposes several **exploration strategies** for online reinforcement learning, which dictate how adaptation actions are ""sampled"" or ""selected"" from the adaptation space.
+
+The specific methods mentioned are:
+
+1.  **ϵ-greedy strategy:** This is used as a baseline. With a certain probability (ϵ), it selects a **random action** for exploration, and with probability (1-ϵ), it exploits existing knowledge by selecting the action with the highest expected reward.
+2.  **Feature-model-guided exploration (FM-guided exploration):** This is the novel contribution, designed to guide the exploration process. It includes:
+    *   **FM-structure exploration:** This strategy leverages the hierarchical structure and semantics of feature models. It starts by randomly selecting a leaf feature and then explores configurations involving that feature before moving to its sibling features, and so on. It involves **random selection within these semantically guided subsets**.
+    *   **FM-difference exploration:** This strategy addresses system evolution by prioritizing the exploration of **newly added configurations** to the adaptation space. This method can be combined with either ϵ-greedy or FM-structure exploration.
+
+In summary, the paper employs a mix of **random exploration** (as part of ϵ-greedy) and novel **feature-model-guided exploration strategies** (FM-structure and FM-difference) which incorporate guided, structured selection, often with a random component within the guided choices.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,less matches,Breno,FALSE,"less information, less matches"
+metzger2024computing,complex,all,sampling method,"The sampling method used in the paper is: The paper employs exploration strategies within online reinforcement learning to select adaptation actions. The baseline strategy used is **ϵ-greedy**, which involves selecting a random action with a certain probability (exploration) or exploiting existing knowledge. The paper's novel contributions are **Feature-model-guided exploration (FM-guided exploration)** strategies, which include:
+*   **FM-structure exploration**: guides exploration by leveraging the semantics and structure of feature models.
+*   **FM-difference exploration**: guides exploration by focusing on adaptation actions added or removed due to system evolution.
+A component of **random exploration** is also used in conjunction with these strategies to prevent premature convergence.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+metzger2024computing,one shot,all,sampling method,"The sampling method used in the paper is: The paper utilizes exploration strategies for selecting adaptation actions in reinforcement learning, which serve as the sampling methods for the adaptation space. These include:
+*   The `ϵ`-greedy strategy as a baseline, where exploration involves selecting a random action.
+*   Novel Feature-Model-guided (FM-guided) exploration strategies proposed by the authors, specifically FM-structure exploration (which guides selection using the semantic structure of feature models and involves structured random selection) and FM-difference exploration (which prioritizes the exploration of newly added configurations due to system evolution).",NI,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+metzger2024computing,simple,all,dataset,"The paper uses two real-world systems and their associated datasets for experiments:
+
+1.  **CloudRM system:** This system utilizes a **real-world workload trace with 10,000 tasks**, spanning a timeframe of 29 days.
+2.  **BerkeleyDB-J system:** This system uses a **dataset collected by Siegmund et al. [36]**, which includes performance measurements for all system configurations, measured using standard benchmarks.","['https://sourceforge.net/p/vm-alloc/task_vm_pm/HEAD/tree/', ' https://www.se.cs.uni-saarland.de/projects/splconqueror/icse2012.php']",FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, contextualized"
+metzger2024computing,complex,all,dataset,The dataset used in the paper is: a real-world workload trace for the CloudRM system and the BerkeleyDB-J dataset.,"['https://sourceforge.net/p/vm-alloc/task_vm_pm/HEAD/tree/', ' https://www.se.cs.uni-saarland.de/projects/splconqueror/icse2012.php']",FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,FALSE,"less information, less matches"
+metzger2024computing,one shot,all,dataset,"The dataset used in the paper is: a real-world workload trace with 10,000 tasks spanning 29 days for the CloudRM system, and the BerkeleyDB-J dataset collected by Siegmund et al. [36].","['https://sourceforge.net/p/vm-alloc/task_vm_pm/HEAD/tree/', ' https://www.se.cs.uni-saarland.de/projects/splconqueror/icse2012.php']",FALSE,Pedro,FALSE,"more information, contextualized",Diogo,FALSE,"more information, less matches",Breno,TRUE,"more information, more matches, contextualized"
+metzger2024computing,simple,all,technique,The paper uses two well-known reinforcement learning algorithms: **Q-Learning** and **SARSA**. These algorithms are used for integrating their proposed feature-model-guided exploration strategies.,"[' Q-Learning', 'SARSA']",FALSE,Pedro,TRUE,contextualized,Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+metzger2024computing,complex,all,technique,The learning algorithms used in the paper are: Q-Learning and SARSA.,"[' Q-Learning', 'SARSA']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, less information"
+metzger2024computing,one shot,all,technique,The learning algorithms used in the paper are: Q-Learning and SARSA.,"[' Q-Learning', 'SARSA']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, less information"
+metzger2024computing,simple,all,partition method,"The paper does not explicitly describe a ""partition method"" for the entire adaptation space. Instead, it proposes two feature-model-guided **exploration strategies** that leverage the inherent structure of feature models and the differences between feature models to prioritize and guide the exploration process within the adaptation space:
+
+1.  **FM-structure exploration strategy**: This method takes advantage of the semantics typically encoded in the hierarchical structure of feature models. It explores adaptation actions by systematically traversing the feature model, prioritizing semantically connected sibling features. For instance, it explores configurations involving a randomly selected leaf feature, then moves to its sibling features, and then to the parent feature.
+2.  **FM-difference exploration strategy**: This method addresses system evolution by leveraging the differences between feature models before and after an evolution step. It identifies configurations that have been *added* to or *removed* from the adaptation space. The strategy then prioritizes the exploration of these newly *added* configurations, as they might offer new opportunities for finding suitable adaptation actions. Configurations that were removed are no longer explored.",NI,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Breno,FALSE,"less information, less matches"
+metzger2024computing,complex,all,partition method,"The paper describes exploration strategies within an online reinforcement learning framework, rather than a traditional data partition method for model training and evaluation. The specific strategies mentioned are:
+*   **ϵ-greedy strategy**: This is used as a baseline, where actions are selected either by exploiting existing knowledge (with probability 1-ϵ) or by exploring new actions randomly (with probability ϵ). The ϵ value decays over time.
+*   **FM-structure exploration strategy**: This strategy uses the semantics and structure of feature models to guide exploration, prioritizing semantically connected sibling features.
+*   **FM-difference exploration strategy**: This strategy leverages differences in feature models before and after an evolution step to prioritize exploration of newly added configurations.",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+metzger2024computing,one shot,all,partition method,"The partition method used in the paper is: Not applicable in the traditional sense of dividing a dataset for training, validation, and testing, as the paper focuses on online reinforcement learning. The learning process occurs continuously through interactions with the environment, and performance is evaluated over time and across system evolution steps. The paper introduces and compares different ""exploration strategies"" (ϵ-greedy, FM-structure exploration, FM-difference exploration) for how the reinforcement learning agent selects actions, rather than methods for partitioning a static dataset.",NI,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Breno,TRUE,"contextualized, more matches"
+metzger2024computing,simple,all,evaluation metric,"The paper uses the following evaluation metrics:
+
+**For learning performance:**
+*   **Asymptotic performance:** Measures the reward achieved at the end of the learning process.
+*   **Time to threshold:** Measures the number of time steps it takes the learning process to reach a predefined reward threshold (90% of the difference between maximum and minimum performance).
+*   **Total performance:** Measures the overall learning performance by computing the area between the reward curve and the asymptotic reward.
+
+**For system quality characteristics (impact of strategies):**
+*   **CloudRM system:** Energy consumption and number of VM manipulations (migrations and launches).
+*   **BerkeleyDB-J system:** Average response time.","['Asymptotic Time', 'Total Effect on Performance', 'Threshold Performance', 'Quality']",FALSE,Pedro,TRUE,"less matches, more information",Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+metzger2024computing,complex,all,evaluation metric,"The evaluation metric used in the paper is: Asymptotic performance, Time to threshold, Total performance, and the impact on the quality characteristics of the subject systems.","['Asymptotic Time', 'Total Effect on Performance', 'Threshold Performance', 'Quality']",FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+metzger2024computing,one shot,all,evaluation metric,"The evaluation metric used in the paper is: Asymptotic performance (reward achieved at the end of the learning process), Time to threshold (number of time steps to reach a predefined reward threshold), Total performance (overall learning performance computed by the area between the reward curve and the asymptotic reward), and the quality characteristics of the subject systems.","['Asymptotic Time', 'Total Effect on Performance', 'Threshold Performance', 'Quality']",FALSE,Pedro,TRUE,,Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,simple,segmented,sampling method,"The paper does not use a single sampling method but rather **evaluates and compares six different sampling strategies** to determine their effectiveness on performance prediction.
+
+The six sampling strategies investigated and compared in the paper are:
+
+1.  **Coverage-based sampling** (e.g., t-wise sampling, specifically with t=1, t=2, and t=3)
+2.  **Solver-based sampling**
+3.  **Randomized solver-based sampling**
+4.  **Distance-based sampling**
+5.  **Diversified distance-based sampling** (a strategy proposed in a previous study by Kaltenecker et al. [25] that this paper replicates and extends)
+6.  **Random sampling**
+
+The authors investigate how these strategies influence the accuracy and robustness of performance predictions under varying conditions.","['Coverage-based    ', 'Solver-based', 'Randomized solver-based', 'Distance-based', 'Distance-based ', 'Diversified distance-based', 'Random']",FALSE,Pedro,TRUE,"contextualized, more information",Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,complex,segmented,sampling method,"The sampling methods used in the paper for evaluation are: t-wise sampling (under the category of Coverage-based), Solver-based sampling, Randomized solver-based sampling, Distance-based sampling, Diversified distance-based sampling, and Random sampling.","['Coverage-based    ', 'Solver-based', 'Randomized solver-based', 'Distance-based', 'Distance-based ', 'Diversified distance-based', 'Random']",TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,one shot,segmented,sampling method," The paper investigates and compares six sampling strategies: Coverage-based, Solver-based, Randomized solver-based, Distance-based, Diversified distance-based, and Random sampling. The study also uses t-wise sampling (t=1, t=2, t=3) to define sample sizes.","['Coverage-based    ', 'Solver-based', 'Randomized solver-based', 'Distance-based', 'Distance-based ', 'Diversified distance-based', 'Random']",TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,simple,segmented,dataset,"The paper uses a dataset consisting of **1,152 configurations of the x264 configurable video encoder** encoded with **17 different input videos**. For each of these configurations and input videos, two performance properties were measured: **encoding time** and **encoding size**.",https://github.com/jualvespereira/ICPE2020,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,complex,segmented,dataset,"The dataset used in the paper is: measurements of encoding time and encoding size for 1,152 configurations of the x264 video encoder across 17 different input videos.",https://github.com/jualvespereira/ICPE2020,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, less information, contextualized"
+alves2020-icpe,one shot,segmented,dataset," The paper uses a dataset derived from the NIST Special Database 19, which is converted to create the EMNIST dataset. A subset of the EMNIST digits is also extracted and compared to the MNIST dataset for validation.",https://github.com/jualvespereira/ICPE2020,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Breno,TRUE,"more information, more matches, contextualized"
+alves2020-icpe,simple,segmented,technique,"Based on the text, the learning algorithm used in this paper is **stepwise multiple linear regression**.
+
+The text states: ""Although several machine-learning techniques have been proposed in the literature with this purpose [46], such as linear regression ..., classification and regression trees (CART) ..., and random forest [3, 6, 49, 61, 63]. **In this paper, we use stepwise multiple linear regression [52] as in Kaltenecker et al. [25].**""",Multiple linear regression,FALSE,Pedro,TRUE,contextualized,Diogo,TRUE,"more information, contextualized",Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,complex,segmented,technique,The learning algorithms used in the paper are: stepwise multiple linear regression.,Multiple linear regression,FALSE,Pedro,FALSE,,Diogo,TRUE,,Breno,FALSE,less matches
+alves2020-icpe,one shot,segmented,technique, stepwise multiple linear regression.,Multiple linear regression,TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,simple,segmented,partition method,"The paper uses a partition method where the performance models are trained on a **subset of configurations (referred to as a ""sample"")**. After training, these models are then used to predict the performance of the **entire dataset of valid configurations (C)**. This entire dataset C is explicitly stated as the **""validation set""** for calculating the prediction error rate (Mean Relative Error - MRE).
+
+In essence, the method involves:
+1.  **Sampling:** Selecting a subset of configurations (the ""sample"") using various sampling strategies.
+2.  **Training:** Building a performance model based on this selected sample.
+3.  **Validation:** Predicting the performance for *all* valid configurations (C) and comparing these predictions against the measured values of C to calculate the error rate. This means the ""validation set"" is the entire known configuration space, not a disjoint subset of it from the training data.",NI,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,less matches,Breno,TRUE,"more information, more matches, contextualized"
+alves2020-icpe,complex,segmented,partition method,"The partition method used in the paper is: A performance model is built based on a ""sample of configurations"" (acting as the training set) which are selected using various ""sampling strategies"" (e.g., t-wise sampling, diversified distance-based sampling, random sampling). The accuracy of this model is then evaluated by predicting the performance of ""the entire dataset of valid configurations C"", which is used as the ""validation set"" for calculating the Mean Relative Error (MRE).",NI,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,less matches,Breno,TRUE,"more information, more matches, contextualized"
+alves2020-icpe,one shot,segmented,partition method," The paper describes the use of **sampling strategies** to select a subset of configurations for performance prediction. It details several sampling strategies, including **coverage-based sampling**, **solver-based sampling**, **randomized solver-based sampling**, **distance-based sampling**, **diversified distance-based sampling**, and **random sampling**. The paper's experiment setup also mentions using three different **sample sizes** (t=1, t=2, and t=3) for these sampling strategies.",NI,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,less matches,Breno,TRUE,"more matches, more information, contextualized"
+alves2020-icpe,simple,segmented,evaluation metric,"The paper uses the following evaluation metrics:
+
+1.  **Mean Relative Error (MRE)**: This is the primary metric used to calculate the **prediction error rate** and estimate the **accuracy** between the exact measurements and the predicted values. It is defined by Equation 1:
+    MRE = 1/|C| * Σ<sub>c ∈C</sub> (|measured<sub>c</sub> - predicted<sub>c</sub>| / measured<sub>c</sub>)
+    A lower MRE indicates higher accuracy.
+
+2.  **Variance across the error rates**: This metric is computed across 100 runs to assess the **robustness** of prediction accuracy. A lower variance indicates higher robustness.",Mean Relative Error (MRE),FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,"more information, more matches",Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,complex,segmented,evaluation metric,The evaluation metric used in the paper is: Mean Relative Error (MRE).,Mean Relative Error (MRE),TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+alves2020-icpe,one shot,segmented,evaluation metric, Mean Relative Error (MRE).,Mean Relative Error (MRE),FALSE,Pedro,FALSE,,Diogo,TRUE,,Breno,TRUE,"more matches, contextualized"
+Ha2019-icse,simple,segmented,sampling method,"The sampling method used in the paper is **random sampling**.
+
+This is explicitly stated in Section III.A.2 (""The Network Architecture""): ""...we propose a neural network architecture that can predict software performance values using a small **random sample** with high prediction accuracy.""",Random,FALSE,Pedro,TRUE,,Diogo,TRUE,contextualized,Breno,TRUE,"more matches, contextualized"
+Ha2019-icse,complex,segmented,sampling method,The sampling method used in the paper is: random sampling.,Random,FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, less information"
+Ha2019-icse,one shot,segmented,sampling method," Not applicable. The provided text discusses methods for **selecting a limited set of configurations (sample)** to build a performance prediction model for software systems, rather than a sampling method for an imbalanced dataset or a statistical sampling method in the traditional sense of selecting participants or data points from a larger population for a study. The paper describes how researchers ""measure the performance of a system with only a limited set of configurations (sample)"" and mentions ""several sampling heuristics and experimental designs for configuration options"" in the context of the SPLConqueror approach, but it does not specify a particular sampling method used **by the authors** for their own experiments in the way of random sampling, stratified sampling, etc. Instead, it refers to the general problem of using ""a small sample"" and the ""sample size."" In the section ""E. Tool Implementation,"" it states, ""To search for the hyperparameters, we use 67% of sample for training and 33% for validation,"" indicating a split of an existing sample, not a method for initially gathering that sample.",Random,FALSE,Pedro,TRUE,,Diogo,FALSE,"more information, less matches",Breno,FALSE,"less information, less matches"
+Ha2019-icse,simple,segmented,dataset,"The paper states that the proposed approach, DeepPerf, was ""evaluated on **eleven real-world conﬁgurable software systems** with up to 1031 conﬁgurations and from different application domains, e.g., compiler, web server, database library, video encoders, etc.""
+
+The text does not provide specific names for these eleven systems or a single, named dataset. Instead, it describes them by quantity, characteristics (real-world, configurable, number of configurations), and application domains.",https://github.com/DeepPerf/DeepPerf,FALSE,Pedro,FALSE,"contextualized, more information",Diogo,FALSE,"more information, less matches",Breno,TRUE,"more information, less matches, contextualized"
+Ha2019-icse,complex,segmented,dataset,"The dataset used in the paper is: eleven real-world configurable software systems with up to 1031 configurations, from different application domains such as compiler, web server, database library, and video encoders.",https://github.com/DeepPerf/DeepPerf,FALSE,Pedro,FALSE,"contextualized, more information",Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, contextualized"
+Ha2019-icse,one shot,segmented,dataset," The EMNIST dataset and the NIST dataset (specifically NIST Special Database 19). The EMNIST dataset is presented as a ""drop-in replacement for the MNIST dataset.""",https://github.com/DeepPerf/DeepPerf,FALSE,Pedro,FALSE,"contextualized, more information",Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, more information, contextualized"
+Ha2019-icse,simple,segmented,technique,"The paper primarily uses a **Deep Feedforward Neural Network (FNN)** as its learning algorithm.
+
+More specifically, it proposes to use a **deep sparse FNN**, which is constructed by combining a normal deep FNN with an **L1 regularization technique** applied to the first hidden layer.
+
+For training the network, the **Adam optimizer** is utilized. Additionally, the paper suggests a specific **hyperparameter search strategy** to tune the network effectively.",rede neural profunda feedforward (FNN) ,FALSE,Pedro,TRUE,"contextualized, more information",Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+Ha2019-icse,complex,segmented,technique,"The learning algorithms used in the paper are: Deep Feedforward Neural Networks (FNN), specifically a deep sparse FNN constructed by combining a normal deep FNN with L1 regularization.",rede neural profunda feedforward (FNN) ,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+Ha2019-icse,one shot,segmented,technique," Deep Feedforward Neural Networks (FNN), specifically a deep sparse FNN combined with L1 regularization. The paper also mentions that the problem is considered a non-linear regression problem. For hyperparameter tuning, the paper proposes a specific search strategy which might implicitly involve grid search or random search at sub-steps. Other methods mentioned in the context of comparison or related work include Classification And Regression Trees (CART), DECART, Fourier Transform of Boolean functions, Support Vector Machine (SVM), and other common machine learning methods (not specified further). However, the core learning algorithm proposed and used in this paper is the deep sparse FNN with L1 regularization.",rede neural profunda feedforward (FNN) ,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+Ha2019-icse,simple,segmented,partition method,"The paper states that for searching hyperparameters, they ""use **67% of sample for training and 33% for validation**.""",NI,FALSE,Pedro,FALSE,more information,Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+Ha2019-icse,complex,segmented,partition method,The partition method used in the paper is: The sample is split into two parts: 67% for training and 33% for validation.,NI,FALSE,Pedro,FALSE,more information,Diogo,FALSE,less matches,Breno,FALSE,"less information, less matches"
+Ha2019-icse,one shot,segmented,partition method," The text describes two ""forced partition methods"" for categorizing samples into different clusters based on 'reb': the percentile method and the k-means method.",NI,FALSE,Pedro,FALSE,more information,Diogo,FALSE,less matches,Breno,FALSE,"less information, less matches"
+Ha2019-icse,simple,segmented,evaluation metric,"Based on the text, the evaluation metrics used are:
+
+1.  **Prediction accuracy:** This is consistently mentioned as the overall goal and the measure by which their proposed method (DeepPerf) is compared to state-of-the-art methods (e.g., ""achieve much higher prediction accuracy with smaller sample sizes"").
+2.  **Prediction error / Validation error:** Specifically for hyperparameter tuning and model validation, the text states they ""evaluate the network performance on a validation dataset with these trial points, and pick the η(i) that has the smallest prediction error"" and ""The optimal L1 regularization hyperparameter is the value that achieves the smallest validation error.""
+3.  **Mean square errors (MSE):** This is explicitly stated as the chosen ""loss function"" for training the neural network, which serves as a direct measure of the error between real and predicted outputs. For regression problems, a lower MSE indicates higher prediction accuracy.",Mean Relative Error (MRE),FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,"more information, more matches",Breno,FALSE,"less matches, less information"
+Ha2019-icse,complex,segmented,evaluation metric,"The evaluation metric used in the paper is: mean square errors (MSE) to quantify prediction error and validation error, with the overall goal of achieving high prediction accuracy.",Mean Relative Error (MRE),FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,more information,Breno,FALSE,"less information, less matches"
+Ha2019-icse,one shot,segmented,evaluation metric, prediction accuracy.,Mean Relative Error (MRE),FALSE,Pedro,FALSE,,Diogo,FALSE,less matches,Breno,FALSE,"less matches, less information"
+Krishna2021,simple,segmented,sampling method,"Based on the provided text, the sampling method used in the paper for the ""Discovery"" phase of the BEETLE (Bellwether Transfer Learner) approach is a **sequential random sampling** strategy as part of a **racing algorithm**.
+
+Here's how it works:
+1.  A small fraction (e.g., ""about 10 percent"") of all available data is **randomly sampled** from the source environments.
+2.  Prediction models are built, and environments with poor performance are statistically eliminated.
+3.  For the remaining environments, **another 10 percent of the samples are added**, and the process is repeated.
+4.  This sequential sampling continues until the ranking order of environments doesn't change for a fixed number of repeats or a budget is exhausted.
+
+The purpose of this method is to ""minimize computational costs"" and to avoid ""exhaustive search"" by evaluating a small, increasing fraction of data to identify the best source (bellwether) environments.",Random,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+Krishna2021,complex,segmented,sampling method,"The sampling method used in the paper is random sampling of a small fraction (e.g., 10%) of configurations in an iterative process, as part of a racing algorithm to discover bellwether environments.",Random,FALSE,Pedro,TRUE,more information,Diogo,TRUE,more information,Breno,TRUE,"more matches, contextualized"
+Krishna2021,one shot,segmented,sampling method," The paper describes a sampling method used within the ""Discovery"" phase of BEETLE, which aims to find bellwether environments. This method is a **racing algorithm**.
+
+Key characteristics of this sampling method include:
+1.  **Iterative Sampling:** It starts by sampling a small fraction (about 10%) of all available data from candidate source environments.
+2.  **Performance Evaluation and Ranking:** It evaluates the performance of environments statistically and ranks them.
+3.  **Elimination:** Environments with poor performance (ranked last) are eliminated.
+4.  **Increasing Sample Size:** For the remaining environments, another small percentage (e.g., 10%) of samples are added, and the process repeats.
+5.  **Early Stopping:** The process terminates when the ranking order doesn't change for a fixed number of repeats or when a budget is exhausted.
+
+The goal is to achieve computational speedups by avoiding exhaustive search, especially with large datasets, by iteratively reducing the number of candidates and increasing sample size only for promising ones.",Random,FALSE,Pedro,TRUE,more information,Diogo,FALSE,less matches,Breno,FALSE,"less information, less matches"
+Krishna2021,simple,segmented,dataset,"The paper uses five real-world software systems as its dataset for evaluation. These systems are:
+
+*   **x264** (a video encoder)
+*   **SAT** (a SAT solver)
+*   **SQLite** (a SQL database)
+*   **GCC** (a high-performance C-compiler)
+*   **Storm** (a streaming data analytics tool)
+
+These systems were measured under a total of 57 different environments.",https://git.io/fjsky,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, contextualized"
+Krishna2021,complex,segmented,dataset,"The dataset used in the paper is performance measurements from five real-world software systems: a video encoder (X264), a SAT solver (SAT), a SQL database (SQL), a high-performance C-compiler (LLVM), and a streaming data analytics tool (JIT), measured under 57 environments overall.",https://git.io/fjsky,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, contextualized"
+Krishna2021,one shot,segmented,dataset," not explicitly mentioned. The paper describes using ""five real-world software systems from different domains – a video encoder, a SAT solver, a SQL database, a high-performance C-compiler, and a streaming data analytics tool"" for evaluation, measured under 57 environments overall. It also references using the ""complete NIST dataset"" in a preceding sentence which seems to be a copy-paste error from another document based on its context. Therefore, the specific dataset is not clearly named, but rather described by the types of software systems it comprises.",https://git.io/fjsky,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"more information, less matches",Breno,TRUE,"more matches, less information, contextualized"
+Krishna2021,simple,segmented,technique,"Based on the provided text, the primary learning algorithm used in the paper is **Regression Trees**.
+
+The text explicitly states:
+*   ""The learning algorithm used in this paper namely, **Regression Trees**, are particularly well suited to handle such a combination of continuous and categorical data."" (Page 3, Section 3)
+*   ""Next, to perform transfer learning, we just use these bellwether environments to train a performance prediction model with **regression trees** [33]."" (Page 5, Section 4)
+*   ""Use the sampled conﬁgurations from each environment as a source build a prediction model with **regression trees**."" (Page 6, Section 4.1, Fig. 3d pseudocode description)
+*   ""On Line 10, we use **regression trees** to make predictions."" (Page 7, Section 4.2)
+
+The paper's overall approach is **Transfer Learning**, and their proposed method is called **BEETLE**, which incorporates a ""racing algorithm"" for discovering bellwether environments, but the specific models built for prediction within BEETLE are **Regression Trees**.",Regression trees,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,TRUE,"more information, contextualized",Breno,TRUE,"more matches, contextualized"
+Krishna2021,complex,segmented,technique,The learning algorithms used in the paper are: Regression Trees.,Regression trees,FALSE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, less information"
+Krishna2021,one shot,segmented,technique, Regression Trees.,Regression trees,TRUE,Pedro,TRUE,,Diogo,TRUE,,Breno,TRUE,"more matches, contexualized"
+Krishna2021,simple,segmented,partition method,"Based on the provided text, the paper primarily uses a **source-target partitioning method at the environment level** for its transfer learning approach (BEETLE).
+
+Here's how it works:
+1.  **Source Environments**: Data from carefully identified ""bellwether environments"" is used as the **source** to train performance prediction models.
+2.  **Target Environments**: The models trained on the bellwether (source) environments are then used to predict the performance of configurations in other environments, referred to as **target environments**.
+
+For the *discovery* of these bellwether environments, the paper also describes a specific strategy:
+*   A **racing algorithm** is employed, which iteratively **samples a small fraction (e.g., 10%)** of configurations from candidate environments.
+*   In a **round-robin fashion**, each environment is temporarily used as a source to build a model, and all others are used as targets. Environments with poor performance in this evaluation are progressively eliminated until the best-ranked ""bellwether(s)"" are identified.",bootstrap,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+Krishna2021,complex,segmented,partition method,"The partition method used in the paper is: a form of ""round-robin"" experimentation, where each environment is sequentially used as a ""source"" (for training a prediction model) and all other environments are used as ""targets"" (for prediction performance evaluation). This process is optimized using a ""racing algorithm"" which samples small fractions of data initially (e.g., 10%) and iteratively adds more samples while eliminating poorly performing environments.",bootstrap,FALSE,Pedro,TRUE,"more information, contextualized",Diogo,FALSE,less matches,Breno,TRUE,"more information, more matches, contextualized"
+Krishna2021,one shot,segmented,partition method, **the percentile method and the k-means method.**,bootstrap,FALSE,Pedro,FALSE,,Diogo,FALSE,less matches,Breno,FALSE,"less matches, more information"
+Krishna2021,simple,segmented,evaluation metric,"Based on the provided text, the specific name of the evaluation metric is **not explicitly stated** in the visible sections.
+
+However, the text indicates that the evaluation criteria are discussed in **Section 6.2**:
+""After using every enviroment as a source, the environments are ranked from best to worst using the **evaluation criteria discussed in Section 6.2.**"" (Page 6)
+
+From the problem statement and objectives, we can infer the **type** of evaluation being performed:
+
+1.  **Quality of Near-Optimal Configurations:** The primary goal is ""ﬁnding the near-optimal conﬁgurations"" such that their ""performance measure (y)"" is ""better than"" other configurations (either minimized or maximized). Therefore, the metric will assess how close the performance of the configurations found by BEETLE are to the true optimal performance. Phrases like ""found conﬁgurations as good as or better than those found by other state-of-the-art transfer learners"" (Page 2) confirm this focus.
+2.  **Cost/Efficiency:** Another key evaluation aspect is the number of measurements required. BEETLE aims to achieve good performance ""while requiring only 1/7th of the measurements needed"" by other methods (Page 2). This implies efficiency (computational or monetary cost) is also an evaluation criterion.",Residual Absoluto Normalizado (NAR),FALSE,Pedro,FALSE,,Diogo,FALSE,less matches,Breno,FALSE,"less information, more matches"
+Krishna2021,complex,segmented,evaluation metric,"The evaluation metric used in the paper includes the number of performance measurements required to find near-optimum configurations. The paper states that their proposed method, BEETLE, achieved its results ""while requiring only 1/7th of the measurements needed by those other methods,"" and also evaluates the ""quality of the model."" The specific criteria for evaluating the quality of the model or configurations are mentioned as being discussed in Section 6.2, which is not provided in the text.",Residual Absoluto Normalizado (NAR),FALSE,Pedro,FALSE,,Diogo,FALSE,less matches,Breno,TRUE,"more information, more matches, contextualized"
+Krishna2021,one shot,segmented,evaluation metric,"
+The text provided does not mention evaluation metrics in the context of the model's performance on the task. It discusses the ""performance of all the environments"" and ""ranking the performances,"" but it does not specify what quantitative measure is used for this performance or ranking. The text only refers to the performance of the system itself, not the performance of the model using evaluation metrics.",Residual Absoluto Normalizado (NAR),FALSE,Pedro,FALSE,,Diogo,FALSE,less matches,Breno,FALSE,"less information, less matches"
+martin2021,simple,segmented,sampling method,"Based on the provided text, the sampling method used in the paper is primarily **random sampling**.
+
+Specifically:
+
+1.  **For the Linux dataset creation**: The text states, ""It consists in the binary size measurement of 92.562 configurations... and obtained with the use of **randconfig, a widely used tool to generate random kernel configurations**."" This indicates that the initial configurations for the Linux dataset were generated randomly.
+2.  **For splitting datasets into training and test sets**: The authors mention, ""We also made vary the training set size from 10% to 70% and used the remaining (at least 30% to avoid overfitting) as test set to study its impact on the accuracy, **the sampling being made at random among the datasets**"".",NI,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,less matches,Breno,FALSE,"less information, more matches"
+martin2021,complex,segmented,sampling method,"The sampling method used in the paper is: random sampling, specifically for creating training and test sets from the datasets, and `randconfig` (a tool for generating random kernel configurations) for the Linux dataset.",NI,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+martin2021,one shot,segmented,sampling method," The paper uses random sampling for training and testing sets, specifically mentioning that the sampling is ""made at random among the datasets"" and citing Pereira et al. [34] who state that ""this sampling method is a strong baseline overall."" For the Linux dataset, the configurations were obtained using ""randconfig, a widely used tool to generate random kernel configurations.""",NI,FALSE,Pedro,TRUE,contextualized,Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+martin2021,simple,segmented,dataset,"The paper uses a total of nine datasets for its experimentation, detailed in Table 1:
+
+1.  **Apache**
+2.  **Berkeley C**
+3.  **Berkeley J**
+4.  **Dune**
+5.  **HMSGP**
+6.  **HIPAcc**
+7.  **LLVM**
+8.  **SQLite**
+9.  **Linux kernel**",https://github.com/HugoJPMartin/SPLC2021,FALSE,Pedro,FALSE,more information,Diogo,FALSE,"contextualized, less matches",Breno,TRUE,"more matches, contextualized"
+martin2021,complex,segmented,dataset,"The dataset used in the paper is: a collection of nine real-world configurable systems, which includes eight common software engineering datasets (Apache, Berkeley C, Berkeley J, Dune, HMSGP, HIPAcc, LLVM, and SQLite) and a larger Linux kernel dataset.",https://github.com/HugoJPMartin/SPLC2021,FALSE,Pedro,FALSE,contextualized,Diogo,FALSE,less matches,Breno,TRUE,"more matches, contextualized"
+martin2021,one shot,segmented,dataset,"
+The paper uses multiple datasets for its experimentation:
+
+1.  **Common SE datasets**: This refers to a collection of 8 real-world configurable systems that have been commonly used in the software engineering community. These include:
+    *   Apache
+    *   Berkeley C
+    *   Berkeley J
+    *   Dune
+    *   HMSGP
+    *   HIPAcc
+    *   LLVM
+    *   SQLite
+    Table 1 provides details for each of these systems, including the number of features and measured configurations.
+
+2.  **Linux kernel dataset**: This is a much larger dataset used to investigate the scalability of the proposed approaches. It consists of:
+    *   Binary size measurements of 92,562 configurations of the Linux kernel.
+    *   Restrained to x86 architectures and 64-bit systems.
+    *   Obtained using `randconfig` (a tool for generating random kernel configurations).
+    *   Contains all boolean and tristate options (encoded as 0 and 1), ""module"" options (encoded as 0), and a feature counting the number of active options, totaling 9,467 features. This dataset was made available by Acher et al. [1].",https://github.com/HugoJPMartin/SPLC2021,FALSE,Pedro,FALSE,"more information, contextualized",Lucas,,,Breno,TRUE,"more information, more matches, contextualized"
+martin2021,simple,segmented,technique,"The paper uses **Decision Trees** as its primary learning algorithm. Specifically, it explores three variants of Decision Trees:
+
+1.  **Regression Trees**
+2.  **Classification Trees**
+3.  **Specialized Regression** (a novel technique based on Regression Trees)
+
+The implementation of Decision Trees used is **CART** from the scikit-learn library.
+
+Additionally, **Random Forests** are used for tree-based feature selection.",Árvores de Decisão,FALSE,Pedro,TRUE,"more matches, more information, contextualized",Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+martin2021,complex,segmented,technique,"The learning algorithms used in the paper are: Decision Trees (specifically the CART implementation, utilized for classification, regression, and a novel specialized regression technique) and Random Forests (used for tree-based feature selection).",Árvores de Decisão,FALSE,Pedro,TRUE,"more matches, more information",Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+martin2021,one shot,segmented,technique," Regression, Classification, Specialized Regression (a novel technique based on Regression Tree), and Random Forests (used for Feature Selection). All these techniques rely on Decision Tree algorithms, specifically the CART implementation in scikit-learn.",Árvores de Decisão,FALSE,Pedro,TRUE,"more matches, more information",Lucas,TRUE,"[""more information""]",Breno,FALSE,"less matches, more information"
+martin2021,simple,segmented,partition method,"The paper partitions its datasets into training and test sets.
+
+Specifically:
+*   The **training set size** was varied from 10% to 70% of the dataset.
+*   The **test set** consisted of the remaining data (at least 30%) to avoid overfitting.
+*   The **sampling** for this partition was performed **at random** among the datasets.",NI,FALSE,Pedro,TRUE,more information,Lucas,FALSE,"[""more information""]",Breno,FALSE,"less information, less matches"
+martin2021,complex,segmented,partition method,"The partition method used in the paper is: random sampling to split the datasets into training sets (varying from 10% to 70% of the data) and test sets (the remaining, at least 30%).",NI,FALSE,Pedro,TRUE,more information,Lucas,FALSE,"[""more information""]",Breno,FALSE,"less information, less matches"
+martin2021,one shot,segmented,partition method," The paper mentions that the sampling for the training and test sets is made at random among the datasets, with the training set size varying from 10% to 70% and the remaining (at least 30%) used as the test set.",NI,FALSE,Pedro,TRUE,more information,Lucas,FALSE,"[""more information""]",Breno,TRUE,"more information, more matches, contextualized"
+martin2021,simple,segmented,evaluation metric,"The evaluation metric used in the paper is **balanced accuracy**.
+
+As stated in section 4.4 ""Metrics"": ""To measure the accuracy of the Decision Trees classification, we use the balance accuracy[8], which is a combination of sensitivity and specificity... In the remaining of the paper, we will refer to balanced accuracy as ""accuracy"".""",Acuraccy,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,TRUE,"[""contextualized""]",Breno,TRUE,"more matches, contextualized"
+martin2021,complex,segmented,evaluation metric,The evaluation metric used in the paper is: Balanced accuracy.,Acuraccy,FALSE,Pedro,TRUE,,Lucas,TRUE,"[""more information""]",Breno,FALSE,"less matches, more information"
+martin2021,one shot,segmented,evaluation metric," **Balanced accuracy**. It is defined as a combination of sensitivity and specificity:
+$$Balanced accuracy = \frac{1}{2} \left( \frac{TP}{TP + FN} + \frac{TN}{TN + FP} \right)$$
+where TP is True Positive, TN is True Negative, FN is False Negative, and FP is False Positive. The paper states that this metric is used because it heavily considers the influence of imbalanced class distribution, which is common due to threshold variation.",Acuraccy,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,TRUE,"[""contextualized""]",Breno,FALSE,"less matches, more information"
+Muhlbauer2020,simple,segmented,sampling method,"The paper uses an **iterative sampling method**. Specifically, it ""iteratively sample[s] pairs of configurations and versions"" and employs a ""search strategy with the goal of measuring selectively and incrementally further pairs"" to increase the accuracy of identified change points.",Iterative and adaptive sampling,FALSE,Pedro,TRUE,"less matches, contextualized",Lucas,TRUE,"[""contextualized""]",Breno,TRUE,"more matches, contextualized"
+Muhlbauer2020,complex,segmented,sampling method,"The sampling method used in the paper is: iterative and selective sampling of pairs of configurations and versions, pursued with a search strategy to incrementally measure further pairs and increase the accuracy of identified change points.",Iterative and adaptive sampling,FALSE,Pedro,TRUE,contextualized,Lucas,TRUE,"[""contextualized""]",Breno,FALSE,"less matches, less information"
+Muhlbauer2020,one shot,segmented,sampling method," iterative sampling of pairs of configurations and versions, combined with a search strategy to selectively and incrementally measure further pairs.",Iterative and adaptive sampling,FALSE,Pedro,TRUE,less matches,Lucas,TRUE,"[""more information""]",Breno,TRUE,"more information, more matches, contextualized"
+Muhlbauer2020,simple,segmented,dataset,"The paper uses two types of datasets:
+
+1.  **Controlled synthetic data sets**
+2.  Data from **real-world scenarios** with different software systems, specifically performing experiments on **three real-world systems**.",https:github.comiole-tangeilrzipicommit!1203aI853e89 2300f79daI9f14acaII15 2b5b890,FALSE,Pedro,FALSE,contextualized,Lucas,FALSE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+Muhlbauer2020,complex,segmented,dataset,The dataset used in the paper is: controlled synthetic data sets and three real-world software systems.,https:github.comiole-tangeilrzipicommit!1203aI853e89 2300f79daI9f14acaII15 2b5b890,FALSE,Pedro,FALSE,contextualized,Lucas,FALSE,"[""more information""]",Breno,FALSE,"less information, less matches"
+Muhlbauer2020,one shot,segmented,dataset," The paper mentions using ""controlled synthetic data sets"" and ""real-world scenarios with different software systems,"" but does not name specific datasets.",https:github.comiole-tangeilrzipicommit!1203aI853e89 2300f79daI9f14acaII15 2b5b890,FALSE,Pedro,FALSE,contextualized,Lucas,FALSE,"[""more information""]",Breno,TRUE,"more information, more matches, contextualized"
+Muhlbauer2020,simple,segmented,technique,"Based on the provided text, the paper describes an approach that involves **iteratively sampling pairs of configurations and versions and measuring their performance to update a model of likelihoods for performance changes.** It also mentions pursuing a **search strategy** to selectively and incrementally measure further pairs to increase accuracy.
+
+However, the text **does not specify or name any particular learning algorithms** (e.g., machine learning algorithms like neural networks, support vector machines, regression, etc.) that are used within this process. It describes a general iterative modeling and search approach.",LASSO regression,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+Muhlbauer2020,complex,segmented,technique,"The learning algorithms used in the paper are: Not specified in the provided text. The paper mentions an approach that iteratively samples and updates a ""model of likelihoods,"" but it does not name any specific machine learning algorithms (e.g., classification, regression, clustering).",LASSO regression,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+Muhlbauer2020,one shot,segmented,technique, Not specified in the provided text.,LASSO regression,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less matches, less information"
+Muhlbauer2020,simple,segmented,partition method,"Based on the provided text, there is no mention of a specific ""partition method"" being used in the paper. The text describes an approach that ""iteratively sample pairs of configurations and versions and measure the respective performance"" to identify configuration-dependent performance changes and pinpoint performance shifts.",NI,FALSE,Pedro,TRUE,contextualized,Lucas,FALSE,"[""more information""]",Breno,FALSE,"less information, less matches"
+Muhlbauer2020,complex,segmented,partition method,The partition method used in the paper is: Not specified in the provided text.,NI,FALSE,Pedro,TRUE,contextualized,Lucas,FALSE,"[""more information""]",Breno,FALSE,less information
+Muhlbauer2020,one shot,segmented,partition method," The text mentions ""Two forced partition methods were employed: the percentile method and the k-means method"" in the context of Random Forest, which is an ensemble learning method. However, the provided text from the ""1 INTRODUCTION"" section does not describe the specific partition method used for training, validation, or testing their proposed approach. It only describes the overall approach of sampling configurations and versions to measure performance changes.",NI,FALSE,Pedro,TRUE,contextualized,Lucas,FALSE,"[""more information""]",Breno,FALSE,"less information, less matches"
+Muhlbauer2020,simple,segmented,evaluation metric,"Based on the provided text, the evaluation metric explicitly mentioned is **accuracy**.
+
+The text states: ""Our evaluation demonstrates that we can pinpoint performance shifts to individual configuration options and interactions as well as commits introducing change points with high **accuracy** and at scale.""",F1-score,FALSE,Pedro,FALSE,"This one is a question, because they say accuray but do not specify the f1-score",Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less matches, less information"
+Muhlbauer2020,complex,segmented,evaluation metric,The evaluation metric used in the paper is: accuracy.,F1-score,FALSE,Pedro,FALSE,"This one is a question, because they say accuray but do not specify the f1-score",Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less matches, less information"
+Muhlbauer2020,one shot,segmented,evaluation metric, Precision and Recall.,F1-score,FALSE,Pedro,FALSE,wrong,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less matches, more information"
+OH2023,simple,segmented,sampling method,"The paper utilizes two primary sampling methods:
+
+1.  **Simple Random Search (SRS)**: This method uniformly selects configurations from the product space. The text states: ""The Simple Random Search (SRS) algorithm uniformly selects n configurations from C..."" (Section 3.2). It is explicitly linked to **Uniform Random Sampling (URS)**, where every configuration has an equal probability of being selected (Section 1). The mechanism for performing this uniform sampling, particularly for colossal spaces, is described in Algorithm 1 (Uniform Random Sampling) and implemented by the BDDSampler tool (Section 3.3).
+
+2.  **Recursive Random Search (RRS)**: This is another random search algorithm proposed and evaluated in the paper. It operates by taking a ""uniform sample"" of configurations in recursive steps, refining the search space based on noteworthy features found in previous samples (Section 4, Algorithm 2).
+
+In essence, both methods are built upon the foundation of Uniform Random Sampling.",Uniform Random Sampling,FALSE,Pedro,TRUE,more matches,Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+OH2023,complex,segmented,sampling method,"The sampling method used in the paper is Uniform Random Sampling (URS), also referred to as Simple Random Search (SRS), and a refined version called Recursive Random Search (RRS).",Uniform Random Sampling,FALSE,Pedro,TRUE,"more matches, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, less information"
+OH2023,one shot,segmented,sampling method," The paper discusses and compares several sampling methods, including Uniform Random Sampling (URS), Simple Random Search (SRS), and Recursive Random Search (RRS). It also mentions and evaluates other non-URS sampling methods like QuickSampler and DDbS, and different sampling methods used by SPLConqueror. The primary sampling method used for analysis and comparison, particularly for its statistical guarantees, is Uniform Random Sampling (URS), which forms the basis for Simple Random Search (SRS). Recursive Random Search (RRS) is presented as an improvement over SRS.",Uniform Random Sampling,FALSE,Pedro,TRUE,"more matches, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+OH2023,simple,segmented,dataset,"The paper uses several Software Product Lines (SPLs) as its datasets for evaluation and analysis. These include:
+
+1.  **For evaluation of enumerable SPLs (Section 5):**
+    *   **BerkeleyDBC:** An embedded database system with 18 features and 2,560 configurations, where benchmark response times were measured.
+    *   **7z:** A file archiver with 44 features and 68,640 configurations, where compression times were measured.
+    *   **VP9:** A video encoder with 42 features and 216,000 configurations, where video encoding times were measured. (Noted as the largest enumerated SPL.)
+
+2.  **For evaluation of colossal Kconfig SPLs (Section 6):**
+    *   **axTLS 2.1.4:** A client-server library with 94 features and approximately 2·10¹² configurations.
+    *   **ToyBox 0.7.5:** A Linux command line utilities package with 316 features and approximately 1.4·10⁸¹ configurations. (For both axTLS and ToyBox, build size was measured).
+
+The paper also references and uses data from prior work (Siegmund et al. [105, 106]) to illustrate Performance Configuration Space (PCS) graphs for other enumerable SPLs in Section 3.6, including:
+*   **Apache:** An open-source Web server (9 features, 192 configurations).
+*   **LLVM:** A compiler infrastructure (11 features, 1,024 configurations).
+*   **H264:** A video encoder library (16 features, 1,152 configurations).",https://doi.org/10.5281/zenodo.7485062,FALSE,Pedro,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+OH2023,complex,segmented,dataset,"The dataset used in the paper is: BerkeleyDBC, 7z, VP9, axTLS 2.1.4, and ToyBox 0.7.5. These are Software Product Lines (SPLs) on which the algorithms were evaluated.",https://doi.org/10.5281/zenodo.7485062,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+OH2023,one shot,segmented,dataset, The paper uses the EMNIST dataset and the complete NIST dataset.,https://doi.org/10.5281/zenodo.7485062,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, less information"
+OH2023,simple,segmented,technique,"The paper uses the following learning algorithms for Performance Modeling (PMs) in its evaluation:
+
+*   **Linear Regression (LR)**: This is a popular Machine Learning approach reviewed and used in SPLO. Specifically, **SPLConqueror** is mentioned as a state-of-the-art LR PM.
+*   **Deep Sparse Neural Network**: This is the type of neural network used by **DeepPerf**, another state-of-the-art PM algorithm compared in the paper.","['SPLConqueror (Regressão Linear)', 'DeepPerf']",FALSE,Pedro,TRUE,,Lucas,FALSE,"[""less information""]",Breno,TRUE,"more matches, contextualized"
+OH2023,complex,segmented,technique,The learning algorithms used in the paper are: Linear Regression and Deep Sparse Neural Network.,"['SPLConqueror (Regressão Linear)', 'DeepPerf']",FALSE,Pedro,TRUE,less information,Lucas,TRUE,"[""less matches""]",Breno,FALSE,"less matches, less information"
+OH2023,one shot,segmented,technique," Linear Regression (LR), Deep Sparse Neural Network, Recursive Random Search (RRS), Simple Random Search (SRS).","['SPLConqueror (Regressão Linear)', 'DeepPerf']",FALSE,Pedro,TRUE,less information,Lucas,TRUE,"[""more information""]",Breno,FALSE,"less matches, less information"
+OH2023,simple,segmented,partition method,"Based on the provided text, the paper uses the following partition methods:
+
+1.  **Uniform Random Sampling (URS) with an underlying feature ordering for partitioning:**
+    *   The primary method for sampling colossal configuration spaces is Uniform Random Sampling (URS), implemented by **Algorithm 1**.
+    *   This algorithm works by sequentially assigning a Boolean value to each feature (f1, f2, ..., fω). Each assignment for a feature `fi` is made based on its probability of being true, conditioned on the Boolean assignments of previously processed features. This process implicitly partitions the solution space at each step based on the choices made for preceding features.
+    *   Crucially, Footnote 3 specifies a method used for efficiency in the implementation of URS (BDDSampler): ""using **Heule’s cube-and-conquer algorithm to find an efficient ordering of features to partition the space**"".
+
+2.  **Recursive Random Search (RRS) for dynamic subspace partitioning:**
+    *   The paper also introduces Recursive Random Search (RRS) as another promising random search algorithm.
+    *   RRS works by **recursively restricting the scope of the search** to a subspace (e.g., `ϕ ∧ f`, where `f` is a noteworthy feature inferred from initial samples). It then takes another uniform sample from this newly ""partitioned"" or constrained subspace. This is a dynamic partitioning where the search space is iteratively narrowed based on observed performance.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+OH2023,complex,segmented,partition method,"The partition method used in the paper is: Uniform Random Sampling (URS). This is explicitly discussed and described as the basis for Simple Random Search (SRS) and Recursive Random Search (RRS), which are used to select configurations for building performance models and evaluating algorithms.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+OH2023,one shot,segmented,partition method, The percentile method and the k-means method.,NI,FALSE,Pedro,FALSE,"more information, contextualized",Lucas,FALSE,"[""less information""]",Breno,FALSE,"less matches, less information"
+OH2023,simple,segmented,evaluation metric,"Based on the provided text, the paper uses the following evaluation metrics:
+
+1.  **Solution Accuracy (Percentile Rank / Average Rank):**
+    *   Expressed as **percentile rank (μx)** of the returned near-optimal configuration (cno) relative to the optimal configuration (cbest). A lower percentile rank indicates higher accuracy (e.g., ""top 1%"").
+    *   For Simple Random Search (SRS), the theoretical expected rank is `1/(n+1)` where `n` is the sample size.
+    *   Often referred to as ""how near cbest"" or `β` (solution accuracy of a PM).
+
+2.  **Reliability (Standard Deviation):**
+    *   Measured by the **standard deviation (σx)** of the returned cnos' percentile ranks. A smaller standard deviation indicates more stable and reliable results.
+    *   For SRS, the theoretical standard deviation is `σ1,n`.
+
+3.  **Confidence:**
+    *   The statistical **confidence (¢)** or probability that a uniform sample of size `n` returns a cno in the top `ρ` accuracy (percentile). (e.g., ""within x% of optimal with y% confidence"").
+
+4.  **Mean Absolute Percentage Error (MAPE):**
+    *   Used specifically as the ""overall measure of **PM (Performance Model) accuracy**."" It calculates the average absolute difference between a configuration's predicted performance and its benchmarked performance across the configuration space.
+
+5.  **Correlation Measures:**
+    *   Spearman’s ρ, Kendall’s τ, Hoeffding’s D, and Distance Correlation (dCor) are used to assess the **correlation between PM accuracy (MAPE) and PM solution accuracy (rank)**.",MAPE,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,TRUE,"[""contextualized""]",Breno,TRUE,"more matches, less information, contextualized"
+OH2023,complex,segmented,evaluation metric,"The evaluation metric used in the paper is: Mean Absolute Percentage Error (MAPE) for overall PM accuracy, the average rank of returned cnos for solution accuracy, and the standard deviation of returned cnos for reliability.",MAPE,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,TRUE,"[""contextualized""]",Breno,FALSE,"less information, less matches"
+OH2023,one shot,segmented,evaluation metric," The evaluation metric used in the paper is Mean Absolute Percentage Error (MAPE), Precision, and Recall.",MAPE,FALSE,Pedro,TRUE,more matches,Lucas,FALSE,"[""more information""]",Breno,FALSE,"less matches, less information"
+shu2020,simple,segmented,sampling method,"The provided text does not specify a particular sampling method used by the authors to collect their training data.
+
+Instead, the paper highlights that:
+*   They aim to address the challenge of ""limited size of samples,"" emphasizing that obtaining a large amount of ""high-quality samples"" is ""very costly to measure and collect.""
+*   Their proposed method, PERF-AL, is designed to achieve high prediction accuracy ""with a smaller number of training samples.""
+*   They validate their model using ""seven real-world datasets,"" suggesting they use pre-existing datasets rather than applying a novel sampling method to generate their own.
+
+In summary, the paper focuses on *how to learn effectively from small sample sizes* rather than describing a specific method for *generating* those samples.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""more information""]",Breno,FALSE,"less information, less matches"
+shu2020,complex,segmented,sampling method,"The sampling method used in the paper is not explicitly described. The paper focuses on developing a prediction model that can achieve high accuracy using a ""small set of samples"" or a ""limited number of configurations (samples)"" due to the high cost and difficulty of measuring performance for all possible configurations. However, the specific technique used to select these limited samples is not detailed.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""more information""]",Breno,FALSE,"less information, less matches"
+shu2020,one shot,segmented,sampling method," The paper addresses the challenge of limited sample size by using a small set of samples for performance prediction, indicating a focus on effective use of *limited samples* rather than a specific sampling technique like undersampling or oversampling. It mentions that previous approaches ""usually require a large amount of training samples"" and that prediction accuracy ""relies heavily on high-quality samples, which are always limited and very costly to measure and collect."" The authors' solution is to achieve comparable prediction accuracy ""by using a small set of samples via adversarial learning.""",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more information, more matches, contextualized"
+shu2020,simple,segmented,dataset,"Based on the provided text:
+
+The paper states: ""We have validated our proposed model using **seven real-world datasets**.""
+
+However, the specific names of these seven datasets are not mentioned in the provided text, as the document ends before the ""Evaluation Results and Analysis"" section (Section 4), where these details would likely be provided.",https://github.com/GANPerf/GANPerf,FALSE,Pedro,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+shu2020,complex,segmented,dataset,The dataset used in the paper is: seven real-world datasets.,https://github.com/GANPerf/GANPerf,TRUE,Pedro,FALSE,more information,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, more matches"
+shu2020,one shot,segmented,dataset, The paper validates the proposed model using seven real-world datasets. The specific names or types of these datasets are not provided in the text.,https://github.com/GANPerf/GANPerf,FALSE,Pedro,FALSE,more information,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+shu2020,simple,segmented,technique,"The paper introduces a new performance prediction approach called **PERF-AL**, which primarily uses **Adversarial Learning**.
+
+Specifically, the core learning algorithm employed is a **Generative Adversarial Network (GAN)**. This GAN framework consists of two main components, both implemented as **Deep Neural Networks**:
+
+1.  **Generator Network**: This is a deep neural network designed as a regression model to predict software performance values. It is optimized using a combination of a supervised loss (Mean Squared Error, typically for regression) and an adversarial loss.
+2.  **Discriminator Network**: This is also a deep neural network that aims to distinguish between the performance values predicted by the generator and the actual ground truth values.
+
+The learning process involves an alternating optimization between these two networks, where the generator tries to ""fool"" the discriminator, and the discriminator tries to correctly identify real vs. generated data. The overall objective function for training combines both supervised and adversarial losses.
+
+Additionally, to combat overfitting, **regularization techniques** are integrated into the proposed PERF-AL network. While L1 regularization and dropout were considered, the paper states that **L2 regularization** was chosen as it performed best in their experiments.",Redes Adversariais Generativas (GANs),FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+shu2020,complex,segmented,technique,"The learning algorithms used in the paper are: Generative Adversarial Networks (GANs), Deep Neural Networks (DNNs), L1 regularization, L2 regularization, and Dropout. The problem is framed as a regression problem.",Redes Adversariais Generativas (GANs),TRUE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less matches, more information"
+shu2020,one shot,segmented,technique," **Adversarial Learning (specifically a variation of Generative Adversarial Networks (GANs) called PERF-AL), which involves a generator network and a discriminator network.** The paper also mentions the use of **deep neural networks** for both the generator and discriminator components, and utilizes **L1 and L2 regularization** as well as **dropout** as regularization techniques to prevent overfitting. It also refers to **regression** as the problem type, and mentions **CART (Classification and Regression Trees)** as an existing method, but not as a learning algorithm used in *this* paper.",Redes Adversariais Generativas (GANs),FALSE,Pedro,TRUE,"more information, contextualized",Lucas,TRUE,"[""more information""]",Breno,FALSE,"less matches, more information"
+shu2020,simple,segmented,partition method,"The provided text *does not explicitly state* the specific partition method used (e.g., k-fold cross-validation, a fixed train-test split ratio).
+
+The paper emphasizes that its proposed method, PERF-AL, is designed to work effectively with a **""small set of samples""** or **""small quantity of training data""** to achieve performance prediction. It defines the training sample as `m: {xi, f (xi)}, i = 1, 2, . . . ,m`. While it mentions the existence of ""test error"" in the context of overfitting, the process by which the ""seven real-world datasets"" are partitioned into training and testing sets for evaluation is not described in this excerpt.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less information""]",Breno,FALSE,"less information, less matches"
+shu2020,complex,segmented,partition method,"The partition method used in the paper is not explicitly stated. The paper mentions the use of ""training samples"" to build the prediction model and discusses ""test error,"" implying a division into training and testing sets, but it does not specify a particular partitioning method (e.g., k-fold cross-validation, a specific train-test split ratio).",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less information""]",Breno,FALSE,"less information, less matches"
+shu2020,one shot,segmented,partition method," The provided text does not explicitly mention a specific partition method like ""percentile method"" or ""k-means method"" used for dividing data into training, validation, or testing sets. It discusses regularization techniques (L1, L2, dropout) to prevent overfitting, and an adversarial learning approach (GANs) for performance prediction using a small set of samples. The text states ""The objective is to predict the software performance value f (x) of any new configuration vector x given a small sample m: {xi, f (xi)}, i = 1, 2, . . . ,m."" and ""The challenge here is to use a small yet effective sample to predict for all other configurations with high accuracy."" but does not detail how this ""small sample"" is derived or how data is split for evaluation.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less information""]",Breno,FALSE,"less information, less matches"
+shu2020,simple,segmented,evaluation metric,"Based on the provided text, the evaluation metric explicitly mentioned and used as a loss function for the generator network is **Mean Square Errors (MSE)**.
+
+The text states: ""For the generator network, since the predicted value and real value are both numeric, we use the mean square errors as the loss function since this is the most frequently used regression loss function in machine learning."" (Section 3.3)
+
+This is also reflected in Equation (6) `L(ŷ,y) = 1/2 * (y - ŷ)^2`, which is the squared error for a single prediction, a component of the Mean Squared Error.","['Mean Relative Error (MRE)', 'Mean Relative Error (MRE),', 'Spearman correlation']",FALSE,Pedro,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+shu2020,complex,segmented,evaluation metric,The evaluation metric used in the paper is: mean square errors (MSE) as the loss function for the generator network's performance prediction.,"['Mean Relative Error (MRE)', 'Mean Relative Error (MRE),', 'Spearman correlation']",FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+shu2020,one shot,segmented,evaluation metric," The provided text does not contain information about Precision, Recall, TP, FN, FP, or TN. It discusses various machine learning concepts like regression problems, adversarial learning, generative and discriminator networks, and regularization techniques (L1, L2, dropout). It also mentions the use of mean square error as the loss function for the generator network and a specific loss function for the discriminator network. However, it does not explicitly state an overall evaluation metric like R-squared, RMSE, MAE, or accuracy for the performance prediction model.","['Mean Relative Error (MRE)', 'Mean Relative Error (MRE),', 'Spearman correlation']",FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,simple,segmented,sampling method,"Based on the provided text, the paper **does not use a sampling method** in the traditional sense of collecting data from a population or a real-world sample.
+
+Instead, the authors propose and validate an **analytical model** of a LoRaWAN network, which is then compared with results obtained through **detailed ns-3 simulations**.
+
+Key phrases supporting this are:
+*   ""In this work, we propose an analytical model of the performance of a LoRaWAN network...""
+*   ""The proposed model is validated by comparing the results with those obtained through detailed ns-3 simulations.""
+*   ""We consider a scenario where the EDs are randomly and uniformly distributed around a single GW."" (This describes the setup of their *simulated/modeled environment*, not a sampling method.)
+*   ""Application-layer packets are generated according to a Poisson Process..."" (This is an *assumption* for their mathematical model, not a data collection method.)","['Random', 'Constrained-driven sampling']",FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,complex,segmented,sampling method,"The sampling method used in the paper is: Not applicable. The paper proposes and validates an **analytical model** of a LoRaWAN network, which is then compared with results obtained through **ns-3 simulations**. It does not involve collecting data from a real-world population or dataset using statistical sampling methods. The ""scenario"" describes assumptions for the model and simulations, such as EDs being ""randomly and uniformly distributed"" and packet generation following a ""Poisson Process,"" which are model parameters, not a sampling method for data collection.","['Random', 'Constrained-driven sampling']",FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,one shot,segmented,sampling method," Not specified in the text. The paper focuses on an analytical model and simulations for LoRaWAN network performance, not on data sampling methods for a dataset.","['Random', 'Constrained-driven sampling']",TRUE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,simple,segmented,dataset,"Based on the provided text, the paper does not use a pre-existing ""dataset.""
+
+Instead, the authors propose and use an **analytical model** to assess the performance of a LoRaWAN network. This model is based on:
+*   **Theoretical assumptions**: e.g., End Devices (EDs) randomly and uniformly distributed around a single Gateway (GW), application-layer packets generated according to a Poisson Process, perfect orthogonality between different Spreading Factors (SFs).
+*   **Tunable parameters**: such as Spreading Factors (SFs), fraction of confirmed traffic (α), number of transmission attempts (h, m), duty cycle constraints (δSB1, δSB2), prioritization flags (τ1, τ2), and number of UL frequency channels (C).
+
+The proposed model is then **validated by comparing its results with those obtained through detailed ns-3 simulations**.",ns-3 simulation LoRaWAN network,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,FALSE,"more information, less matches"
+magrin2022_twc,complex,segmented,dataset,"The dataset used in the paper is: Not applicable. The paper proposes an analytical model of LoRaWAN network performance and validates it using data generated through detailed ns-3 simulations, rather than using an external, pre-existing dataset.",ns-3 simulation LoRaWAN network,FALSE,Pedro,TRUE,contextualized,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,one shot,segmented,dataset," The provided text does not mention the use of any specific dataset for experimental evaluation or analysis. It focuses on proposing an analytical model for LoRaWAN network performance and validating it through simulations (ns-3), rather than using pre-existing datasets.",ns-3 simulation LoRaWAN network,FALSE,Pedro,TRUE,contextualized,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,simple,segmented,technique,"Based on the provided text, the paper **does not use learning algorithms**.
+
+Instead, the authors propose and validate an **analytical model** to assess the performance of a LoRaWAN network. This model uses:
+*   **Mathematical formulations**
+*   **Poisson Processes** for traffic generation and packet filtering
+*   **Fixed-point iteration** to find solutions to the system of inter-dependent equations that describe the network behavior.
+
+The model's results are then validated against **ns-3 simulations**.",Trust Region Method,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more information, more matches, contextualized"
+magrin2022_twc,complex,segmented,technique,"The learning algorithms used in the paper are: The provided text describes an analytical model for LoRaWAN network performance, using mathematical formulations, probability theory (e.g., Poisson processes, alternating renewal processes), and fixed-point iteration to solve a system of equations. It does not mention or employ any learning algorithms.",Trust Region Method,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,one shot,segmented,technique," The provided text does not mention any learning algorithms. It describes an analytical model for LoRaWAN network performance, validated by simulations, and discusses performance metrics like reliability, delay, and fairness.",Trust Region Method,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,simple,segmented,partition method,"Based on the text, the paper uses a partition method based on the **Spreading Factors (SFs)**.
+
+Specifically, the ""IV. MODEL"" section states:
+*   ""For tractability, we assume **perfect orthogonality between different SFs**, i.e., only packets employing the same SF can collide.""
+*   ""The assumption of perfect orthogonality between different SFs makes it possible to **split the network trafﬁc in different logical channels that do not interfere with each other.**""
+
+Therefore, the network traffic is partitioned into logical channels according to the Spreading Factor used, assuming no interference between different SFs. Additionally, the traffic load for each SF is further ""split uniformly over the given C frequency channels.""",Não se aplica. ,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,TRUE,"more matches, contextualized"
+magrin2022_twc,complex,segmented,partition method,"The partition method used in the paper is: Not applicable. The paper proposes and validates an analytical model by comparing its results with those obtained through detailed ns-3 simulations, rather than using a data partition method for machine learning model training and testing.",Não se aplica. ,FALSE,Pedro,TRUE,,Lucas,FALSE,"[""less information""]",Breno,TRUE,"less information, more matches, contextualized"
+magrin2022_twc,one shot,segmented,partition method," The text provided does not contain information about the partition method used for training, validation, or testing of machine learning models. The document describes an analytical model and its validation through ns-3 simulations for a LoRaWAN network, focusing on performance assessment and optimization.",Não se aplica. ,FALSE,Pedro,TRUE,,Lucas,FALSE,"[""less information""]",Breno,FALSE,"less information, less matches"
+magrin2022_twc,simple,segmented,evaluation metric,"The paper uses the following evaluation metrics:
+
+1.  **Reliability Metrics**:
+    *   Unconfirmed Uplink Packet Delivery Rate (UU PDR)
+    *   Confirmed Uplink Packet Delivery Rate (CU PDR)
+    *   Confirmed Downlink Packet Delivery Rate (CD PDR)
+2.  **Delay Metrics**:
+    *   ΔUL: Average time from the first transmission attempt to the successful delivery of an Uplink (UL) confirmed packet to the Gateway (GW).
+    *   ΔDL: Average time from the first transmission of a confirmed packet to the successful reception of the corresponding reply (ACK).
+3.  **Fairness Metric**:
+    *   Jain’s fairness index","['Packet Success Probability', 'Delay', 'Fairness']",FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contexualized"
+magrin2022_twc,complex,segmented,evaluation metric,"The evaluation metric used in the paper is: packet success probability, average delays, and fairness. More specifically, these are broken down into:
+*   **Reliability Metrics:**
+    *   Unconﬁrmed Uplink Packet Delivery Rate (UU PDR)
+    *   Conﬁrmed Uplink Packet Delivery Rate (CU PDR)
+    *   Conﬁrmed Downlink Packet Delivery Rate (CD PDR)
+*   **Delay Metrics:**
+    *   ΔUL (average delay from the first transmission attempt to successful delivery of an UL confirmed packet to the GW)
+    *   ΔDL (average delay from the first transmission of a confirmed packet to the successful reception of the corresponding reply)
+*   **Fairness Metric:**
+    *   Jain’s fairness index","['Packet Success Probability', 'Delay', 'Fairness']",FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+magrin2022_twc,one shot,segmented,evaluation metric," The paper considers three Packet Delivery Rate (PDR) indexes: Unconfirmed Uplink PDR (UU), Confirmed Uplink PDR (CU), and Confirmed Downlink PDR (CD). Additionally, two delay metrics, ΔUL and ΔDL, are used for confirmed traffic, and Jain's fairness index is employed to assess fairness among devices using different Spreading Factors (SFs).","['Packet Success Probability', 'Delay', 'Fairness']",FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,simple,segmented,sampling method,"Based on the provided text, the sampling method used for the model fragments in the evaluation is **random selection**.
+
+The text states:
+""Therefore, instead of evaluating all the model fragments of a product model, we **randomly selected** the model fragments for our evaluation and grouped them into representative sets."" (Page 10, left column)
+
+These randomly selected model fragments were then grouped into ""representative sets"" to evaluate different ""location challenges"" (density, multiplicity, and dispersion).",NI,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,complex,segmented,sampling method,"The sampling method used in the paper is: Model fragments were **randomly selected** from large product models and then **grouped into representative sets** based on nine different location challenges (density, multiplicity, and dispersion) to ensure a diverse evaluation.",NI,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,one shot,segmented,sampling method," **Undersampling, Oversampling, and ROSE sampling approaches**",NI,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,FALSE,"less matches, more information"
+marcén2022ssm,simple,segmented,dataset,"The paper uses two industrial case studies as datasets:
+
+1.  **CAF Case Study (Railway Domain):**
+    *   Provided by CAF, a worldwide provider of railway solutions.
+    *   Includes **1800 test cases**.
+    *   Consists of 10 feature descriptions (about 25 words each).
+    *   Contains 180 sets of model fragments from 20 different product models.
+    *   A knowledge base with 1339 samples, each containing a feature description (about 25 words), a model fragment (about 15 elements), and a score (0-4).
+    *   A domain ontology with 103 elements (concepts, properties, relations).
+    *   An oracle with 10 correct model fragments.
+
+2.  **BSH Case Study (Home Appliances Domain):**
+    *   Provided by BSH, one of the largest manufacturers of home appliances in Europe.
+    *   Includes **108 test cases**.
+    *   Consists of 6 feature descriptions (about 10 words each).
+    *   Contains 18 sets of model fragments from 2 different product models.
+    *   A knowledge base with 758 samples, each containing a feature description (about 10 words), a model fragment (about 8 elements), and a score (0-4).
+    *   A domain ontology with 13 elements (concepts, properties, relations).
+    *   An oracle with 6 correct model fragments.
+
+These case studies provide the ""feature descriptions, product models, and approved solutions"" necessary for the evaluation.",https://bitbucket.org/svitusj/flame/src/master/FLiM_ML/,FALSE,Pedro,FALSE,contextualized,Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more information, more matches, contextualized"
+marcén2022ssm,complex,segmented,dataset,"The dataset used in the paper is: two industrial case studies provided by CAF (a worldwide provider of railway solutions) and BSH (one of the largest manufacturers of home appliances in Europe).
+The CAF case study includes 1800 test cases, 10 feature descriptions, 180 sets of model fragments from 20 product models, a knowledge base (1339 samples), an ontology (103 elements), and an oracle (10 model fragments).
+The BSH case study includes 108 test cases, 6 feature descriptions, 18 sets of model fragments from 2 product models, a knowledge base (758 samples), an ontology (13 elements), and an oracle (6 model fragments).",https://bitbucket.org/svitusj/flame/src/master/FLiM_ML/,FALSE,Pedro,FALSE,contextualized,Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more information, more matches, contextualized"
+marcén2022ssm,one shot,segmented,dataset,"
+The paper does not explicitly state the name of a dataset used for the main research, but it does mention that the evaluation of the proposed encodings (source, extended, and mapped) is based on **two industrial case studies**.
+
+Specifically:
+- The first case study was provided by **CAF**, a worldwide provider of railway solutions, and includes **1800 test cases**.
+- The second case study was provided by **BSH**, one of the largest manufacturers of home appliances in Europe, and includes **108 test cases**.
+
+These case studies are comprised of:
+- **Feature descriptions**
+- **Sets of model fragments**
+- A **knowledge base**
+- An **ontology**
+
+The paper also mentions using the **human encoding**, which was provided by domain experts from these industrial partners.
+
+Furthermore, in the ""Comparison with previous results"" section, the paper contrasts the current work with ""our previous work [60]"" which used a case study of ""29 test cases, where the models had about 2000 elements and the requirements had about 50 words"". This is context about a previous work, not the current one.
+
+The sentence ""This paper introduces the EMNIST dataset and then ap- plies two ELM-based neural networks to the classification tasks made possible with the complete NIST dataset."" appears to be a hallucination or from a different document, as no mention of EMNIST or NIST datasets is found in the provided text.",https://bitbucket.org/svitusj/flame/src/master/FLiM_ML/,FALSE,Pedro,FALSE,contextualized,Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more information, less matches, contextualized"
+marcén2022ssm,simple,segmented,technique,"The paper uses the following learning algorithms:
+
+1.  **RankBoost** (a Learning to Rank algorithm)
+2.  **Feedforward Neural Network (FNN)**
+3.  **Recurrent Neural Network (RNN)**","['RankBoost', 'Rede Neural Feedforward', 'a Rede Neural Recorrente']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,complex,segmented,technique,"The learning algorithms used in the paper are: RankBoost, Feedforward Neural Network (FNN), and Recurrent Neural Network (RNN).","['RankBoost', 'Rede Neural Feedforward', 'a Rede Neural Recorrente']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,one shot,segmented,technique," RankBoost, Feedforward Neural Network (FNN), and Recurrent Neural Network (RNN).","['RankBoost', 'Rede Neural Feedforward', 'a Rede Neural Recorrente']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, more information"
+marcén2022ssm,simple,segmented,partition method,"The paper uses the **k-fold cross-validation method** with a **k value of 4**.
+
+Additionally, it specifies that ""the folds were selected in a **stratified manner** so that each partition contains roughly the same proportions of each score value."" This means the data was partitioned to maintain the distribution of the target variable (score value) across each fold.",cross-validation,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,TRUE,"[""more information""]",Breno,FALSE,"less information, more matches"
+marcén2022ssm,complex,segmented,partition method,"The partition method used in the paper is: k-fold cross-validation (with k=4), where the folds are selected in a stratified manner.",cross-validation,TRUE,Pedro,TRUE,more information,Lucas,TRUE,"[""more information""]",Breno,FALSE,"less matches, more information"
+marcén2022ssm,one shot,segmented,partition method, Two forced partition methods: the percentile method and the k-means method.,cross-validation,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less matches""]",Breno,FALSE,"less matches, less information"
+marcén2022ssm,simple,segmented,evaluation metric,"The paper uses the following evaluation metrics:
+
+*   **Precision**
+*   **Recall**
+*   **F-measure**
+*   **Matthews Correlation Coefficient (MCC)**","['Precision', 'Recall', 'F-measure', 'MCC']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""less matches""]",Breno,TRUE,"more matches, contexualized"
+marcén2022ssm,complex,segmented,evaluation metric,"The evaluation metric used in the paper is: precision, recall, F-measure, and Matthews Correlation Coefficient (MCC).","['Precision', 'Recall', 'F-measure', 'MCC']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+marcén2022ssm,one shot,segmented,evaluation metric," precision, recall, F-measure, and Matthews Correlation Coefficient (MCC).","['Precision', 'Recall', 'F-measure', 'MCC']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""less matches""]",Breno,TRUE,"more matches, contexualized"
+metzger2024computing,simple,segmented,sampling method,"Based on the provided text, the paper does not describe a ""sampling method"" in the traditional sense of data collection for a research study (e.g., selecting participants or a subset of a population).
+
+Instead, the terms like ""random exploration"" or ""FM-guided exploration"" refer to **strategies used by the online reinforcement learning algorithms (Q-Learning and SARSA) to select adaptation actions** within the self-adaptive system's environment during its learning process. These are algorithmic approaches for the learning agent to discover suitable actions.
+
+The experiments in the paper are conducted using:
+*   A **real-world workload trace** for the CloudRM system.
+*   A **pre-existing dataset** for the BerkeleyDB-J system, which ""was collected by Siegmund et al [36].""
+
+Therefore, the researchers are using existing datasets and systems to test their proposed exploration strategies, rather than employing a specific sampling method to collect new data.",NI,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,FALSE,"less information, less matches"
+metzger2024computing,complex,segmented,sampling method,"The sampling method used in the paper is: an **ϵ-greedy strategy** which serves as a baseline, balancing exploitation of existing knowledge with exploration. This strategy is enhanced by **Feature-Model-guided (FM-guided) exploration strategies** (specifically FM-structure exploration and FM-difference exploration) that leverage feature models to guide the selection of the next adaptation action for exploration, while also incorporating a small degree of randomness to prevent premature convergence.",NI,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,TRUE,"more information, more matches, contextualized"
+metzger2024computing,one shot,segmented,sampling method," Undersampling, Oversampling, and ROSE sampling.",NI,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,FALSE,less matches
+metzger2024computing,simple,segmented,dataset,"The paper uses two real-world systems and their associated datasets for its experiments:
+
+1.  **CloudRM System:** A real-world **workload trace with 10,000 tasks**, spanning over 29 days [22], is used for this adaptive cloud resource management service.
+2.  **BerkeleyDB-J System:** The **BerkeleyDB-J dataset**, collected by Siegmund et al. [36], which includes performance measurements for all system configurations, is used for this reconfigurable database system.","['https://sourceforge.net/p/vm-alloc/task_vm_pm/HEAD/tree/', ' https://www.se.cs.uni-saarland.de/projects/splconqueror/icse2012.php']",FALSE,Pedro,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+metzger2024computing,complex,segmented,dataset,"The dataset used in the paper is: a real-world workload trace with 10,000 tasks spanning 29 days (for the CloudRM system) and the BerkeleyDB-J dataset collected by Siegmund et al. [36] which includes performance measurements for all system configurations.","['https://sourceforge.net/p/vm-alloc/task_vm_pm/HEAD/tree/', ' https://www.se.cs.uni-saarland.de/projects/splconqueror/icse2012.php']",FALSE,Pedro,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more information, more matches, contextualized"
+metzger2024computing,one shot,segmented,dataset," The authors explicitly state using two real-world systems and their associated datasets for their experiments:
+
+1.  **CloudRM System:** This is an adaptive cloud resource management service. The experiments for CloudRM are based on a real-world workload trace with 10,000 tasks, spanning 29 days.
+2.  **BerkeleyDB-J System:** This is an open-source reconfigurable database written in Java. The BerkeleyDB-J dataset was collected by Siegmund et al. [36] and includes performance measurements for all system configurations, measured using standard benchmarks.","['https://sourceforge.net/p/vm-alloc/task_vm_pm/HEAD/tree/', ' https://www.se.cs.uni-saarland.de/projects/splconqueror/icse2012.php']",FALSE,Pedro,FALSE,"more information, contextualized",Lucas,FALSE,"[""less matches""]",Breno,TRUE,"more information, more matches, contextualized"
+metzger2024computing,simple,segmented,technique,"The paper uses two specific reinforcement learning algorithms:
+
+1.  **Q-Learning**
+2.  **SARSA**
+
+It integrates its proposed exploration strategies into both of these algorithms.","[' Q-Learning', 'SARSA']",FALSE,Pedro,TRUE,,Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, contextualized"
+metzger2024computing,complex,segmented,technique,The learning algorithms used in the paper are: Q-Learning and SARSA.,"[' Q-Learning', 'SARSA']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, less information"
+metzger2024computing,one shot,segmented,technique, Q-Learning and SARSA.,"[' Q-Learning', 'SARSA']",TRUE,Pedro,TRUE,,Lucas,TRUE,"[""more information""]",Breno,TRUE,"more matches, contexualized"
+metzger2024computing,simple,segmented,partition method,"Based on the provided text, there is no ""partition method"" explicitly described for dividing the system's adaptation space into distinct partitions.
+
+Instead, the paper introduces **exploration strategies** that guide how the system navigates its (potentially large and discrete) adaptation space:
+
+1.  **FM-structure exploration:** This strategy leverages the hierarchical structure and semantic connections within the feature model (e.g., sibling features, parent features) to guide the exploration process, prioritizing certain groups of configurations.
+2.  **FM-difference exploration:** This strategy addresses system evolution by identifying and prioritizing configurations that have been ""added"" to or ""removed"" from the adaptation space due to changes in the feature model.
+
+These are methods for *exploring* the space, not for *partitioning* it in a general sense for other processing.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less information""]",Breno,FALSE,"less information, less matches"
+metzger2024computing,complex,segmented,partition method,"The partition method used in the paper is: Not explicitly stated as a traditional data partitioning method (like train/test split or cross-validation). The paper focuses on online reinforcement learning, where the system learns and adapts at runtime by interacting with real-world workload traces or pre-collected performance measurements, evaluating learning performance over time rather than on a separate, pre-partitioned test set.",NI,FALSE,Pedro,TRUE,"more information, contextualized",Lucas,FALSE,"[""less information""]",Breno,FALSE,"less information, less matches"
+metzger2024computing,one shot,segmented,partition method, Two forced partition methods were employed: the percentile method and the k-means method.,NI,FALSE,Pedro,FALSE,,Lucas,FALSE,"[""less information""]",Breno,TRUE,"more matches, contextualized"
+metzger2024computing,simple,segmented,evaluation metric,"Based on the text provided, the evaluation metrics used in the paper are:
+
+1.  **For the learning process performance:**
+    *   **Asymptotic performance:** Measures the reward achieved at the end of the learning process.
+    *   **Time to threshold:** Measures the number of time steps it takes the learning process to reach a predefined reward threshold.
+    *   **Total performance:** Measures the overall learning performance by computing the area between the reward curve and the asymptotic reward.
+
+2.  **For the quality characteristics of the subject systems (which define the reward):**
+    *   For the **CloudRM system**: **energy consumption** and **number of VM manipulations** (migrations and launches). The reward is defined as `r = -(ρ·e+(1−ρ)·m)`, where 'e' is energy consumption and 'm' is VM manipulations.
+    *   For the **BerkeleyDB-J system**: **response time**. The reward is defined as `r = -t`, where 't' is response time.
+
+The general goal of reinforcement learning, and thus an overarching metric, is to optimize **cumulative rewards**.","['Asymptotic Time', 'Total Effect on Performance', 'Threshold Performance', 'Quality']",FALSE,Pedro,TRUE,"more information, contextualized",Lucas,TRUE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+metzger2024computing,complex,segmented,evaluation metric,"The evaluation metric used in the paper is: Asymptotic performance, Time to threshold, and Total performance. The paper also measures how different strategies impact the quality characteristics of the subject systems.","['Asymptotic Time', 'Total Effect on Performance', 'Threshold Performance', 'Quality']",TRUE,Pedro,TRUE,less matches,Lucas,TRUE,"[""less matches""]",Breno,TRUE,"more matches, contextualized"
+metzger2024computing,one shot,segmented,evaluation metric," Asymptotic performance, Time to threshold, Total performance.","['Asymptotic Time', 'Total Effect on Performance', 'Threshold Performance', 'Quality']",TRUE,Pedro,FALSE,less matches,Lucas,TRUE,"[""less matches""]",Breno,FALSE,"less matches, less information"
