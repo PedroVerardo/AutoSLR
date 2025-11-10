@@ -720,11 +720,7 @@ if __name__ == "__main__":
                 print("INFO: No sections found in the HTML, trying with generic section title.")
                 return []
         
-        return result_sections
-        
-
-
-        
+        return result_sections    
         
 
 
